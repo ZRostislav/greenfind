@@ -1,0 +1,92 @@
+:host {
+  display: flex;
+  flex-direction: column; /* Ставим столбец вместо строки */
+  align-items: center;    /* Выравнивание по горизонтали */
+  justify-content: center;/* Выравнивание по вертикали */
+  
+  // background: #318429;
+  // box-shadow: inset 0px 0px 150px 16px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  height: 100vh;
+
+  padding-bottom: 5%;
+}
+
+
+.title {
+  font-family: 'Josefin Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 96px;
+  line-height: 96px;
+  color: #FFFFFF;
+  text-shadow: 0px 3px 0.6px rgba(0, 0, 0, 0.25);
+  padding-bottom: 15px;
+}
+
+.search {
+  display: flex;
+  gap: 10px;
+}
+
+.search__input {
+  all: unset;
+  width: 500px;
+  height: 50px;
+
+  background: #D9D9D9;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 50.5px;
+
+  padding: 0 22px; /* <-- отступы слева и справа */
+  box-sizing: border-box; /* <-- чтобы padding не ломал размер */
+
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
+  color: #333;
+}
+
+/* красивый placeholder */
+.search__input::placeholder {
+  color: #868686;
+  opacity: 0.7;
+  font-weight: 300;
+}
+
+
+.search__btn.setting,
+.search__btn.search {
+  all: unset;
+  width: 50px;
+  height: 50px;
+  background: #D9D9D9;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 25px;
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.search__btn.setting:hover,
+.search__btn.search:hover {
+  transform: scale(1.07);
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.28);
+}
+
+.search__btn.setting:active,
+.search__btn.search:active {
+  transform: scale(0.95);
+}
+
+
+.search__btn.search svg {
+  margin-left: 3px;
+}
+
+svg {
+  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.25));
+}
