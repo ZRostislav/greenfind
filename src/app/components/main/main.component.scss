@@ -9,7 +9,7 @@
   width: 100%;
   height: 100vh;
 
-  padding-bottom: 5%;
+  // padding-bottom: 5%;
 }
 
 
@@ -17,21 +17,32 @@
   font-family: 'Josefin Sans';
   font-style: normal;
   font-weight: 400;
-  font-size: 96px;
+  font-size: clamp(36px, 8vw, 96px);
   line-height: 96px;
   color: #FFFFFF;
   text-shadow: 0px 3px 0.6px rgba(0, 0, 0, 0.25);
   padding-bottom: 15px;
+
+  transition: 0.3s ease;
+}
+
+/* Когда открыты фильтры */
+.title--active {
+  padding-bottom: 0px;
+  top: 25px;
+  font-size: 80px;
+  position: fixed;
 }
 
 .search {
   display: flex;
   gap: 10px;
+  z-index: 1;
 }
 
 .search__input {
   all: unset;
-  width: 500px;
+  width: 50dvw;
   height: 50px;
 
   background: #D9D9D9;
@@ -42,7 +53,7 @@
   box-sizing: border-box; /* <-- чтобы padding не ломал размер */
 
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  font-size: 18px;
+  font-size: clamp(14px, 1.6vw, 18px);
   color: #333;
 }
 
@@ -89,4 +100,118 @@
 
 svg {
   filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.25));
+}
+
+
+.filters {
+  position: absolute;
+  margin-bottom: 55px;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  gap: 5px;
+}
+
+.filter {
+  background-color: #D9D9D9;
+  border-radius: 20px;
+  height: 80px;
+  width: max-content;
+  padding: 7px;
+  font-size: 24px;
+  cursor: pointer;
+
+  position: relative; /* для движения вверх */
+  display: inline-block; /* важно, чтобы transition работал корректно */
+  transition: transform 0.2s ease; /* используем transform вместо top */
+}
+
+.filter:hover {
+  transform: translateY(-20px); /* плавно поднимаем вверх */
+}
+
+.filter label {
+  cursor: pointer;
+}
+
+.filter.region-filter {
+  padding: 0px;
+  border-radius: 50px;
+}
+
+.region-select {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.selected-flag {
+  width: 40px;
+  height: 30px;
+  cursor: pointer;
+
+  /* центровка */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.region-select input {
+  all: unset;
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
+  text-align: center;
+}
+
+.region-list {
+  position: absolute;
+  top: 55px;
+  left: 0;
+  width: 50px;
+  background: #D9D9D9;
+  border-radius: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 5px;
+}
+
+.region-list li img {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  cursor: pointer;
+
+  width: 200px;
+  border-radius: 20px;
+  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.50));
+}
+
+.region-list {
+  max-height: 200px;   /* скролл сохранится */
+  overflow-y: auto;
+
+  /* скрыть скроллбар */
+  scrollbar-width: none; /* Firefox */
+}
+
+.region-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.region-list li {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+
+.selected-flag  {
+  border-radius: 20px;
+  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.50));
+}
+
+.filter__input.region-search {
+  padding: 5px 0 ;
 }

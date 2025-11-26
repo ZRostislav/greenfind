@@ -1,7 +1,78 @@
-<h1 class="title">GreenFind</h1>
+<h1 class="title" [class.title--active]="showFilters">GreenFind</h1>
+
+<div class="filters" *ngIf="showFilters">
+  <!-- Фильтр: Регион -->
+  <div class="filter region-filter">
+    <div class="region-select">
+      <!-- 1. SVG флаг вместо input -->
+      <img
+        *ngIf="selectedCountry"
+        [src]="selectedCountry.svg"
+        class="selected-flag"
+        (click)="editRegion()"
+        alt="flag"
+      />
+
+      <!-- 2. Input — показывается только если нет выбранного флага -->
+      <input
+        *ngIf="!selectedCountry"
+        type="text"
+        placeholder=""
+        [(ngModel)]="regionQuery"
+        (focus)="showRegionList = true"
+        class="filter__input region-search"
+        maxlength="2"
+      />
+
+      <!-- список стран -->
+      <ul class="region-list" *ngIf="showRegionList">
+        <li *ngFor="let country of filteredRegions()" (click)="selectRegion(country)">
+          <img [src]="country.svg" alt="{{ country.name }}" width="24" />
+        </li>
+      </ul>
+    </div>
+  </div>
+  <!-- Фильтр: Поиск по сайту -->
+  <div class="filter">
+    <label>Site search</label>
+  </div>
+
+  <!-- Фильтр: Тип файла (множественный выбор) -->
+  <!-- <div class="filter file-filter">
+    <label>File Type</label>
+    <div class="file-select" (click)="toggleFileList()">
+      <div class="file-chosen">
+        {{ selectedFiles.length ? selectedFiles.join(', ') : 'Select the file types' }}
+      </div>
+      <ul class="file-list" [class.show]="fileListOpen">
+        <li *ngFor="let f of fileTypes">
+          <input
+            type="checkbox"
+            [value]="f"
+            (change)="toggleFileType($event)"
+            [checked]="selectedFiles.includes(f)"
+          />
+          {{ f }}
+        </li>
+      </ul>
+    </div>
+  </div> -->
+
+  <div class="filter">
+    <label>Exclude words</label>
+  </div>
+
+  <div class="filter">
+    <label>The exact phrase</label>
+  </div>
+
+  <div class="filter">
+    <label>Similar sites to</label>
+  </div>
+</div>
 
 <div class="search">
-  <button class="search__btn setting">
+  <button class="search__btn setting" (click)="toggleFilters()">
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="14.9999" cy="15" r="11.0676" stroke="#4A4A4A" stroke-width="3" />
       <line
@@ -78,8 +149,8 @@
       />
     </svg>
   </button>
-  <input class="search__input" type="text" placeholder="" />
-  <button class="search__btn search">
+  <input class="search__input" type="text" placeholder="Search..." [(ngModel)]="query" />
+  <button class="search__btn search" (click)="search()">
     <svg width="14" height="25" viewBox="0 0 14 25" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M0.439209 0.439331C1.025 -0.146455 1.97452 -0.146455 2.5603 0.439331L13.4392 11.3173C13.763 11.6411 13.907 12.0766 13.8728 12.4999C13.9069 12.923 13.7629 13.3578 13.4392 13.6815L2.5603 24.5604C1.97454 25.1461 1.02497 25.1461 0.439209 24.5604C-0.146547 23.9747 -0.146485 23.0251 0.439209 22.4393L10.3787 12.4999L0.439209 2.56042C-0.146549 1.97467 -0.146492 1.02512 0.439209 0.439331Z"
@@ -89,4 +160,22 @@
   </button>
 </div>
 
-<div class="results" id="results"></div>
+<!-- <input type="text" placeholder="example.com" [(ngModel)]="filters.site" class="filter__input" /> -->
+<!-- <input
+  type="text"
+  placeholder="Words separated by a space"
+  class="filter__input"
+  [(ngModel)]="filters.exclude"
+/> -->
+<!-- <input
+  type="text"
+  placeholder="For example, the 'Angular Component'"
+  class="filter__input"
+  [(ngModel)]="filters.exact"
+/> -->
+<!-- <input
+      type="text"
+      placeholder="example.com"
+      class="filter__input"
+      [(ngModel)]="filters.similar"
+    /> -->

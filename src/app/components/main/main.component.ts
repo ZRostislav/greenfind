@@ -1,10 +1,107 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import emojiFlags from 'emoji-flags';
+
+interface Country {
+  code: string;
+  name: string;
+  svg: string;
+}
 
 @Component({
   selector: 'app-main',
-  imports: [],
   templateUrl: './main.component.html',
-  styleUrl: './main.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./main.component.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
-export class MainComponent {}
+export class MainComponent implements OnInit {
+  query = '';
+  filters = {
+    site: '',
+    region: '',
+    exclude: '',
+    exact: '',
+    similar: '',
+  };
+  selectedCountry: Country | null = null;
+  showFilters = false;
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
+  }
+
+  fileTypes = ['PDF', 'DOCX', 'TXT', 'XLSX', 'PPTX'];
+  selectedFiles: string[] = [];
+  fileListOpen = false;
+
+  toggleFileList() {
+    this.fileListOpen = !this.fileListOpen;
+  }
+
+  toggleFileType(event: any) {
+    const value = event.target.value;
+    if (event.target.checked) {
+      if (!this.selectedFiles.includes(value)) this.selectedFiles.push(value);
+    } else {
+      this.selectedFiles = this.selectedFiles.filter((f) => f !== value);
+    }
+  }
+
+  regionQuery = '';
+  showRegionList = false;
+  regions: Country[] = []; // страны с SVG
+
+  ngOnInit() {
+    this.loadCountriesWithSVG();
+    this.detectCountry();
+  }
+
+  loadCountriesWithSVG() {
+    // emojiFlags.data содержит все страны, берем код ISO и название
+    this.regions = emojiFlags.data.map((c) => ({
+      code: c.code, // US, RU, FR...
+      name: c.name, // United States, Russia...
+      svg: `3x2/${c.code}.svg`, // путь к SVG флагу в assets
+    }));
+  }
+
+  async detectCountry() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      const code = data.country_code;
+
+      const country = this.regions.find((r) => r.code === code);
+      if (country) {
+        this.filters.region = country.name;
+
+        this.regionQuery = ''; // input остается пустым
+        this.selectedCountry = country; // показываем SVG вместо input
+      }
+    } catch (e) {
+      console.warn('Не удалось определить страну');
+    }
+  }
+
+  filteredRegions() {
+    const q = this.regionQuery.toLowerCase();
+    return this.regions.filter((r) => r.name.toLowerCase().includes(q));
+  }
+
+  selectRegion(country: Country) {
+    this.selectedCountry = country; // ← сохраняем выбранную страну
+    this.showRegionList = false;
+  }
+
+  editRegion() {
+    this.selectedCountry = null;
+    this.regionQuery = '';
+    this.showRegionList = true;
+  }
+
+  search() {
+    console.log('Поиск:', this.query, this.filters, this.selectedFiles);
+  }
+}
