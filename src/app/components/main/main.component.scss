@@ -1,17 +1,15 @@
 :host {
   display: flex;
-  flex-direction: column; /* Ставим столбец вместо строки */
-  align-items: center;    /* Выравнивание по горизонтали */
-  justify-content: center;/* Выравнивание по вертикали */
-  
-  // background: #318429;
-  // box-shadow: inset 0px 0px 150px 16px rgba(0, 0, 0, 0.4);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100vh;
-
-  // padding-bottom: 5%;
 }
 
+/* ===========================
+      TITLE
+=========================== */
 
 .title {
   font-family: 'Josefin Sans';
@@ -22,17 +20,20 @@
   color: #FFFFFF;
   text-shadow: 0px 3px 0.6px rgba(0, 0, 0, 0.25);
   padding-bottom: 15px;
-
-  transition: 0.3s ease;
+  transition: .8s;
 }
 
 /* Когда открыты фильтры */
 .title--active {
-  padding-bottom: 0px;
-  top: 25px;
   font-size: 80px;
-  position: fixed;
+  transform: translateY(-35vh);
 }
+
+
+
+/* ===========================
+      SEARCH
+=========================== */
 
 .search {
   display: flex;
@@ -44,26 +45,22 @@
   all: unset;
   width: 50dvw;
   height: 50px;
-
   background: #D9D9D9;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 50.5px;
-
-  padding: 0 22px; /* <-- отступы слева и справа */
-  box-sizing: border-box; /* <-- чтобы padding не ломал размер */
+  padding: 0 22px;
+  box-sizing: border-box;
 
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
   font-size: clamp(14px, 1.6vw, 18px);
   color: #333;
 }
 
-/* красивый placeholder */
 .search__input::placeholder {
   color: #868686;
   opacity: 0.7;
   font-weight: 300;
 }
-
 
 .search__btn.setting,
 .search__btn.search {
@@ -71,9 +68,9 @@
   width: 50px;
   height: 50px;
   background: #D9D9D9;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 25px;
   cursor: pointer;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
   display: flex;
   justify-content: center;
@@ -93,7 +90,6 @@
   transform: scale(0.95);
 }
 
-
 .search__btn.search svg {
   margin-left: 3px;
 }
@@ -102,42 +98,73 @@ svg {
   filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.25));
 }
 
+/* ===========================
+      FILTERS
+=========================== */
 
 .filters {
-  position: absolute;
-  margin-bottom: 51px;
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  display: flex;
-  gap: 5px;
+font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+position: absolute;
+display: flex;
+gap: 5px;
+margin-bottom: -80px;
+
+opacity: 0;
+transform: translateY(20px);
+pointer-events: none;
+
+/* плавный вход/выход контейнера */
+transition: margin-bottom 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+.filters--active {
+margin-bottom: -60px;
+opacity: 1;
+transform: translateY(0);
+pointer-events: auto;
 }
 
 .filter {
-  background-color: #D9D9D9;
-  border-radius: 20px;
-  height: 80px;
-  width: max-content;
-  padding: 7px;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  position: relative; /* для движения вверх */
-  display: inline-block; /* важно, чтобы transition работал корректно */
-  transition: transform 0.2s ease; /* используем transform вместо top */
+background-color: #D9D9D9;
+border-radius: 20px;
+height: 15px;
+width: max-content;
+padding: 7px;
+font-size: 24px;
+cursor: pointer;
+display: inline-block;
+position: relative;
+
+opacity: 0;
+transform: translateY(20px);
+
+/* transition для появления фильтров */
+transition: opacity 0.3s ease, transform 0.3s ease, height 0.2s ease;
 }
 
+/* появление элементов с последовательной задержкой только при активных фильтрах */
+.filters--active .filter {
+opacity: 1;
+transform: translateY(0);
+height: 80px;
+}
+
+/* Hover — моментальный, без задержки, анимация только transform */
 .filter:hover {
-  transform: translateY(-10px); /* плавно поднимаем вверх */
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.50);
+transform: translateY(-10px) !important;
+box-shadow: 0px 4px 4px rgba(0,0,0,0.5);
+transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.filter.active {
-  transform: translateY(-15px);
-}
-
 
 .filter label {
-  cursor: pointer;
+cursor: pointer;
 }
+
+
+
+/* ===========================
+      REGION SELECTOR
+=========================== */
 
 .filter.region-filter {
   padding: 0px;
@@ -155,11 +182,13 @@ svg {
   height: 30px;
   cursor: pointer;
 
-  /* центровка */
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
+  border-radius: 20px;
+  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.50));
 }
 
 .region-select input {
@@ -170,36 +199,21 @@ svg {
   text-align: center;
 }
 
+/* Список регионов */
 .region-list {
   position: absolute;
-  top: 55px;
+  top: 88px;
   left: 0;
   width: 50px;
   background: #D9D9D9;
+  border-radius: 50.5px;
+
   max-height: 200px;
   overflow-y: auto;
   padding: 5px;
-}
 
-.region-list li img {
-  display: flex;
-  align-items: center;
-  padding: 5px;
-  cursor: pointer;
-  border-radius: 20px;
-  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.50));
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
-  transition: transform 0.25s ease; /* <-- плавное уменьшение */
-}
-
-.region-list li img:hover {
-  transform: scale(0.85); /* <-- уменьшение при наведении */
-}
-
-
-.region-list {
-  max-height: 200px;  
-  overflow-y: auto;
   scrollbar-width: none;
 }
 
@@ -209,24 +223,23 @@ svg {
 }
 
 .region-list li {
+  display: flex;
   justify-content: center;
   align-items: center;
-  display: flex;
-  margin: 0 auto;
 }
 
-.region-list {
-  top: 88px;
-  border-radius: 50.5px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-}
-
-
-.selected-flag  {
+.region-list li img {
+  padding: 5px;
+  cursor: pointer;
   border-radius: 20px;
   filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.50));
+  transition: transform 0.25s ease;
+}
+
+.region-list li img:hover {
+  transform: scale(0.85);
 }
 
 .filter__input.region-search {
-  padding: 5px 0 ;
+  padding: 5px 0;
 }
