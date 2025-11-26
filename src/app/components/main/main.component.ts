@@ -27,6 +27,30 @@ export class MainComponent implements OnInit {
   };
   selectedCountry: Country | null = null;
   showFilters = false;
+  activeFilter: string | null = null;
+
+  toggleFilter(name: string) {
+    // если нажали на тот же фильтр → выключаем
+    if (this.activeFilter === name) {
+      this.activeFilter = null;
+      this.showRegionList = false;
+      return;
+    }
+
+    // включаем новый фильтр
+    this.activeFilter = name;
+
+    // если region → сразу активировать input
+    if (name === 'region') {
+      setTimeout(() => {
+        const input = document.querySelector('.region-search') as HTMLInputElement;
+        if (input) {
+          input.focus();
+          this.showRegionList = true;
+        }
+      });
+    }
+  }
 
   toggleFilters() {
     this.showFilters = !this.showFilters;

@@ -2,20 +2,17 @@
 
 <div class="filters" *ngIf="showFilters">
   <!-- Фильтр: Регион -->
-  <div class="filter region-filter">
+  <div
+    class="filter region-filter"
+    [class.active]="activeFilter === 'region'"
+    (click)="toggleFilter('region')"
+  >
     <div class="region-select">
-      <!-- 1. SVG флаг вместо input -->
-      <img
-        *ngIf="selectedCountry"
-        [src]="selectedCountry.svg"
-        class="selected-flag"
-        (click)="editRegion()"
-        alt="flag"
-      />
+      <img *ngIf="selectedCountry" [src]="selectedCountry.svg" class="selected-flag" alt="flag" />
 
-      <!-- 2. Input — показывается только если нет выбранного флага -->
       <input
-        *ngIf="!selectedCountry"
+        #regionInput
+        *ngIf="!selectedCountry || activeFilter === 'region'"
         type="text"
         placeholder=""
         [(ngModel)]="regionQuery"
@@ -24,16 +21,16 @@
         maxlength="2"
       />
 
-      <!-- список стран -->
       <ul class="region-list" *ngIf="showRegionList">
         <li *ngFor="let country of filteredRegions()" (click)="selectRegion(country)">
-          <img [src]="country.svg" alt="{{ country.name }}" width="24" />
+          <img [src]="country.svg" />
         </li>
       </ul>
     </div>
   </div>
+
   <!-- Фильтр: Поиск по сайту -->
-  <div class="filter">
+  <div class="filter" [class.active]="activeFilter === 'site'" (click)="toggleFilter('site')">
     <label>Site search</label>
   </div>
 
@@ -58,15 +55,15 @@
     </div>
   </div> -->
 
-  <div class="filter">
+  <div class="filter" [class.active]="activeFilter === 'exclude'" (click)="toggleFilter('exclude')">
     <label>Exclude words</label>
   </div>
 
-  <div class="filter">
+  <div class="filter" [class.active]="activeFilter === 'exact'" (click)="toggleFilter('exact')">
     <label>The exact phrase</label>
   </div>
 
-  <div class="filter">
+  <div class="filter" [class.active]="activeFilter === 'similar'" (click)="toggleFilter('similar')">
     <label>Similar sites to</label>
   </div>
 </div>
