@@ -115,8 +115,11 @@ export class MainComponent implements OnInit {
   }
 
   selectRegion(country: Country) {
-    this.selectedCountry = country; // ← сохраняем выбранную страну
+    this.selectedCountry = country;
     this.showRegionList = false;
+
+    // автоматически скрываем input
+    this.regionQuery = '';
   }
 
   editRegion() {

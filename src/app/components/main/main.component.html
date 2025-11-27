@@ -9,23 +9,6 @@
   >
     <div class="region-select">
       <img *ngIf="selectedCountry" [src]="selectedCountry.svg" class="selected-flag" alt="flag" />
-
-      <input
-        #regionInput
-        *ngIf="!selectedCountry || activeFilter === 'region'"
-        type="text"
-        placeholder=""
-        [(ngModel)]="regionQuery"
-        (focus)="showRegionList = true"
-        class="filter__input region-search"
-        maxlength="2"
-      />
-
-      <ul class="region-list" *ngIf="showRegionList">
-        <li *ngFor="let country of filteredRegions()" (click)="selectRegion(country)">
-          <img [src]="country.svg" />
-        </li>
-      </ul>
     </div>
   </div>
 
@@ -156,6 +139,25 @@
     </svg>
   </button>
 </div>
+
+<!-- ПОЛЕ ВВОДА РЕГИОНА -->
+<input
+  #regionInput
+  type="text"
+  placeholder=""
+  [(ngModel)]="regionQuery"
+  (focus)="showRegionList = true"
+  class="filter__input region-search"
+  maxlength="2"
+  [class.active]="!selectedCountry && activeFilter === 'region'"
+/>
+
+<!-- СПИСОК СТРАН -->
+<ul class="region-list" *ngIf="showRegionList" [class.active]="activeFilter === 'region'">
+  <li *ngFor="let country of filteredRegions()" (click)="selectRegion(country)">
+    <img [src]="country.svg" />
+  </li>
+</ul>
 
 <!-- <input type="text" placeholder="example.com" [(ngModel)]="filters.site" class="filter__input" /> -->
 <!-- <input
