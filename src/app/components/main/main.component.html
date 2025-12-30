@@ -1,5 +1,16 @@
 <h1 class="title" [class.title--active]="showFilters">GreenFind</h1>
 
+<!-- АКТИВНЫЙ SITE ФИЛЬТР -->
+<div class="active-filters" [class.active]="showFilters" *ngIf="activeSite">
+  <div class="active-filter site">
+    <img *ngIf="activeSite.favicon" [src]="activeSite.favicon" alt="favicon" class="site-favicon" />
+
+    <span class="site-domain">{{ activeSite.domain }}</span>
+
+    <button class="remove-filter" (click)="removeSiteFilter()">✕</button>
+  </div>
+</div>
+
 <div class="filters" [class.filters--active]="showFilters">
   <!-- Фильтр: Регион -->
   <div
@@ -51,6 +62,7 @@
   </div>
 </div>
 
+<!-- ПОИСК -->
 <div class="search">
   <button class="search__btn setting" (click)="toggleFilters()">
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -144,7 +156,7 @@
 <input
   #regionInput
   type="text"
-  placeholder=""
+  [placeholder]="selectedCountry ? selectedCountry.code : ''"
   [(ngModel)]="regionQuery"
   (focus)="showRegionList = true"
   class="filter__input region-search"
@@ -153,19 +165,123 @@
 />
 
 <!-- СПИСОК СТРАН -->
-<ul class="region-list" *ngIf="showRegionList" [class.active]="activeFilter === 'region'">
+<ul class="region-list" [class.active]="activeFilter === 'region'">
   <li *ngFor="let country of filteredRegions()" (click)="selectRegion(country)">
     <img [src]="country.svg" />
   </li>
 </ul>
 
-<!-- <input type="text" placeholder="example.com" [(ngModel)]="filters.site" class="filter__input" /> -->
-<!-- <input
-  type="text"
-  placeholder="Words separated by a space"
-  class="filter__input"
-  [(ngModel)]="filters.exclude"
-/> -->
+<div class="site__filter">
+  <input
+    type="text"
+    placeholder="https://website.com"
+    [(ngModel)]="filters.site"
+    (ngModelChange)="validateSite()"
+    class="filter__input site-input"
+    [class.active]="activeFilter === 'site'"
+    [class.error]="siteError"
+  />
+
+  <button
+    class="search__btn-small site__btn"
+    [class.active]="activeFilter === 'site'"
+    (click)="applySiteFilter()"
+  >
+    <svg width="27" height="22" viewBox="0 0 27 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g filter="url(#filter0_d_93_13)">
+        <path
+          d="M20.4395 3.43929C21.0252 2.85361 21.9748 2.85354 22.5605 3.43929C23.1462 4.02504 23.1462 4.97462 22.5605 5.56038L11.6816 16.4393C11.5171 16.6038 11.323 16.7197 11.1172 16.7918C10.5559 17.071 9.85639 16.9783 9.38867 16.5106L4.43945 11.5604C3.85367 10.9746 3.85367 10.0251 4.43945 9.43929C5.02524 8.85351 5.97476 8.8535 6.56055 9.43929L10.5 13.3778L20.4395 3.43929Z"
+          fill="#4A4A4A"
+        />
+      </g>
+      <defs>
+        <filter
+          id="filter0_d_93_13"
+          x="0"
+          y="0"
+          width="27"
+          height="21.9489"
+          filterUnits="userSpaceOnUse"
+          color-interpolation-filters="sRGB"
+        >
+          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dy="1" />
+          <feGaussianBlur stdDeviation="2" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_93_13" />
+          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_93_13" result="shape" />
+        </filter>
+      </defs>
+    </svg>
+  </button>
+  <!-- ТЕКСТ ОШИБКИ -->
+  <div class="filter-error" *ngIf="siteError">
+    {{ siteErrorText }}
+  </div>
+</div>
+
+<div class="site__filter">
+  <input
+    type="text"
+    placeholder="Words separated by a space"
+    [(ngModel)]="filters.exclude"
+    (ngModelChange)="validateSite()"
+    class="filter__input site-input"
+    [class.active]="activeFilter === 'exclude'"
+  />
+
+  <button
+    class="search__btn-small site__btn"
+    [class.active]="activeFilter === 'exclude'"
+    (click)="applySiteFilter()"
+  >
+    <svg width="27" height="22" viewBox="0 0 27 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g filter="url(#filter0_d_93_13)">
+        <path
+          d="M20.4395 3.43929C21.0252 2.85361 21.9748 2.85354 22.5605 3.43929C23.1462 4.02504 23.1462 4.97462 22.5605 5.56038L11.6816 16.4393C11.5171 16.6038 11.323 16.7197 11.1172 16.7918C10.5559 17.071 9.85639 16.9783 9.38867 16.5106L4.43945 11.5604C3.85367 10.9746 3.85367 10.0251 4.43945 9.43929C5.02524 8.85351 5.97476 8.8535 6.56055 9.43929L10.5 13.3778L20.4395 3.43929Z"
+          fill="#4A4A4A"
+        />
+      </g>
+      <defs>
+        <filter
+          id="filter0_d_93_13"
+          x="0"
+          y="0"
+          width="27"
+          height="21.9489"
+          filterUnits="userSpaceOnUse"
+          color-interpolation-filters="sRGB"
+        >
+          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dy="1" />
+          <feGaussianBlur stdDeviation="2" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_93_13" />
+          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_93_13" result="shape" />
+        </filter>
+      </defs>
+    </svg>
+  </button>
+  <!-- ТЕКСТ ОШИБКИ
+  <div class="filter-error" *ngIf="excludeError">
+    {{ excludeErrorText }}
+  </div> -->
+</div>
+
 <!-- <input
   type="text"
   placeholder="For example, the 'Angular Component'"

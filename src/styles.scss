@@ -14,3 +14,9 @@ html, body {
   width: 100%;
   height: 100%;
 }
+
+
+:root {
+  --search-width: 50dvw; /* ширина поля поиска */
+  --filters-width: 45dvw;
+}

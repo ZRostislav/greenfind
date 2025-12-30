@@ -28,32 +28,43 @@ export class MainComponent implements OnInit {
   selectedCountry: Country | null = null;
   showFilters = false;
   activeFilter: string | null = null;
+  siteError = false;
+  siteErrorText = '';
+  activeSite: {
+    domain: string;
+    favicon: string;
+  } | null = null;
 
   toggleFilter(name: string) {
-    // если нажали на тот же фильтр → выключаем
+    // если уже открыт — закрываем
     if (this.activeFilter === name) {
       this.activeFilter = null;
-      this.showRegionList = false;
       return;
     }
 
     // включаем новый фильтр
     this.activeFilter = name;
 
-    // если region → сразу активировать input
+    // region → фокус на input
     if (name === 'region') {
       setTimeout(() => {
         const input = document.querySelector('.region-search') as HTMLInputElement;
-        if (input) {
-          input.focus();
-          this.showRegionList = true;
-        }
+        if (input) input.focus();
+      });
+    }
+
+    // site → фокус на сайт input
+    if (name === 'site') {
+      setTimeout(() => {
+        const input = document.querySelector('.site-input') as HTMLInputElement;
+        if (input) input.focus();
       });
     }
   }
 
   toggleFilters() {
     this.showFilters = !this.showFilters;
+    this.activeFilter = null;
   }
 
   fileTypes = ['PDF', 'DOCX', 'TXT', 'XLSX', 'PPTX'];
@@ -117,9 +128,7 @@ export class MainComponent implements OnInit {
   selectRegion(country: Country) {
     this.selectedCountry = country;
     this.showRegionList = false;
-
-    // автоматически скрываем input
-    this.regionQuery = '';
+    this.activeFilter = '';
   }
 
   editRegion() {
@@ -128,7 +137,50 @@ export class MainComponent implements OnInit {
     this.showRegionList = true;
   }
 
+  validateSite() {
+    if (!this.filters.site) {
+      this.siteError = false;
+      this.siteErrorText = '';
+      return true;
+    }
+
+    const siteRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+
+    const isValid = siteRegex.test(this.filters.site.trim());
+
+    this.siteError = !isValid;
+    this.siteErrorText = isValid ? '' : 'Enter a valid domain (example.com)';
+
+    return isValid;
+  }
+
+  applySiteFilter() {
+    if (!this.validateSite()) {
+      return;
+    }
+
+    // нормализация домена
+    const domain = this.filters.site
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .trim();
+
+    this.filters.site = domain;
+
+    this.activeSite = {
+      domain,
+      favicon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
+    };
+
+    this.activeFilter = null;
+  }
+
   search() {
     console.log('Поиск:', this.query, this.filters, this.selectedFiles);
+  }
+
+  removeSiteFilter() {
+    this.activeSite = null;
+    this.filters.site = '';
   }
 }

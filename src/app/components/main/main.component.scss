@@ -7,6 +7,10 @@
   height: 100vh;
 }
 
+.active {
+  z-index: 1 !important;
+}
+
 /* ===========================
       TITLE
 =========================== */
@@ -17,10 +21,10 @@
   font-weight: 400;
   font-size: clamp(36px, 8vw, 96px);
   line-height: 96px;
-  color: #FFFFFF;
+  color: #ffffff;
   text-shadow: 0px 3px 0.6px rgba(0, 0, 0, 0.25);
   padding-bottom: 15px;
-  transition: .8s;
+  transition: 0.8s;
 }
 
 /* Когда открыты фильтры */
@@ -29,8 +33,6 @@
   transform: translateY(-35vh);
 }
 
-
-
 /* ===========================
       SEARCH
 =========================== */
@@ -38,20 +40,21 @@
 .search {
   display: flex;
   gap: 10px;
-  z-index: 1;
+  z-index: 2;
 }
 
 .search__input {
   all: unset;
-  width: 50dvw;
+  width: var(--search-width);
   height: 50px;
-  background: #D9D9D9;
+  background: #d9d9d9;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 50.5px;
   padding: 0 22px;
   box-sizing: border-box;
 
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
+    Arial, sans-serif;
   font-size: clamp(14px, 1.6vw, 18px);
   color: #333;
 }
@@ -62,12 +65,11 @@
   font-weight: 300;
 }
 
-.search__btn.setting,
-.search__btn.search {
+.search__btn {
   all: unset;
   width: 50px;
   height: 50px;
-  background: #D9D9D9;
+  background: #d9d9d9;
   border-radius: 25px;
   cursor: pointer;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -79,19 +81,42 @@
   transition: transform 0.2s ease, box-shadow 0.25s ease;
 }
 
-.search__btn.setting:hover,
-.search__btn.search:hover {
+.search__btn:hover {
   transform: scale(1.07);
   box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.28);
 }
 
-.search__btn.setting:active,
-.search__btn.search:active {
+.search__btn:active {
   transform: scale(0.95);
 }
 
 .search__btn.search svg {
   margin-left: 3px;
+}
+
+.search__btn-small {
+  all: unset;
+  width: 40px;
+  height: 40px;
+  background: #d9d9d9;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.search__btn-small:hover {
+  transform: scale(1.07);
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.28);
+}
+
+.search__btn-small:active {
+  transform: scale(0.95);
 }
 
 svg {
@@ -103,50 +128,55 @@ svg {
 =========================== */
 
 .filters {
-font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-position: absolute;
-display: flex;
-gap: 5px;
-margin-bottom: -80px;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
+    Arial, sans-serif;
+  position: absolute;
+  display: flex;
+  gap: 5px;
+  margin-bottom: -80px;
+  width: var(--filters-width);
+  justify-content: center;
 
-opacity: 0;
-transform: translateY(20px);
-pointer-events: none;
+  z-index: 1;
 
-/* плавный вход/выход контейнера */
-transition: margin-bottom 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+
+  /* плавный вход/выход контейнера */
+  transition: margin-bottom 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
 
 .filters--active {
-margin-bottom: -60px;
-opacity: 1;
-transform: translateY(0);
-pointer-events: auto;
+  margin-bottom: -60px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .filter {
-background-color: #D9D9D9;
-border-radius: 20px;
-height: 15px;
-width: max-content;
-padding: 7px;
-font-size: 24px;
-cursor: pointer;
-display: inline-block;
-position: relative;
+  background-color: #d9d9d9;
+  border-radius: 20px;
+  height: 15px;
+  width: max-content;
+  padding: 7px;
+  font-size: clamp(10px, 1.1vw, 24px);
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
 
-opacity: 0;
-transform: translateY(20px);
+  opacity: 0;
+  transform: translateY(20px);
 
-/* transition для появления фильтров */
-transition: opacity 0.6s ease, transform 0.6s ease, height 0.6s ease;
+  /* transition для появления фильтров */
+  transition: opacity 0.6s ease, transform 0.6s ease, height 0.6s ease;
 }
 
 /* появление элементов с последовательной задержкой только при активных фильтрах */
 .filters--active .filter {
-opacity: 1;
-transform: translateY(0);
-height: 80px;
+  opacity: 1;
+  transform: translateY(0);
+  height: 80px;
 }
 
 .filter.active {
@@ -155,16 +185,14 @@ height: 80px;
 
 /* Hover — моментальный, без задержки, анимация только transform */
 .filter:hover {
-transform: translateY(-10px) !important;
-box-shadow: 0px 4px 4px rgba(0,0,0,0.5);
-transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transform: translateY(-10px) !important;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .filter label {
-cursor: pointer;
+  cursor: pointer;
 }
-
-
 
 /* ===========================
       REGION SELECTOR
@@ -192,7 +220,7 @@ cursor: pointer;
   transform: translate(-50%, -50%);
 
   border-radius: 20px;
-  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.50));
+  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.5));
 }
 
 .region-select input {
@@ -207,9 +235,9 @@ cursor: pointer;
 .region-list {
   position: absolute;
   left: 0;
-  margin-left: 2dvw;
+  margin-left: -5vw;
   width: 50px;
-  background: #D9D9D9;
+  background: #d9d9d9;
   border-radius: 50.5px;
 
   max-height: 25dvh;
@@ -219,6 +247,13 @@ cursor: pointer;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
   scrollbar-width: none;
+  opacity: 0;
+  transition: 0.4s ease;
+}
+
+.region-list.active {
+  opacity: 1;
+  margin-left: 2dvw;
 }
 
 .region-list::-webkit-scrollbar {
@@ -236,7 +271,7 @@ cursor: pointer;
   padding: 5px;
   cursor: pointer;
   border-radius: 20px;
-  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.50));
+  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 0.5));
   transition: transform 0.25s ease;
 }
 
@@ -247,21 +282,197 @@ cursor: pointer;
 .filter__input.region-search {
   all: unset;
   position: absolute;
-  bottom: 500px;
-    width: 100px;
-    height: 40px;
-    text-align: center;
-  background: #D9D9D9;
+  margin-top: 115px;
+  width: 100px;
+  height: 40px;
+  text-align: center;
+  background: #d9d9d9;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 50.5px;
   padding: 0 22px;
   box-sizing: border-box;
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
+    Arial, sans-serif;
   font-size: 18px;
   color: #333;
   opacity: 0;
+  transition: opacity 0.6s ease, 0.4s ease;
 }
 
 .filter__input.region-search.active {
   opacity: 1;
+  margin-top: 255px;
+}
+
+.filter__input.region-search.active:hover {
+  width: 105px;
+  height: 43px;
+}
+
+/* ===========================
+      Site Filter
+=========================== */
+
+.site__filter {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.site__btn {
+  opacity: 0;
+  margin-top: 120px;
+  transition: opacity 0.6s ease, 0.4s ease;
+}
+
+.search__btn-small.site__btn.active {
+  opacity: 1;
+  margin-top: 255px;
+}
+
+.filter__input.site-input {
+  all: unset;
+  margin-top: 115px;
+  width: 600px;
+  height: 40px;
+  text-align: center;
+  background: #d9d9d9;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 50.5px;
+  padding: 0 22px;
+  box-sizing: border-box;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
+    Arial, sans-serif;
+  font-size: 18px;
+  color: #333;
+  opacity: 0;
+  transition: opacity 0.6s ease, 0.4s ease;
+}
+
+.filter-error {
+  position: absolute;
+  left: 50%;
+  top: 310px; /* Совпадает с вашим расположением */
+  transform: translateX(-50%);
+
+  /* Стиль в духе вашего интерфейса */
+  background: #d9d9d9; /* Полупрозрачный серый */
+  backdrop-filter: blur(4px);
+  padding: 8px 20px;
+  border-radius: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+
+  /* Типографика */
+  font-family: -apple-system, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ff4d4f;
+  text-shadow: 0px 1px 0.6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+
+  /* Анимация появления */
+  animation: errorAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+@keyframes errorAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* Класс для эффекта дрожания при повторной ошибке */
+.filter-error--shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(-50%);
+  }
+  20%,
+  60% {
+    transform: translateX(-52%);
+  }
+  40%,
+  80% {
+    transform: translateX(-48%);
+  }
+}
+
+/* Иконка перед текстом (опционально, если добавите в HTML) */
+.filter-error::before {
+  content: '⚠️';
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.filter__input.site-input.active {
+  opacity: 1;
+  margin-top: 255px;
+}
+
+.filter__input.site-input.active:hover {
+  width: 640px;
+}
+
+///
+.active-filters {
+  display: none;
+}
+
+.active-filters.active {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
+    Arial, sans-serif;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  position: absolute;
+  top: 400px;
+  z-index: 1;
+}
+
+.active-filter.site {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #d9d9d9;
+  font-size: 14px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+}
+
+.site-favicon {
+  width: 16px;
+  height: 16px;
+}
+
+.site-domain {
+  font-weight: 500;
+  color: #333;
+}
+
+.remove-filter {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+  filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 1));
+}
+
+.active-filter.site:has(.remove-filter:hover) {
+  gap: 10px;
 }
