@@ -313,25 +313,33 @@ svg {
       Site Filter
 =========================== */
 
-.site__filter {
+.site__filter,
+.exclude__filter,
+.exact__filter {
   position: absolute;
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
-.site__btn {
+.site__btn,
+.exclude__btn,
+.exact__btn {
   opacity: 0;
   margin-top: 120px;
   transition: opacity 0.6s ease, 0.4s ease;
 }
 
-.search__btn-small.site__btn.active {
+.search__btn-small.site__btn.active,
+.search__btn-small.exclude__btn.active,
+.search__btn-small.exact__btn.active {
   opacity: 1;
   margin-top: 255px;
 }
 
-.filter__input.site-input {
+.filter__input.site-input,
+.filter__input.exclude-input,
+.filter__input.exact-input {
   all: unset;
   margin-top: 115px;
   width: 600px;
@@ -417,28 +425,38 @@ svg {
   font-size: 14px;
 }
 
-.filter__input.site-input.active {
+.filter__input.site-input.active,
+.filter__input.exclude-input.active,
+.filter__input.exact-input.active {
   opacity: 1;
   margin-top: 255px;
 }
 
-.filter__input.site-input.active:hover {
+.filter__input.site-input.active:hover,
+.filter__input.exclude-input.active:hover,
+.filter__input.exact-input.active:hover {
   width: 640px;
 }
 
 ///
 .active-filters {
-  display: none;
-}
-
-.active-filters.active {
   font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
     Arial, sans-serif;
   display: flex;
   gap: 10px;
   margin-bottom: 12px;
+  top: 410px;
   position: absolute;
-  top: 400px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.4s ease;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.active-filters.active {
+  transform: translateY(0px);
+  opacity: 1;
   z-index: 1;
 }
 
@@ -471,8 +489,35 @@ svg {
   font-size: 12px;
   color: #333;
   filter: drop-shadow(0px 1px 0.6px rgba(0, 0, 0, 1));
+  transition: all 0.3s ease;
 }
 
 .active-filter.site:has(.remove-filter:hover) {
   gap: 10px;
+
+  .remove-filter {
+    transform: scale(1.2);
+  }
+}
+
+.active-filter.exclude,
+.active-filter.exact {
+  display: flex;
+  border-radius: 20px;
+  background: #d9d9d9;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 14px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  align-items: center;
+}
+
+.active-filter.exclude:has(.remove-filter:hover),
+.active-filter.exact:has(.remove-filter:hover) {
+  gap: 10px;
+
+  .remove-filter {
+    transform: scale(1.2);
+  }
 }

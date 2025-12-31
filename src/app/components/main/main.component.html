@@ -1,13 +1,28 @@
 <h1 class="title" [class.title--active]="showFilters">GreenFind</h1>
 
-<!-- АКТИВНЫЙ SITE ФИЛЬТР -->
-<div class="active-filters" [class.active]="showFilters" *ngIf="activeSite">
-  <div class="active-filter site">
+<!-- АКТИВНЫЕ ФИЛЬТРЫ -->
+<div class="active-filters" [class.active]="showFilters" *ngIf="activeSite || excludeWords.length">
+  <!-- SITE -->
+  <div class="active-filter site" *ngIf="activeSite">
     <img *ngIf="activeSite.favicon" [src]="activeSite.favicon" alt="favicon" class="site-favicon" />
 
-    <span class="site-domain">{{ activeSite.domain }}</span>
+    <span class="site-domain">site:{{ activeSite.domain }}</span>
 
     <button class="remove-filter" (click)="removeSiteFilter()">✕</button>
+  </div>
+
+  <!-- EXCLUDE -->
+  <div class="active-filter exclude" *ngFor="let word of excludeWords">
+    <span class="exclude-word">-{{ word }}</span>
+
+    <button class="remove-filter" (click)="removeExcludeWord(word)">✕</button>
+  </div>
+
+  <!-- EXACT -->
+  <div class="active-filter exact" *ngFor="let word of exactWords">
+    <span class="exact-word">+{{ word }}</span>
+
+    <button class="remove-filter" (click)="removeExactWord(word)">✕</button>
   </div>
 </div>
 
@@ -27,27 +42,6 @@
   <div class="filter" [class.active]="activeFilter === 'site'" (click)="toggleFilter('site')">
     <label>Site search</label>
   </div>
-
-  <!-- Фильтр: Тип файла (множественный выбор) -->
-  <!-- <div class="filter file-filter">
-    <label>File Type</label>
-    <div class="file-select" (click)="toggleFileList()">
-      <div class="file-chosen">
-        {{ selectedFiles.length ? selectedFiles.join(', ') : 'Select the file types' }}
-      </div>
-      <ul class="file-list" [class.show]="fileListOpen">
-        <li *ngFor="let f of fileTypes">
-          <input
-            type="checkbox"
-            [value]="f"
-            (change)="toggleFileType($event)"
-            [checked]="selectedFiles.includes(f)"
-          />
-          {{ f }}
-        </li>
-      </ul>
-    </div>
-  </div> -->
 
   <div class="filter" [class.active]="activeFilter === 'exclude'" (click)="toggleFilter('exclude')">
     <label>Exclude words</label>
@@ -227,35 +221,35 @@
   </div>
 </div>
 
-<div class="site__filter">
+<div class="exclude__filter">
   <input
     type="text"
-    placeholder="Words separated by a space"
-    [(ngModel)]="filters.exclude"
-    (ngModelChange)="validateSite()"
-    class="filter__input site-input"
+    placeholder="Exclude word"
+    [(ngModel)]="excludeInput"
+    class="filter__input exclude-input"
     [class.active]="activeFilter === 'exclude'"
+    (keydown.enter)="addExcludeWord()"
   />
 
   <button
-    class="search__btn-small site__btn"
+    class="search__btn-small exclude__btn"
     [class.active]="activeFilter === 'exclude'"
-    (click)="applySiteFilter()"
+    (click)="addExcludeWord()"
   >
-    <svg width="27" height="22" viewBox="0 0 27 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g filter="url(#filter0_d_93_13)">
+    <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g filter="url(#filter0_d_102_52)">
         <path
-          d="M20.4395 3.43929C21.0252 2.85361 21.9748 2.85354 22.5605 3.43929C23.1462 4.02504 23.1462 4.97462 22.5605 5.56038L11.6816 16.4393C11.5171 16.6038 11.323 16.7197 11.1172 16.7918C10.5559 17.071 9.85639 16.9783 9.38867 16.5106L4.43945 11.5604C3.85367 10.9746 3.85367 10.0251 4.43945 9.43929C5.02524 8.85351 5.97476 8.8535 6.56055 9.43929L10.5 13.3778L20.4395 3.43929Z"
+          d="M20.885 10.7775C21.7133 10.7775 22.3846 11.449 22.3848 12.2773C22.3848 13.1057 21.7134 13.7772 20.885 13.7772L14.6073 13.7765V19.8849C14.6071 20.7131 13.9357 21.3847 13.1075 21.3848C12.279 21.3848 11.6069 20.7127 11.6069 19.8842V13.7772L5.50055 13.7778C4.67212 13.7778 4.00002 13.1057 4.00002 12.2773C4.00017 11.4492 4.67175 10.7777 5.49986 10.7775L11.6076 10.7768V4.49983C11.6076 3.67141 12.279 2.99999 13.1075 2.99999C13.9358 3.0001 14.6073 3.67147 14.6073 4.49983V10.7768L20.885 10.7775Z"
           fill="#4A4A4A"
         />
       </g>
       <defs>
         <filter
-          id="filter0_d_93_13"
+          id="filter0_d_102_52"
           x="0"
           y="0"
-          width="27"
-          height="21.9489"
+          width="26.3848"
+          height="26.3848"
           filterUnits="userSpaceOnUse"
           color-interpolation-filters="sRGB"
         >
@@ -270,27 +264,71 @@
           <feGaussianBlur stdDeviation="2" />
           <feComposite in2="hardAlpha" operator="out" />
           <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_93_13" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_93_13" result="shape" />
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_102_52" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_102_52"
+            result="shape"
+          />
         </filter>
       </defs>
     </svg>
   </button>
-  <!-- ТЕКСТ ОШИБКИ
-  <div class="filter-error" *ngIf="excludeError">
-    {{ excludeErrorText }}
-  </div> -->
 </div>
 
-<!-- <input
-  type="text"
-  placeholder="For example, the 'Angular Component'"
-  class="filter__input"
-  [(ngModel)]="filters.exact"
-/> -->
-<!-- <input
-      type="text"
-      placeholder="example.com"
-      class="filter__input"
-      [(ngModel)]="filters.similar"
-    /> -->
+<div class="exact__filter">
+  <input
+    type="text"
+    placeholder="Exact word"
+    [(ngModel)]="exactInput"
+    class="filter__input exact-input"
+    [class.active]="activeFilter === 'exact'"
+    (keydown.enter)="addExactWord()"
+  />
+
+  <button
+    class="search__btn-small exclude__btn"
+    [class.active]="activeFilter === 'exact'"
+    (click)="addExactWord()"
+  >
+    <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g filter="url(#filter0_d_102_52)">
+        <path
+          d="M20.885 10.7775C21.7133 10.7775 22.3846 11.449 22.3848 12.2773C22.3848 13.1057 21.7134 13.7772 20.885 13.7772L14.6073 13.7765V19.8849C14.6071 20.7131 13.9357 21.3847 13.1075 21.3848C12.279 21.3848 11.6069 20.7127 11.6069 19.8842V13.7772L5.50055 13.7778C4.67212 13.7778 4.00002 13.1057 4.00002 12.2773C4.00017 11.4492 4.67175 10.7777 5.49986 10.7775L11.6076 10.7768V4.49983C11.6076 3.67141 12.279 2.99999 13.1075 2.99999C13.9358 3.0001 14.6073 3.67147 14.6073 4.49983V10.7768L20.885 10.7775Z"
+          fill="#4A4A4A"
+        />
+      </g>
+      <defs>
+        <filter
+          id="filter0_d_102_52"
+          x="0"
+          y="0"
+          width="26.3848"
+          height="26.3848"
+          filterUnits="userSpaceOnUse"
+          color-interpolation-filters="sRGB"
+        >
+          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dy="1" />
+          <feGaussianBlur stdDeviation="2" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_102_52" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_102_52"
+            result="shape"
+          />
+        </filter>
+      </defs>
+    </svg>
+  </button>
+</div>

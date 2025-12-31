@@ -34,6 +34,38 @@ export class MainComponent implements OnInit {
     domain: string;
     favicon: string;
   } | null = null;
+  excludeInput = '';
+  excludeWords: string[] = [];
+  exactInput = '';
+  exactWords: string[] = [];
+
+  addExactWord() {
+    const word = this.exactInput.trim();
+
+    if (!word) return;
+    if (this.exactWords.includes(word)) return;
+
+    this.exactWords.push(word);
+    this.exactInput = '';
+  }
+
+  removeExactWord(word: string) {
+    this.exactWords = this.exactWords.filter((w) => w !== word);
+  }
+
+  addExcludeWord() {
+    const word = this.excludeInput.trim();
+
+    if (!word) return;
+    if (this.excludeWords.includes(word)) return;
+
+    this.excludeWords.push(word);
+    this.excludeInput = '';
+  }
+
+  removeExcludeWord(word: string) {
+    this.excludeWords = this.excludeWords.filter((w) => w !== word);
+  }
 
   toggleFilter(name: string) {
     // если уже открыт — закрываем
@@ -65,23 +97,6 @@ export class MainComponent implements OnInit {
   toggleFilters() {
     this.showFilters = !this.showFilters;
     this.activeFilter = null;
-  }
-
-  fileTypes = ['PDF', 'DOCX', 'TXT', 'XLSX', 'PPTX'];
-  selectedFiles: string[] = [];
-  fileListOpen = false;
-
-  toggleFileList() {
-    this.fileListOpen = !this.fileListOpen;
-  }
-
-  toggleFileType(event: any) {
-    const value = event.target.value;
-    if (event.target.checked) {
-      if (!this.selectedFiles.includes(value)) this.selectedFiles.push(value);
-    } else {
-      this.selectedFiles = this.selectedFiles.filter((f) => f !== value);
-    }
   }
 
   regionQuery = '';
@@ -175,9 +190,7 @@ export class MainComponent implements OnInit {
     this.activeFilter = null;
   }
 
-  search() {
-    console.log('Поиск:', this.query, this.filters, this.selectedFiles);
-  }
+  search() {}
 
   removeSiteFilter() {
     this.activeSite = null;
