@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import emojiFlags from 'emoji-flags';
+import { SearchService } from '../../services/search.service';
+import { HttpClientModule } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 interface Country {
   code: string;
@@ -14,7 +17,7 @@ interface Country {
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
 })
 export class MainComponent implements OnInit {
   query = '';
@@ -30,7 +33,13 @@ export class MainComponent implements OnInit {
   activeFilter: string | null = null;
   siteError = false;
   siteErrorText = '';
+  similarError = false;
+  similarErrorText = '';
   activeSite: {
+    domain: string;
+    favicon: string;
+  } | null = null;
+  activeSimilar: {
     domain: string;
     favicon: string;
   } | null = null;
@@ -38,6 +47,14 @@ export class MainComponent implements OnInit {
   excludeWords: string[] = [];
   exactInput = '';
   exactWords: string[] = [];
+  results: any = null;
+  loading = false;
+  error: string | null = null;
+
+  constructor(
+    private searchService: SearchService,
+    private router: Router,
+  ) {}
 
   addExactWord() {
     const word = this.exactInput.trim();
@@ -89,6 +106,13 @@ export class MainComponent implements OnInit {
     if (name === 'site') {
       setTimeout(() => {
         const input = document.querySelector('.site-input') as HTMLInputElement;
+        if (input) input.focus();
+      });
+    }
+
+    if (name === 'similar') {
+      setTimeout(() => {
+        const input = document.querySelector('.similar-input') as HTMLInputElement;
         if (input) input.focus();
       });
     }
@@ -169,6 +193,23 @@ export class MainComponent implements OnInit {
     return isValid;
   }
 
+  validateSimilar() {
+    if (!this.filters.similar) {
+      this.similarError = false;
+      this.similarErrorText = '';
+      return true;
+    }
+
+    const similarRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+
+    const isValid = similarRegex.test(this.filters.similar.trim());
+
+    this.similarError = !isValid;
+    this.similarErrorText = isValid ? '' : 'Enter a valid domain (example.com)';
+
+    return isValid;
+  }
+
   applySiteFilter() {
     if (!this.validateSite()) {
       return;
@@ -190,10 +231,80 @@ export class MainComponent implements OnInit {
     this.activeFilter = null;
   }
 
-  search() {}
+  applySimilarFilter() {
+    if (!this.validateSimilar()) {
+      return;
+    }
+
+    // нормализация домена
+    const domain = this.filters.similar
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .trim();
+
+    this.filters.similar = domain;
+
+    this.activeSimilar = {
+      domain,
+      favicon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
+    };
+
+    this.activeFilter = null;
+  }
+
+  search() {
+    if (!this.query.trim()) return;
+
+    this.searchService.search({
+      query: this.query.trim(),
+      country: this.selectedCountry?.code?.toLowerCase(),
+      city: this.filters.region || undefined,
+      site: this.activeSite?.domain,
+      similar: this.activeSimilar?.domain,
+      exclude: this.excludeWords,
+      exact: this.exactWords,
+      fileTypes: this.fileTypesSelected,
+    });
+
+    this.router.navigate(['/results']);
+  }
 
   removeSiteFilter() {
     this.activeSite = null;
     this.filters.site = '';
+  }
+  removeSimilarFilter() {
+    this.activeSimilar = null;
+    this.filters.similar = '';
+  }
+
+  ///
+
+  fileTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
+
+  fileTypesSelected: string[] = [];
+
+  toggleFileType(type: string) {
+    if (this.fileTypesSelected.includes(type)) {
+      this.fileTypesSelected = this.fileTypesSelected.filter((t) => t !== type);
+    } else {
+      this.fileTypesSelected.push(type);
+    }
+  }
+
+  removeFileType(type: string) {
+    this.fileTypesSelected = this.fileTypesSelected.filter((t) => t !== type);
+  }
+
+  private hasActiveFilters(): boolean {
+    return !!(
+      this.activeSite ||
+      this.activeSimilar ||
+      this.excludeWords.length ||
+      this.exactWords.length ||
+      this.fileTypesSelected.length ||
+      this.selectedCountry ||
+      this.filters.region
+    );
   }
 }

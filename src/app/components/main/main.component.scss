@@ -315,7 +315,8 @@ svg {
 
 .site__filter,
 .exclude__filter,
-.exact__filter {
+.exact__filter,
+.similar__filter {
   position: absolute;
   display: flex;
   align-items: center;
@@ -324,7 +325,8 @@ svg {
 
 .site__btn,
 .exclude__btn,
-.exact__btn {
+.exact__btn,
+.similar__btn {
   opacity: 0;
   margin-top: 120px;
   transition: opacity 0.6s ease, 0.4s ease;
@@ -332,14 +334,16 @@ svg {
 
 .search__btn-small.site__btn.active,
 .search__btn-small.exclude__btn.active,
-.search__btn-small.exact__btn.active {
+.search__btn-small.exact__btn.active,
+.search__btn-small.similar__btn.active {
   opacity: 1;
   margin-top: 255px;
 }
 
 .filter__input.site-input,
 .filter__input.exclude-input,
-.filter__input.exact-input {
+.filter__input.exact-input,
+.filter__input.similar-input {
   all: unset;
   margin-top: 115px;
   width: 600px;
@@ -427,14 +431,16 @@ svg {
 
 .filter__input.site-input.active,
 .filter__input.exclude-input.active,
-.filter__input.exact-input.active {
+.filter__input.exact-input.active,
+.filter__input.similar-input.active {
   opacity: 1;
   margin-top: 255px;
 }
 
 .filter__input.site-input.active:hover,
 .filter__input.exclude-input.active:hover,
-.filter__input.exact-input.active:hover {
+.filter__input.exact-input.active:hover,
+.filter__input.similar-input.active:hover {
   width: 640px;
 }
 
@@ -460,7 +466,8 @@ svg {
   z-index: 1;
 }
 
-.active-filter.site {
+.active-filter.site,
+.active-filter.similar {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -472,12 +479,14 @@ svg {
   transition: all 0.3s ease;
 }
 
-.site-favicon {
+.site-favicon,
+.similar-favicon {
   width: 16px;
   height: 16px;
 }
 
-.site-domain {
+.site-domain,
+.similar-domain {
   font-weight: 500;
   color: #333;
 }
@@ -492,7 +501,8 @@ svg {
   transition: all 0.3s ease;
 }
 
-.active-filter.site:has(.remove-filter:hover) {
+.active-filter.site:has(.remove-filter:hover),
+.active-filter.similar:has(.remove-filter:hover) {
   gap: 10px;
 
   .remove-filter {
@@ -520,4 +530,27 @@ svg {
   .remove-filter {
     transform: scale(1.2);
   }
+}
+
+///
+.filetype__filter {
+  display: none;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filetype__filter.active {
+  display: flex;
+}
+
+.filetype-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.filetype-btn.selected {
+  background: #4a4a4a;
+  color: #fff;
 }
