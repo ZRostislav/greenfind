@@ -3,8 +3,23 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import emojiFlags from 'emoji-flags';
 import { SearchService } from '../../services/search.service';
-import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
+import {
+  LucideAngularModule,
+  Search,
+  SlidersHorizontal,
+  Globe,
+  Link,
+  Check,
+  X,
+  Plus,
+  Minus,
+  Type,
+  FileText,
+  Leaf,
+  ArrowRight,
+} from 'lucide-angular';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 interface Country {
   code: string;
@@ -12,150 +27,125 @@ interface Country {
   svg: string;
 }
 
+export interface SearchFilters {
+  query: string;
+  country?: string;
+  region?: string;
+  city?: string;
+  site?: string;
+  similar?: string;
+  exclude?: string[];
+  exact?: string[];
+  fileTypes?: string[];
+}
+
+export const fadeIn = trigger('fadeIn', [
+  transition(':enter', [style({ opacity: 0 }), animate('600ms ease-out', style({ opacity: 1 }))]),
+]);
+
+export const slideUp = trigger('slideUp', [
+  transition(':enter', [
+    style({ opacity: 0, transform: 'translateY(40px)' }),
+    animate('700ms cubic-bezier(.22,1,.36,1)', style({ opacity: 1, transform: 'none' })),
+  ]),
+]);
+
+export const cardAnim = trigger('cardAnim', [
+  transition(':enter', [
+    style({ opacity: 0, transform: 'translateY(30px)' }),
+    animate('500ms ease-out', style({ opacity: 1, transform: 'none' })),
+  ]),
+]);
+
 @Component({
   selector: 'app-main',
-  templateUrl: './main.component.html',
-  styleUrls: ['./main.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  templateUrl: './main.component.html',
+  imports: [CommonModule, FormsModule, LucideAngularModule],
 })
 export class MainComponent implements OnInit {
+  readonly SearchIcon = Search;
+  readonly SlidersIcon = SlidersHorizontal;
+  readonly GlobeIcon = Globe;
+  readonly LinkIcon = Link;
+  readonly CheckIcon = Check;
+  readonly XIcon = X;
+  readonly PlusIcon = Plus;
+  readonly MinusIcon = Minus;
+  readonly TypeIcon = Type;
+  readonly FileTextIcon = FileText;
+  readonly LeafIcon = Leaf;
+  readonly ArrowRightIcon = ArrowRight;
+
+  // ========================
+  // CORE STATE
+  // ========================
+
   query = '';
-  filters = {
-    site: '',
-    region: '',
-    exclude: '',
-    exact: '',
-    similar: '',
-  };
+
+  siteInput = '';
+  similarInput = '';
+
+  excludeInput = '';
+  exactInput = '';
+
+  excludeWords: string[] = [];
+  exactWords: string[] = [];
+  fileTypesSelected: string[] = [];
+
+  activeSite: string | null = null;
+  activeSimilar: string | null = null;
+
+  siteError: string | null = null;
+  similarError: string | null = null;
+
   selectedCountry: Country | null = null;
+  regionQuery = '';
+  regions: Country[] = [];
+  selectedCity: string | null = null;
+
   showFilters = false;
   activeFilter: string | null = null;
-  siteError = false;
-  siteErrorText = '';
-  similarError = false;
-  similarErrorText = '';
-  activeSite: {
-    domain: string;
-    favicon: string;
-  } | null = null;
-  activeSimilar: {
-    domain: string;
-    favicon: string;
-  } | null = null;
-  excludeInput = '';
-  excludeWords: string[] = [];
-  exactInput = '';
-  exactWords: string[] = [];
-  results: any = null;
-  loading = false;
-  error: string | null = null;
+
+  readonly fileTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
 
   constructor(
     private searchService: SearchService,
     private router: Router,
   ) {}
 
-  addExactWord() {
-    const word = this.exactInput.trim();
-
-    if (!word) return;
-    if (this.exactWords.includes(word)) return;
-
-    this.exactWords.push(word);
-    this.exactInput = '';
-  }
-
-  removeExactWord(word: string) {
-    this.exactWords = this.exactWords.filter((w) => w !== word);
-  }
-
-  addExcludeWord() {
-    const word = this.excludeInput.trim();
-
-    if (!word) return;
-    if (this.excludeWords.includes(word)) return;
-
-    this.excludeWords.push(word);
-    this.excludeInput = '';
-  }
-
-  removeExcludeWord(word: string) {
-    this.excludeWords = this.excludeWords.filter((w) => w !== word);
-  }
-
-  toggleFilter(name: string) {
-    // если уже открыт — закрываем
-    if (this.activeFilter === name) {
-      this.activeFilter = null;
-      return;
-    }
-
-    // включаем новый фильтр
-    this.activeFilter = name;
-
-    // region → фокус на input
-    if (name === 'region') {
-      setTimeout(() => {
-        const input = document.querySelector('.region-search') as HTMLInputElement;
-        if (input) input.focus();
-      });
-    }
-
-    // site → фокус на сайт input
-    if (name === 'site') {
-      setTimeout(() => {
-        const input = document.querySelector('.site-input') as HTMLInputElement;
-        if (input) input.focus();
-      });
-    }
-
-    if (name === 'similar') {
-      setTimeout(() => {
-        const input = document.querySelector('.similar-input') as HTMLInputElement;
-        if (input) input.focus();
-      });
-    }
-  }
-
-  toggleFilters() {
-    this.showFilters = !this.showFilters;
-    this.activeFilter = null;
-  }
-
-  regionQuery = '';
-  showRegionList = false;
-  regions: Country[] = []; // страны с SVG
+  // ========================
+  // INIT
+  // ========================
 
   ngOnInit() {
-    this.loadCountriesWithSVG();
+    this.loadCountries();
     this.detectCountry();
   }
 
-  loadCountriesWithSVG() {
-    // emojiFlags.data содержит все страны, берем код ISO и название
+  private loadCountries() {
     this.regions = emojiFlags.data.map((c) => ({
-      code: c.code, // US, RU, FR...
-      name: c.name, // United States, Russia...
-      svg: `3x2/${c.code}.svg`, // путь к SVG флагу в assets
+      code: c.code,
+      name: c.name,
+      svg: `3x2/${c.code}.svg`,
     }));
   }
+
+  // ========================
+  // COUNTRY AUTO-DETECT
+  // ========================
 
   async detectCountry() {
     try {
       const res = await fetch('https://ipapi.co/json/');
       const data = await res.json();
-      const code = data.country_code;
+      const country = this.regions.find((r) => r.code === data.country_code);
 
-      const country = this.regions.find((r) => r.code === code);
       if (country) {
-        this.filters.region = country.name;
-
-        this.regionQuery = ''; // input остается пустым
-        this.selectedCountry = country; // показываем SVG вместо input
+        this.selectedCountry = country;
       }
-    } catch (e) {
-      console.warn('Не удалось определить страну');
+    } catch {
+      console.warn('Country detection failed');
     }
   }
 
@@ -166,123 +156,101 @@ export class MainComponent implements OnInit {
 
   selectRegion(country: Country) {
     this.selectedCountry = country;
-    this.showRegionList = false;
-    this.activeFilter = '';
+    this.activeFilter = null;
   }
 
-  editRegion() {
+  clearRegion() {
     this.selectedCountry = null;
-    this.regionQuery = '';
-    this.showRegionList = true;
   }
 
-  validateSite() {
-    if (!this.filters.site) {
-      this.siteError = false;
-      this.siteErrorText = '';
-      return true;
+  // ========================
+  // WORD MANAGEMENT
+  // ========================
+
+  addWord(type: 'exact' | 'exclude') {
+    const input = type === 'exact' ? this.exactInput : this.excludeInput;
+    const word = input.trim();
+
+    if (!word) return;
+
+    const target = type === 'exact' ? this.exactWords : this.excludeWords;
+
+    if (!target.includes(word)) {
+      target.push(word);
     }
 
-    const siteRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-
-    const isValid = siteRegex.test(this.filters.site.trim());
-
-    this.siteError = !isValid;
-    this.siteErrorText = isValid ? '' : 'Enter a valid domain (example.com)';
-
-    return isValid;
+    if (type === 'exact') this.exactInput = '';
+    else this.excludeInput = '';
   }
 
-  validateSimilar() {
-    if (!this.filters.similar) {
-      this.similarError = false;
-      this.similarErrorText = '';
-      return true;
+  removeWord(type: 'exact' | 'exclude', word: string) {
+    if (type === 'exact') {
+      this.exactWords = this.exactWords.filter((w) => w !== word);
+    } else {
+      this.excludeWords = this.excludeWords.filter((w) => w !== word);
     }
-
-    const similarRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-
-    const isValid = similarRegex.test(this.filters.similar.trim());
-
-    this.similarError = !isValid;
-    this.similarErrorText = isValid ? '' : 'Enter a valid domain (example.com)';
-
-    return isValid;
   }
 
-  applySiteFilter() {
-    if (!this.validateSite()) {
+  // ========================
+  // DOMAIN LOGIC
+  // ========================
+
+  private normalizeDomain(domain: string): string {
+    return domain
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .trim()
+      .toLowerCase();
+  }
+
+  private isValidDomain(domain: string): boolean {
+    const regex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+    return regex.test(domain.trim());
+  }
+
+  applySite() {
+    if (!this.siteInput) {
+      this.activeSite = null;
       return;
     }
 
-    // нормализация домена
-    const domain = this.filters.site
-      .replace(/^https?:\/\//, '')
-      .replace(/^www\./, '')
-      .trim();
-
-    this.filters.site = domain;
-
-    this.activeSite = {
-      domain,
-      favicon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
-    };
-
-    this.activeFilter = null;
-  }
-
-  applySimilarFilter() {
-    if (!this.validateSimilar()) {
+    if (!this.isValidDomain(this.siteInput)) {
+      this.siteError = 'Enter a valid domain';
       return;
     }
 
-    // нормализация домена
-    const domain = this.filters.similar
-      .replace(/^https?:\/\//, '')
-      .replace(/^www\./, '')
-      .trim();
-
-    this.filters.similar = domain;
-
-    this.activeSimilar = {
-      domain,
-      favicon: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
-    };
-
-    this.activeFilter = null;
+    this.siteError = null;
+    this.activeSite = this.normalizeDomain(this.siteInput);
   }
 
-  search() {
-    if (!this.query.trim()) return;
-
-    this.searchService.search({
-      query: this.query.trim(),
-      country: this.selectedCountry?.code?.toLowerCase(),
-      city: this.filters.region || undefined,
-      site: this.activeSite?.domain,
-      similar: this.activeSimilar?.domain,
-      exclude: this.excludeWords,
-      exact: this.exactWords,
-      fileTypes: this.fileTypesSelected,
-    });
-
-    this.router.navigate(['/results']);
-  }
-
-  removeSiteFilter() {
+  removeSite() {
     this.activeSite = null;
-    this.filters.site = '';
+    this.siteInput = '';
   }
-  removeSimilarFilter() {
+
+  applySimilar() {
+    if (!this.similarInput) {
+      this.activeSimilar = null;
+      return;
+    }
+
+    if (!this.isValidDomain(this.similarInput)) {
+      this.similarError = 'Enter a valid domain';
+      return;
+    }
+
+    this.similarError = null;
+    this.activeSimilar = this.normalizeDomain(this.similarInput);
+  }
+
+  removeSimilar() {
     this.activeSimilar = null;
-    this.filters.similar = '';
+    this.similarInput = '';
   }
 
-  ///
-
-  fileTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
-
-  fileTypesSelected: string[] = [];
+  // ========================
+  // FILE TYPES
+  // ========================
 
   toggleFileType(type: string) {
     if (this.fileTypesSelected.includes(type)) {
@@ -296,15 +264,45 @@ export class MainComponent implements OnInit {
     this.fileTypesSelected = this.fileTypesSelected.filter((t) => t !== type);
   }
 
-  private hasActiveFilters(): boolean {
+  // ========================
+  // SEARCH
+  // ========================
+
+  private cleanArray(arr: string[]): string[] | undefined {
+    return arr.length ? arr : undefined;
+  }
+
+  private buildPayload(): SearchFilters | null {
+    if (!this.query.trim()) return null;
+
+    return {
+      query: this.query.trim(),
+      country: this.selectedCountry?.code?.toLowerCase(),
+      city: this.regionQuery || undefined, // ✅ вернуть
+      site: this.activeSite || undefined,
+      similar: this.activeSimilar || undefined,
+      exclude: this.excludeWords,
+      exact: this.exactWords,
+      fileTypes: this.fileTypesSelected,
+    };
+  }
+
+  search() {
+    const payload = this.buildPayload();
+    if (!payload) return;
+
+    this.searchService.search(payload);
+    this.router.navigate(['/results']);
+  }
+
+  hasActiveFilters(): boolean {
     return !!(
       this.activeSite ||
       this.activeSimilar ||
       this.excludeWords.length ||
       this.exactWords.length ||
       this.fileTypesSelected.length ||
-      this.selectedCountry ||
-      this.filters.region
+      this.selectedCountry
     );
   }
 }

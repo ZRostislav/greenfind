@@ -1,455 +1,232 @@
-<h1 class="title" [class.title--active]="showFilters">GreenFind</h1>
-
-<!-- АКТИВНЫЕ ФИЛЬТРЫ -->
-<div
-  class="active-filters"
-  [class.active]="showFilters"
-  *ngIf="
-    activeSite ||
-    activeSimilar ||
-    excludeWords.length ||
-    exactWords.length ||
-    fileTypesSelected.length
-  "
->
-  <!-- SITE -->
-  <div class="active-filter site" *ngIf="activeSite">
-    <img *ngIf="activeSite.favicon" [src]="activeSite.favicon" alt="favicon" class="site-favicon" />
-
-    <span class="site-domain">site:{{ activeSite.domain }}</span>
-
-    <button class="remove-filter" (click)="removeSiteFilter()">✕</button>
+<div class="min-h-screen flex flex-col items-center pt-[25vh] px-4 relative w-full overflow-y-auto">
+  <div class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
+    <div
+      class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-white rounded-full blur-[160px] opacity-20 animate-pulse-slow"
+    ></div>
+    <div
+      class="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-[#57c84d] rounded-full blur-[180px] opacity-20 animate-float"
+    ></div>
   </div>
 
-  <!-- EXCLUDE -->
-  <div class="active-filter exclude" *ngFor="let word of excludeWords">
-    <span class="exclude-word">-{{ word }}</span>
-
-    <button class="remove-filter" (click)="removeExcludeWord(word)">✕</button>
-  </div>
-
-  <!-- EXACT -->
-  <div class="active-filter exact" *ngFor="let word of exactWords">
-    <span class="exact-word">+{{ word }}</span>
-
-    <button class="remove-filter" (click)="removeExactWord(word)">✕</button>
-  </div>
-
-  <!-- similar -->
-  <div class="active-filter similar" *ngIf="activeSimilar">
-    <img
-      *ngIf="activeSimilar.favicon"
-      [src]="activeSimilar.favicon"
-      alt="favicon"
-      class="similar-favicon"
-    />
-
-    <span class="similar-domain">related:{{ activeSimilar.domain }}</span>
-
-    <button class="remove-filter" (click)="removeSimilarFilter()">✕</button>
-  </div>
-
-  <!-- FILETYPE -->
-  <div class="active-filter filetype" *ngFor="let type of fileTypesSelected">
-    <span class="filetype-word">filetype:{{ type }}</span>
-
-    <button class="remove-filter" (click)="removeFileType(type)">✕</button>
-  </div>
-</div>
-
-<div class="filters" [class.filters--active]="showFilters">
-  <!-- Фильтр: Регион -->
-  <div
-    class="filter region-filter"
-    [class.active]="activeFilter === 'region'"
-    (click)="toggleFilter('region')"
-  >
-    <div class="region-select">
-      <img *ngIf="selectedCountry" [src]="selectedCountry.svg" class="selected-flag" alt="flag" />
+  <div class="w-full max-w-5xl z-10 flex flex-col items-center relative">
+    <div class="flex items-center gap-4 mb-10 animate-slide-up" style="animation-delay: 0.1s">
+      <h1 class="text-7xl md:text-8xl font-bold tracking-tighter text-white drop-shadow-lg">
+        GreenFind
+      </h1>
     </div>
-  </div>
 
-  <!-- Фильтр: Поиск по сайту -->
-  <div class="filter" [class.active]="activeFilter === 'site'" (click)="toggleFilter('site')">
-    <label>Site search</label>
-  </div>
-
-  <div class="filter" [class.active]="activeFilter === 'exclude'" (click)="toggleFilter('exclude')">
-    <label>Exclude words</label>
-  </div>
-
-  <div class="filter" [class.active]="activeFilter === 'exact'" (click)="toggleFilter('exact')">
-    <label>The exact phrase</label>
-  </div>
-
-  <div class="filter" [class.active]="activeFilter === 'similar'" (click)="toggleFilter('similar')">
-    <label>Similar sites to</label>
-  </div>
-
-  <div
-    class="filter"
-    [class.active]="activeFilter === 'filetype'"
-    (click)="toggleFilter('filetype')"
-  >
-    <label>File type</label>
-  </div>
-</div>
-
-<!-- ПОИСК -->
-<div class="search">
-  <button class="search__btn setting" (click)="toggleFilters()">
-    <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="14.9999" cy="15" r="11.0676" stroke="#4A4A4A" stroke-width="3" />
-      <line
-        x1="15.2837"
-        y1="27.446"
-        x2="15.2837"
-        y2="28.5"
-        stroke="#4A4A4A"
-        stroke-width="3"
-        stroke-linecap="round"
-      />
-      <line
-        x1="15.2837"
-        y1="1.5"
-        x2="15.2837"
-        y2="2.55405"
-        stroke="#4A4A4A"
-        stroke-width="3"
-        stroke-linecap="round"
-      />
-      <line
-        x1="27.446"
-        y1="14.7162"
-        x2="28.5001"
-        y2="14.7162"
-        stroke="#4A4A4A"
-        stroke-width="3"
-        stroke-linecap="round"
-      />
-      <line
-        x1="1.5"
-        y1="14.7162"
-        x2="2.55405"
-        y2="14.7162"
-        stroke="#4A4A4A"
-        stroke-width="3"
-        stroke-linecap="round"
-      />
-      <line
-        x1="24.0014"
-        y1="23.5999"
-        x2="24.7468"
-        y2="24.3453"
-        stroke="#4A4A4A"
-        stroke-width="3"
-        stroke-linecap="round"
-      />
-      <line
-        x1="5.65477"
-        y1="5.25339"
-        x2="6.4001"
-        y2="5.99872"
-        stroke="#4A4A4A"
-        stroke-width="3"
-        stroke-linecap="round"
-      />
-      <line
-        x1="23.5999"
-        y1="5.99874"
-        x2="24.3452"
-        y2="5.25341"
-        stroke="#4A4A4A"
-        stroke-width="3"
-        stroke-linecap="round"
-      />
-      <line
-        x1="5.25317"
-        y1="24.3453"
-        x2="5.9985"
-        y2="23.6"
-        stroke="#4A4A4A"
-        stroke-width="3"
-        stroke-linecap="round"
-      />
-    </svg>
-  </button>
-  <input class="search__input" type="text" placeholder="Search..." [(ngModel)]="query" />
-  <button class="search__btn search" (click)="search()">
-    <svg width="14" height="25" viewBox="0 0 14 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M0.439209 0.439331C1.025 -0.146455 1.97452 -0.146455 2.5603 0.439331L13.4392 11.3173C13.763 11.6411 13.907 12.0766 13.8728 12.4999C13.9069 12.923 13.7629 13.3578 13.4392 13.6815L2.5603 24.5604C1.97454 25.1461 1.02497 25.1461 0.439209 24.5604C-0.146547 23.9747 -0.146485 23.0251 0.439209 22.4393L10.3787 12.4999L0.439209 2.56042C-0.146549 1.97467 -0.146492 1.02512 0.439209 0.439331Z"
-        fill="#4A4A4A"
-      />
-    </svg>
-  </button>
-</div>
-
-<!-- ПОЛЕ ВВОДА РЕГИОНА -->
-<input
-  #regionInput
-  type="text"
-  [placeholder]="selectedCountry ? selectedCountry.code : ''"
-  [(ngModel)]="regionQuery"
-  (focus)="showRegionList = true"
-  class="filter__input region-search"
-  maxlength="2"
-  [class.active]="activeFilter === 'region'"
-/>
-
-<!-- СПИСОК СТРАН -->
-<ul class="region-list" [class.active]="activeFilter === 'region'">
-  <li *ngFor="let country of filteredRegions()" (click)="selectRegion(country)">
-    <img [src]="country.svg" />
-  </li>
-</ul>
-
-<div class="site__filter">
-  <input
-    type="text"
-    placeholder="https://website.com"
-    [(ngModel)]="filters.site"
-    (ngModelChange)="validateSite()"
-    class="filter__input site-input"
-    [class.active]="activeFilter === 'site'"
-    [class.error]="siteError"
-  />
-
-  <button
-    class="search__btn-small site__btn"
-    [class.active]="activeFilter === 'site'"
-    (click)="applySiteFilter()"
-  >
-    <svg width="27" height="22" viewBox="0 0 27 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g filter="url(#filter0_d_93_13)">
-        <path
-          d="M20.4395 3.43929C21.0252 2.85361 21.9748 2.85354 22.5605 3.43929C23.1462 4.02504 23.1462 4.97462 22.5605 5.56038L11.6816 16.4393C11.5171 16.6038 11.323 16.7197 11.1172 16.7918C10.5559 17.071 9.85639 16.9783 9.38867 16.5106L4.43945 11.5604C3.85367 10.9746 3.85367 10.0251 4.43945 9.43929C5.02524 8.85351 5.97476 8.8535 6.56055 9.43929L10.5 13.3778L20.4395 3.43929Z"
-          fill="#4A4A4A"
+    <div
+      class="w-full max-w-3xl relative group mb-8 animate-slide-up"
+      style="animation-delay: 0.2s"
+    >
+      <div class="relative w-full">
+        <input
+          type="text"
+          [(ngModel)]="query"
+          (keydown.enter)="search()"
+          placeholder="Search for anything..."
+          class="w-full h-[85px] pl-10 pr-[140px] text-2xl font-bold text-white placeholder-white/50 bg-white/10 backdrop-blur-lg border border-white/20 rounded-[40px] focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
         />
-      </g>
-      <defs>
-        <filter
-          id="filter0_d_93_13"
-          x="0"
-          y="0"
-          width="27"
-          height="21.9489"
-          filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+        <button
+          (click)="search()"
+          class="absolute right-2 top-2 bottom-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 rounded-[40px] font-bold text-xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center backdrop-blur-md"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
-          <feColorMatrix
-            in="SourceAlpha"
-            type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-            result="hardAlpha"
-          />
-          <feOffset dy="1" />
-          <feGaussianBlur stdDeviation="2" />
-          <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_93_13" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_93_13" result="shape" />
-        </filter>
-      </defs>
-    </svg>
-  </button>
-  <!-- ТЕКСТ ОШИБКИ -->
-  <div class="filter-error" *ngIf="siteError">
-    {{ siteErrorText }}
-  </div>
-</div>
+          Поиск
+        </button>
+      </div>
+    </div>
 
-<div class="exclude__filter">
-  <input
-    type="text"
-    placeholder="Exclude word"
-    [(ngModel)]="excludeInput"
-    class="filter__input exclude-input"
-    [class.active]="activeFilter === 'exclude'"
-    (keydown.enter)="addExcludeWord()"
-  />
+    <button
+      (click)="showFilters = !showFilters"
+      class="mb-8 flex items-center gap-3 text-white/80 hover:text-white transition-all font-semibold text-lg py-3 px-8 rounded-full border border-white/20 bg-white/5 backdrop-blur-md hover:bg-white/10 select-none animate-slide-up shadow-[0_4px_16px_rgba(0,0,0,0.1)]"
+      style="animation-delay: 0.3s"
+    >
+      <lucide-icon
+        [img]="SlidersIcon"
+        class="transition-transform duration-500"
+        [class.rotate-180]="showFilters"
+        [size]="20"
+      ></lucide-icon>
+      {{ showFilters ? 'Hide Filters' : 'Advanced Filters' }}
+      <span
+        *ngIf="hasActiveFilters()"
+        class="w-2.5 h-2.5 bg-[#57c84d] rounded-full shadow-[0_0_10px_#57c84d]"
+      ></span>
+    </button>
 
-  <button
-    class="search__btn-small exclude__btn"
-    [class.active]="activeFilter === 'exclude'"
-    (click)="addExcludeWord()"
-  >
-    <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g filter="url(#filter0_d_102_52)">
-        <path
-          d="M20.885 10.7775C21.7133 10.7775 22.3846 11.449 22.3848 12.2773C22.3848 13.1057 21.7134 13.7772 20.885 13.7772L14.6073 13.7765V19.8849C14.6071 20.7131 13.9357 21.3847 13.1075 21.3848C12.279 21.3848 11.6069 20.7127 11.6069 19.8842V13.7772L5.50055 13.7778C4.67212 13.7778 4.00002 13.1057 4.00002 12.2773C4.00017 11.4492 4.67175 10.7777 5.49986 10.7775L11.6076 10.7768V4.49983C11.6076 3.67141 12.279 2.99999 13.1075 2.99999C13.9358 3.0001 14.6073 3.67147 14.6073 4.49983V10.7768L20.885 10.7775Z"
-          fill="#4A4A4A"
-        />
-      </g>
-      <defs>
-        <filter
-          id="filter0_d_102_52"
-          x="0"
-          y="0"
-          width="26.3848"
-          height="26.3848"
-          filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+    <div
+      *ngIf="showFilters"
+      class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 animate-pop-in origin-top pb-12"
+    >
+      <div class="space-y-6">
+        <div
+          class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 group hover:border-white/40 transition-colors shadow-lg"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
-          <feColorMatrix
-            in="SourceAlpha"
-            type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-            result="hardAlpha"
-          />
-          <feOffset dy="1" />
-          <feGaussianBlur stdDeviation="2" />
-          <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_102_52" />
-          <feBlend
-            mode="normal"
-            in="SourceGraphic"
-            in2="effect1_dropShadow_102_52"
-            result="shape"
-          />
-        </filter>
-      </defs>
-    </svg>
-  </button>
-</div>
+          <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
+            <lucide-icon [img]="GlobeIcon" class="text-white/80" [size]="24"></lucide-icon> Region
+          </label>
 
-<div class="exact__filter">
-  <input
-    type="text"
-    placeholder="Exact word"
-    [(ngModel)]="exactInput"
-    class="filter__input exact-input"
-    [class.active]="activeFilter === 'exact'"
-    (keydown.enter)="addExactWord()"
-  />
+          <div class="relative mb-4">
+            <input
+              type="text"
+              [(ngModel)]="regionQuery"
+              placeholder="Type country..."
+              class="w-full py-3 px-6 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
+            />
+            <div
+              *ngIf="selectedCountry"
+              class="absolute right-2 top-2 bottom-2 bg-[#57c84d]/30 border border-[#57c84d]/50 backdrop-blur-md text-white px-4 rounded-xl flex items-center gap-2 font-bold shadow-md animate-pop-in"
+            >
+              {{ selectedCountry.code }}
+              <button (click)="clearRegion()" class="hover:text-red-300 transition-colors">
+                <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+              </button>
+            </div>
+          </div>
 
-  <button
-    class="search__btn-small exclude__btn"
-    [class.active]="activeFilter === 'exact'"
-    (click)="addExactWord()"
-  >
-    <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g filter="url(#filter0_d_102_52)">
-        <path
-          d="M20.885 10.7775C21.7133 10.7775 22.3846 11.449 22.3848 12.2773C22.3848 13.1057 21.7134 13.7772 20.885 13.7772L14.6073 13.7765V19.8849C14.6071 20.7131 13.9357 21.3847 13.1075 21.3848C12.279 21.3848 11.6069 20.7127 11.6069 19.8842V13.7772L5.50055 13.7778C4.67212 13.7778 4.00002 13.1057 4.00002 12.2773C4.00017 11.4492 4.67175 10.7777 5.49986 10.7775L11.6076 10.7768V4.49983C11.6076 3.67141 12.279 2.99999 13.1075 2.99999C13.9358 3.0001 14.6073 3.67147 14.6073 4.49983V10.7768L20.885 10.7775Z"
-          fill="#4A4A4A"
-        />
-      </g>
-      <defs>
-        <filter
-          id="filter0_d_102_52"
-          x="0"
-          y="0"
-          width="26.3848"
-          height="26.3848"
-          filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+            <button
+              *ngFor="let country of filteredRegions()"
+              (click)="selectRegion(country)"
+              class="px-4 py-1.5 bg-white/5 hover:bg-white/20 text-white/90 border border-white/10 rounded-full text-sm font-medium transition-all"
+            >
+              {{ country.code }}
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 group hover:border-white/40 transition-colors shadow-lg"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
-          <feColorMatrix
-            in="SourceAlpha"
-            type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-            result="hardAlpha"
-          />
-          <feOffset dy="1" />
-          <feGaussianBlur stdDeviation="2" />
-          <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_102_52" />
-          <feBlend
-            mode="normal"
-            in="SourceGraphic"
-            in2="effect1_dropShadow_102_52"
-            result="shape"
-          />
-        </filter>
-      </defs>
-    </svg>
-  </button>
-</div>
+          <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
+            <lucide-icon [img]="LinkIcon" class="text-white/80" [size]="24"></lucide-icon> Specific
+            Site
+          </label>
 
-<div class="similar__filter">
-  <input
-    type="text"
-    placeholder="https://website.com"
-    [(ngModel)]="filters.similar"
-    (ngModelChange)="validateSimilar()"
-    class="filter__input similar-input"
-    [class.active]="activeFilter === 'similar'"
-    [class.error]="similarError"
-  />
+          <div class="flex gap-3 relative">
+            <input
+              [(ngModel)]="siteInput"
+              placeholder="example.com"
+              class="w-full py-3 pl-6 pr-16 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
+            />
+            <button
+              (click)="applySite()"
+              class="absolute right-1 top-1 bottom-1 w-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+            >
+              <lucide-icon [img]="CheckIcon" [size]="20"></lucide-icon>
+            </button>
+          </div>
 
-  <button
-    class="search__btn-small similar__btn"
-    [class.active]="activeFilter === 'similar'"
-    (click)="applySimilarFilter()"
-  >
-    <svg width="27" height="22" viewBox="0 0 27 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g filter="url(#filter0_d_93_13)">
-        <path
-          d="M20.4395 3.43929C21.0252 2.85361 21.9748 2.85354 22.5605 3.43929C23.1462 4.02504 23.1462 4.97462 22.5605 5.56038L11.6816 16.4393C11.5171 16.6038 11.323 16.7197 11.1172 16.7918C10.5559 17.071 9.85639 16.9783 9.38867 16.5106L4.43945 11.5604C3.85367 10.9746 3.85367 10.0251 4.43945 9.43929C5.02524 8.85351 5.97476 8.8535 6.56055 9.43929L10.5 13.3778L20.4395 3.43929Z"
-          fill="#4A4A4A"
-        />
-      </g>
-      <defs>
-        <filter
-          id="filter0_d_93_13"
-          x="0"
-          y="0"
-          width="27"
-          height="21.9489"
-          filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          <div
+            *ngIf="activeSite"
+            class="mt-4 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-5 py-2 rounded-full font-bold text-sm shadow-lg animate-pop-in"
+          >
+            Site: {{ activeSite }}
+            <button
+              (click)="removeSite()"
+              class="bg-red-500/20 p-0.5 rounded-full text-red-300 hover:bg-red-500/40 hover:text-white transition-all"
+            >
+              <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div
+          class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 group hover:border-white/40 transition-colors shadow-lg"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
-          <feColorMatrix
-            in="SourceAlpha"
-            type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-            result="hardAlpha"
-          />
-          <feOffset dy="1" />
-          <feGaussianBlur stdDeviation="2" />
-          <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_93_13" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_93_13" result="shape" />
-        </filter>
-      </defs>
-    </svg>
-  </button>
-  <!-- ТЕКСТ ОШИБКИ -->
-  <div class="filter-error" *ngIf="similarError">
-    {{ similarErrorText }}
-  </div>
-</div>
+          <label class="flex items-center gap-3 text-white font-bold text-2xl mb-6">
+            <lucide-icon [img]="TypeIcon" class="text-white/80" [size]="24"></lucide-icon> Word
+            Filters
+          </label>
 
-<div class="filetype__filter" [class.active]="activeFilter === 'filetype'">
-  <button
-    *ngFor="let type of fileTypes"
-    class="filetype-btn"
-    [class.selected]="fileTypesSelected.includes(type)"
-    (click)="toggleFileType(type)"
-  >
-    {{ type }}
-  </button>
-</div>
+          <div class="mb-6">
+            <div class="flex gap-2 mb-3 relative">
+              <input
+                [(ngModel)]="exactInput"
+                (keydown.enter)="addWord('exact')"
+                placeholder="Exact words..."
+                class="w-full py-3 pl-6 pr-16 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
+              />
+              <button
+                (click)="addWord('exact')"
+                class="absolute right-1 top-1 bottom-1 w-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+              >
+                <lucide-icon [img]="PlusIcon" [size]="22"></lucide-icon>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span
+                *ngFor="let word of exactWords"
+                class="bg-[#57c84d]/20 backdrop-blur-md border border-[#57c84d]/40 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm animate-pop-in"
+              >
+                "{{ word }}"
+                <button
+                  (click)="removeWord('exact', word)"
+                  class="hover:text-red-300 transition-colors"
+                >
+                  <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                </button>
+              </span>
+            </div>
+          </div>
 
-<div>
-  <div *ngIf="loading">Loading...</div>
+          <div>
+            <div class="flex gap-2 mb-3 relative">
+              <input
+                [(ngModel)]="excludeInput"
+                (keydown.enter)="addWord('exclude')"
+                placeholder="Exclude words..."
+                class="w-full py-3 pl-6 pr-16 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
+              />
+              <button
+                (click)="addWord('exclude')"
+                class="absolute right-1 top-1 bottom-1 w-12 bg-red-500/20 border border-red-500/30 rounded-xl flex items-center justify-center text-red-200 hover:bg-red-500/40 hover:text-white transition-colors"
+              >
+                <lucide-icon [img]="MinusIcon" [size]="22"></lucide-icon>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span
+                *ngFor="let word of excludeWords"
+                class="bg-red-500/20 backdrop-blur-md border border-red-500/30 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm animate-pop-in"
+              >
+                - {{ word }}
+                <button
+                  (click)="removeWord('exclude', word)"
+                  class="hover:text-red-300 transition-colors"
+                >
+                  <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
 
-  <div *ngIf="error">{{ error }}</div>
-
-  <div *ngIf="results?.organic_results">
-    <div *ngFor="let item of results.organic_results">
-      <a [href]="item.link" target="_blank">
-        <h3>{{ item.title }}</h3>
-      </a>
-      <p>{{ item.snippet }}</p>
+        <div
+          class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 group hover:border-white/40 transition-colors shadow-lg"
+        >
+          <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
+            <lucide-icon [img]="FileTextIcon" class="text-white/80" [size]="24"></lucide-icon> File
+            Types
+          </label>
+          <div class="flex flex-wrap gap-3">
+            <button
+              *ngFor="let type of fileTypes"
+              (click)="toggleFileType(type)"
+              class="px-5 py-2.5 rounded-[40px] text-sm font-bold transition-all duration-300 border uppercase tracking-wide backdrop-blur-md"
+              [class]="
+                fileTypesSelected.includes(type)
+                  ? 'bg-white/30 text-white border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.2)] transform -translate-y-1'
+                  : 'bg-white/5 text-white/60 border-white/10 hover:border-white/30 hover:bg-white/10 hover:text-white'
+              "
+            >
+              {{ type }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
