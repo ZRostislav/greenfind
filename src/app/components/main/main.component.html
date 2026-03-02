@@ -29,16 +29,17 @@
         />
         <button
           (click)="search()"
-          class="absolute right-2 top-2 bottom-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 rounded-[40px] font-bold text-xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center backdrop-blur-md"
+          class="absolute cursor-pointer right-2 top-2 bottom-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 rounded-[40px] font-bold text-xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center backdrop-blur-md"
         >
-          Поиск
+          Search
         </button>
       </div>
     </div>
 
     <button
       (click)="showFilters = !showFilters"
-      class="mb-8 flex items-center gap-3 text-white/80 hover:text-white transition-all font-semibold text-lg py-3 px-8 rounded-full border border-white/20 bg-white/5 backdrop-blur-md hover:bg-white/10 select-none animate-slide-up shadow-[0_4px_16px_rgba(0,0,0,0.1)]"
+      [style.width.px]="showFilters ? 220 : 260"
+      class="mb-8 flex cursor-pointer items-center gap-3 text-white/80 hover:text-white transition-all duration-500 ease-in-out font-semibold text-lg py-3 px-8 rounded-full border border-white/20 bg-white/5 backdrop-blur-md hover:bg-white/10 select-none animate-slide-up shadow-[0_4px_16px_rgba(0,0,0,0.1)] whitespace-nowrap"
       style="animation-delay: 0.3s"
     >
       <lucide-icon
@@ -56,174 +57,195 @@
 
     <div
       *ngIf="showFilters"
-      class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 animate-pop-in origin-top pb-12"
+      class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 animate-pop-in origin-top pb-12 items-stretch"
     >
-      <div class="space-y-6">
+      <div class="space-y-6 flex flex-col">
         <div
-          class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 group hover:border-white/40 transition-colors shadow-lg"
+          class="h-[300px] flex flex-col bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-lg"
         >
-          <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
-            <lucide-icon [img]="GlobeIcon" class="text-white/80" [size]="24"></lucide-icon> Region
-          </label>
+          <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+            <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
+              <lucide-icon [img]="GlobeIcon" class="text-white/80" [size]="24"></lucide-icon> Region
+            </label>
 
-          <div class="relative mb-4">
-            <input
-              type="text"
-              [(ngModel)]="regionQuery"
-              placeholder="Type country..."
-              class="w-full py-3 px-6 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
-            />
-            <div
-              *ngIf="selectedCountry"
-              class="absolute right-2 top-2 bottom-2 bg-[#57c84d]/30 border border-[#57c84d]/50 backdrop-blur-md text-white px-4 rounded-xl flex items-center gap-2 font-bold shadow-md animate-pop-in"
-            >
-              {{ selectedCountry.code }}
-              <button (click)="clearRegion()" class="hover:text-red-300 transition-colors">
-                <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+            <div class="relative mb-4">
+              <input
+                type="text"
+                [(ngModel)]="regionQuery"
+                placeholder="Type country..."
+                class="w-full py-3 px-6 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
+              />
+              <div
+                *ngIf="selectedCountry"
+                class="absolute right-2 top-2 bottom-2 bg-[#57c84d]/30 border border-[#57c84d]/50 backdrop-blur-md text-white px-4 rounded-xl flex items-center gap-2 font-bold shadow-md animate-pop-in"
+              >
+                {{ selectedCountry.code }}
+                <button (click)="clearRegion()" class="hover:text-red-300 transition-colors">
+                  <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+              <button
+                *ngFor="let country of filteredRegions()"
+                (click)="selectRegion(country)"
+                class="px-4 py-1.5 bg-white/5 hover:bg-white/20 text-white/90 border border-white/10 rounded-full text-sm font-medium transition-all"
+              >
+                {{ country.code }}
               </button>
             </div>
-          </div>
-
-          <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
-            <button
-              *ngFor="let country of filteredRegions()"
-              (click)="selectRegion(country)"
-              class="px-4 py-1.5 bg-white/5 hover:bg-white/20 text-white/90 border border-white/10 rounded-full text-sm font-medium transition-all"
-            >
-              {{ country.code }}
-            </button>
           </div>
         </div>
 
         <div
-          class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 group hover:border-white/40 transition-colors shadow-lg"
+          class="h-[200px] flex flex-col bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-lg"
         >
-          <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
-            <lucide-icon [img]="LinkIcon" class="text-white/80" [size]="24"></lucide-icon> Specific
-            Site
-          </label>
+          <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+            <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
+              <lucide-icon [img]="LinkIcon" class="text-white/80" [size]="24"></lucide-icon>
+              Specific Site
+            </label>
 
-          <div class="flex gap-3 relative">
-            <input
-              [(ngModel)]="siteInput"
-              placeholder="example.com"
-              class="w-full py-3 pl-6 pr-16 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
-            />
-            <button
-              (click)="applySite()"
-              class="absolute right-1 top-1 bottom-1 w-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+            <div
+              class="group flex items-center flex-wrap gap-2 w-full min-h-[56px] py-2 px-4 bg-white/5 border border-white/20 rounded-2xl focus-within:border-white/50 focus-within:ring-1 focus-within:ring-white/20 transition-all relative"
             >
-              <lucide-icon [img]="CheckIcon" [size]="20"></lucide-icon>
-            </button>
-          </div>
+              <div
+                *ngIf="activeSite"
+                class="flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-3 py-1.5 rounded-xl font-bold text-sm animate-pop-in shadow-none"
+              >
+                <span class="drop-shadow-none">
+                  {{ activeSite }}
+                </span>
 
-          <div
-            *ngIf="activeSite"
-            class="mt-4 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-5 py-2 rounded-full font-bold text-sm shadow-lg animate-pop-in"
-          >
-            Site: {{ activeSite }}
-            <button
-              (click)="removeSite()"
-              class="bg-red-500/20 p-0.5 rounded-full text-red-300 hover:bg-red-500/40 hover:text-white transition-all"
-            >
-              <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
-            </button>
+                <button
+                  (click)="removeSite()"
+                  class="bg-red-500/20 p-0.5 rounded-full text-red-300 hover:bg-red-500/40 hover:text-white transition-all"
+                >
+                  <lucide-icon [img]="XIcon" [size]="12"></lucide-icon>
+                </button>
+              </div>
+
+              <input
+                *ngIf="!activeSite"
+                [(ngModel)]="siteInput"
+                (keyup.enter)="applySite()"
+                placeholder="example.com"
+                class="flex-1 min-w-[120px] bg-transparent border-none outline-none text-lg font-semibold text-white placeholder-white/40"
+              />
+
+              <button
+                *ngIf="!activeSite && siteInput"
+                (click)="applySite()"
+                class="absolute right-2 top-2 bottom-2 w-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+              >
+                <lucide-icon [img]="CheckIcon" [size]="18"></lucide-icon>
+              </button>
+            </div>
+
+            <p *ngIf="activeSite" class="text-xs mt-3 px-2">
+              Удалите текущий сайт, чтобы ввести новый
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="space-y-6">
+      <div class="space-y-6 flex flex-col">
         <div
-          class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 group hover:border-white/40 transition-colors shadow-lg"
+          class="h-[300px] flex flex-col bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-lg"
         >
-          <label class="flex items-center gap-3 text-white font-bold text-2xl mb-6">
-            <lucide-icon [img]="TypeIcon" class="text-white/80" [size]="24"></lucide-icon> Word
-            Filters
-          </label>
+          <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+            <label class="flex items-center gap-3 text-white font-bold text-2xl mb-6">
+              <lucide-icon [img]="TypeIcon" class="text-white/80" [size]="24"></lucide-icon> Word
+              Filters
+            </label>
 
-          <div class="mb-6">
-            <div class="flex gap-2 mb-3 relative">
-              <input
-                [(ngModel)]="exactInput"
-                (keydown.enter)="addWord('exact')"
-                placeholder="Exact words..."
-                class="w-full py-3 pl-6 pr-16 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
-              />
-              <button
-                (click)="addWord('exact')"
-                class="absolute right-1 top-1 bottom-1 w-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-              >
-                <lucide-icon [img]="PlusIcon" [size]="22"></lucide-icon>
-              </button>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                *ngFor="let word of exactWords"
-                class="bg-[#57c84d]/20 backdrop-blur-md border border-[#57c84d]/40 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm animate-pop-in"
-              >
-                "{{ word }}"
+            <div class="mb-6">
+              <div class="flex gap-2 mb-3 relative">
+                <input
+                  [(ngModel)]="exactInput"
+                  (keydown.enter)="addWord('exact')"
+                  placeholder="Exact words..."
+                  class="w-full py-3 pl-6 pr-16 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
+                />
                 <button
-                  (click)="removeWord('exact', word)"
-                  class="hover:text-red-300 transition-colors"
+                  (click)="addWord('exact')"
+                  class="absolute right-1 top-1 bottom-1 w-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/30 transition-colors"
                 >
-                  <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                  <lucide-icon [img]="PlusIcon" [size]="22"></lucide-icon>
                 </button>
-              </span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  *ngFor="let word of exactWords"
+                  class="bg-[#57c84d]/20 backdrop-blur-md border border-[#57c84d]/40 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm animate-pop-in"
+                >
+                  "{{ word }}"
+                  <button
+                    (click)="removeWord('exact', word)"
+                    class="hover:text-red-300 transition-colors"
+                  >
+                    <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                  </button>
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <div class="flex gap-2 mb-3 relative">
-              <input
-                [(ngModel)]="excludeInput"
-                (keydown.enter)="addWord('exclude')"
-                placeholder="Exclude words..."
-                class="w-full py-3 pl-6 pr-16 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
-              />
-              <button
-                (click)="addWord('exclude')"
-                class="absolute right-1 top-1 bottom-1 w-12 bg-red-500/20 border border-red-500/30 rounded-xl flex items-center justify-center text-red-200 hover:bg-red-500/40 hover:text-white transition-colors"
-              >
-                <lucide-icon [img]="MinusIcon" [size]="22"></lucide-icon>
-              </button>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                *ngFor="let word of excludeWords"
-                class="bg-red-500/20 backdrop-blur-md border border-red-500/30 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm animate-pop-in"
-              >
-                - {{ word }}
+            <div>
+              <div class="flex gap-2 mb-3 relative">
+                <input
+                  [(ngModel)]="excludeInput"
+                  (keydown.enter)="addWord('exclude')"
+                  placeholder="Exclude words..."
+                  class="w-full py-3 pl-6 pr-16 text-lg font-semibold text-white placeholder-white/40 bg-white/5 border border-white/20 rounded-2xl focus:outline-none focus:border-white/50 transition-all"
+                />
                 <button
-                  (click)="removeWord('exclude', word)"
-                  class="hover:text-red-300 transition-colors"
+                  (click)="addWord('exclude')"
+                  class="absolute right-1 top-1 bottom-1 w-12 bg-red-500/20 border border-red-500/30 rounded-xl flex items-center justify-center text-red-200 hover:bg-red-500/40 hover:text-white transition-colors"
                 >
-                  <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                  <lucide-icon [img]="MinusIcon" [size]="22"></lucide-icon>
                 </button>
-              </span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  *ngFor="let word of excludeWords"
+                  class="bg-red-500/20 backdrop-blur-md border border-red-500/30 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm animate-pop-in"
+                >
+                  - {{ word }}
+                  <button
+                    (click)="removeWord('exclude', word)"
+                    class="hover:text-red-300 transition-colors"
+                  >
+                    <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                  </button>
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         <div
-          class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 group hover:border-white/40 transition-colors shadow-lg"
+          class="h-[200px] flex flex-col bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 shadow-lg"
         >
-          <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
-            <lucide-icon [img]="FileTextIcon" class="text-white/80" [size]="24"></lucide-icon> File
-            Types
-          </label>
-          <div class="flex flex-wrap gap-3">
-            <button
-              *ngFor="let type of fileTypes"
-              (click)="toggleFileType(type)"
-              class="px-5 py-2.5 rounded-[40px] text-sm font-bold transition-all duration-300 border uppercase tracking-wide backdrop-blur-md"
-              [class]="
-                fileTypesSelected.includes(type)
-                  ? 'bg-white/30 text-white border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.2)] transform -translate-y-1'
-                  : 'bg-white/5 text-white/60 border-white/10 hover:border-white/30 hover:bg-white/10 hover:text-white'
-              "
-            >
-              {{ type }}
-            </button>
+          <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+            <label class="flex items-center gap-3 text-white font-bold text-2xl mb-4">
+              <lucide-icon [img]="FileTextIcon" class="text-white/80" [size]="24"></lucide-icon>
+              File Types
+            </label>
+            <div class="flex flex-wrap gap-3">
+              <button
+                *ngFor="let type of fileTypes"
+                (click)="toggleFileType(type)"
+                class="inline-flex cursor-pointer justify-center items-center px-4 pt-[10px] pb-[8px] rounded-[0.45rem] text-center text-sm font-bold leading-none transition-all duration-300 border uppercase tracking-wide backdrop-blur-md"
+                [class]="
+                  fileTypesSelected.includes(type)
+                    ? 'bg-white/10 text-white border-white/70'
+                    : 'bg-white/5 text-white/60 border-white/10 hover:border-white/30 hover:bg-white/10 hover:text-white'
+                "
+              >
+                <span class="translate-y-[1px]">{{ type }}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
