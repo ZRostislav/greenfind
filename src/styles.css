@@ -192,3 +192,39 @@
 .ui-type-btn.active {
   @apply bg-white text-[#318429] border-white shadow-lg -translate-y-1;
 }
+
+/* --- Custom Scrollbar for GreenFind --- */
+
+/* 1. Track (The background of the scrollbar) */
+::-webkit-scrollbar {
+  width: 10px; /* Width of the vertical scrollbar */
+  height: 10px; /* Height of the horizontal scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  /* Matching the white/5 backdrop-blur style */
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+/* 2. Thumb (The draggable part) */
+::-webkit-scrollbar-thumb {
+  /* Using the #57c84d Green color with some transparency */
+  background: rgba(87, 200, 77, 0.3);
+  border-radius: 20px;
+  border: 2px solid transparent; /* Creates padding around the thumb */
+  background-clip: content-box;
+  transition: all 0.3s ease;
+}
+
+/* 3. Thumb on Hover (Brighter green to match the glow) */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(87, 200, 77, 0.6);
+  box-shadow: 0 0 10px rgba(87, 200, 77, 0.4);
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
+}

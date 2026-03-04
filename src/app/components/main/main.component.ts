@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import {
   LucideAngularModule,
   Search,
-  SlidersHorizontal,
+  Sliders,
   Globe,
   Link,
   Check,
@@ -19,7 +19,7 @@ import {
   Leaf,
   ArrowRight,
 } from 'lucide-angular';
-import { animate, style, transition, trigger } from '@angular/animations';
+import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
 
 interface Country {
   code: string;
@@ -57,15 +57,70 @@ export const cardAnim = trigger('cardAnim', [
   ]),
 ]);
 
+export const filtersAnim = trigger('filtersAnim', [
+  transition(':enter', [
+    // 1. Начальное состояние контейнера
+    style({
+      opacity: 0,
+      transform: 'translateY(-20px) scale(0.98)',
+      filter: 'blur(10px)',
+    }),
+    group([
+      // 2. Плавное проявление самого контейнера
+      animate(
+        '400ms cubic-bezier(0.25, 0.8, 0.25, 1)',
+        style({
+          opacity: 1,
+          transform: 'translateY(0) scale(1)',
+          filter: 'blur(0px)',
+        }),
+      ),
+      // 3. Каскадное появление внутренних элементов (опционально)
+      // Ищем элементы с классом .filter-item и заставляем их "всплывать"
+      query(
+        '.filter-item',
+        [
+          style({ opacity: 0, transform: 'translateY(10px)' }),
+          stagger(40, [
+            animate('300ms 100ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+          ]),
+        ],
+        { optional: true },
+      ),
+    ]),
+  ]),
+
+  transition(':leave', [
+    group([
+      // Контейнер исчезает чуть быстрее
+      animate(
+        '250ms ease-in',
+        style({
+          opacity: 0,
+          transform: 'translateY(-15px) scale(0.98)',
+          filter: 'blur(5px)',
+        }),
+      ),
+      // Элементы внутри слегка "тонут" при закрытии
+      query(
+        '.filter-item',
+        [animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(5px)' }))],
+        { optional: true },
+      ),
+    ]),
+  ]),
+]);
+
 @Component({
   selector: 'app-main',
   standalone: true,
   templateUrl: './main.component.html',
   imports: [CommonModule, FormsModule, LucideAngularModule],
+  animations: [fadeIn, slideUp, cardAnim, filtersAnim], // 👈 добавили
 })
 export class MainComponent implements OnInit {
   readonly SearchIcon = Search;
-  readonly SlidersIcon = SlidersHorizontal;
+  readonly SlidersIcon = Sliders;
   readonly GlobeIcon = Globe;
   readonly LinkIcon = Link;
   readonly CheckIcon = Check;
@@ -107,6 +162,10 @@ export class MainComponent implements OnInit {
   showFilters = false;
   activeFilter: string | null = null;
 
+  isCountryManuallySelected = false;
+  private countryAutoDetected = false;
+  private autoDetectedCountryCode: string | null = null;
+
   readonly fileTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
 
   constructor(
@@ -136,13 +195,20 @@ export class MainComponent implements OnInit {
   // ========================
 
   async detectCountry() {
+    if (this.isCountryManuallySelected || this.countryAutoDetected) return;
+
     try {
       const res = await fetch('https://ipapi.co/json/');
       const data = await res.json();
-      const country = this.regions.find((r) => r.code === data.country_code);
+
+      const country = this.regions.find(
+        (r) => r.code.toLowerCase() === data.country_code.toLowerCase(),
+      );
 
       if (country) {
         this.selectedCountry = country;
+        this.countryAutoDetected = true;
+        this.autoDetectedCountryCode = country.code.toLowerCase();
       }
     } catch {
       console.warn('Country detection failed');
@@ -150,17 +216,33 @@ export class MainComponent implements OnInit {
   }
 
   filteredRegions() {
-    const q = this.regionQuery.toLowerCase();
-    return this.regions.filter((r) => r.name.toLowerCase().includes(q));
+    const q = this.regionQuery.trim().toLowerCase();
+
+    if (!q) return this.regions;
+
+    return this.regions
+      .filter((r) => r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q))
+      .sort((a, b) => {
+        const aStarts = a.name.toLowerCase().startsWith(q);
+        const bStarts = b.name.toLowerCase().startsWith(q);
+
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+
+        return a.name.localeCompare(b.name);
+      });
   }
 
   selectRegion(country: Country) {
     this.selectedCountry = country;
-    this.activeFilter = null;
+    this.regionQuery = country.name;
+    this.isCountryManuallySelected = true;
   }
 
   clearRegion() {
     this.selectedCountry = null;
+    this.regionQuery = '';
+    this.isCountryManuallySelected = true;
   }
 
   // ========================
@@ -295,14 +377,19 @@ export class MainComponent implements OnInit {
     this.router.navigate(['/results']);
   }
 
-  hasActiveFilters(): boolean {
+  get hasFilters(): boolean {
+    const selectedCountryCode = this.selectedCountry?.code.toLowerCase() ?? null;
+    const hasCountryFilter = this.isCountryManuallySelected
+      ? selectedCountryCode !== this.autoDetectedCountryCode
+      : false;
+
     return !!(
       this.activeSite ||
       this.activeSimilar ||
       this.excludeWords.length ||
       this.exactWords.length ||
       this.fileTypesSelected.length ||
-      this.selectedCountry
+      hasCountryFilter
     );
   }
 }
