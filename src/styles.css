@@ -208,6 +208,14 @@
   animation: micWave 1.7s cubic-bezier(0.15, 0.75, 0.3, 1) 0.55s infinite;
 }
 
+.voice-input--listening {
+  border-color: rgba(252, 165, 165, 0.5) !important;
+  box-shadow:
+    0 0 0 1px rgba(252, 165, 165, 0.25),
+    0 0 22px rgba(248, 113, 113, 0.22) !important;
+  animation: voiceInputPulse 1.8s ease-in-out infinite;
+}
+
 @keyframes float {
   0%,
   100% {
@@ -268,6 +276,20 @@
   }
   60% {
     transform: scale(0.96);
+  }
+}
+
+@keyframes voiceInputPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(252, 165, 165, 0.2),
+      0 0 16px rgba(248, 113, 113, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(252, 165, 165, 0.4),
+      0 0 28px rgba(248, 113, 113, 0.3);
   }
 }
 
