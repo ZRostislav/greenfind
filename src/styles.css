@@ -115,6 +115,99 @@
   animation: popIn 0.5s ease-in-out forwards;
 }
 
+.voice-mic-btn {
+  position: absolute;
+  right: 3.5rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 2.9rem;
+  border-radius: 0.85rem;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.45);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  isolation: isolate;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.voice-mic-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.voice-mic-btn__icon {
+  position: relative;
+  z-index: 4;
+  transition: transform 0.3s ease;
+}
+
+.voice-mic-btn__glow {
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(248, 113, 113, 0.5) 0%, rgba(239, 68, 68, 0) 70%);
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.voice-mic-btn__ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 1rem;
+  border: 1px solid rgba(252, 165, 165, 0.65);
+  opacity: 0;
+  transform: scale(0.72);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.voice-mic-btn--disabled {
+  color: rgba(255, 255, 255, 0.2);
+  cursor: not-allowed;
+}
+
+.voice-mic-btn--disabled:hover {
+  background: transparent;
+  transform: none;
+}
+
+.voice-mic-btn--listening {
+  color: #fecaca;
+  border-color: rgba(252, 165, 165, 0.45);
+  background: linear-gradient(145deg, rgba(248, 113, 113, 0.2), rgba(239, 68, 68, 0.18));
+  box-shadow:
+    0 0 0 1px rgba(252, 165, 165, 0.2),
+    0 0 20px rgba(248, 113, 113, 0.25);
+}
+
+.voice-mic-btn--listening .voice-mic-btn__glow {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.voice-mic-btn--listening .voice-mic-btn__icon {
+  animation: micBeat 1.15s ease-in-out infinite;
+}
+
+.voice-mic-btn--listening .voice-mic-btn__ring--one {
+  animation: micWave 1.7s cubic-bezier(0.15, 0.75, 0.3, 1) infinite;
+}
+
+.voice-mic-btn--listening .voice-mic-btn__ring--two {
+  animation: micWave 1.7s cubic-bezier(0.15, 0.75, 0.3, 1) 0.55s infinite;
+}
+
 @keyframes float {
   0%,
   100% {
@@ -151,6 +244,30 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes micWave {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.68);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.42);
+  }
+}
+
+@keyframes micBeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.07);
+  }
+  60% {
+    transform: scale(0.96);
   }
 }
 

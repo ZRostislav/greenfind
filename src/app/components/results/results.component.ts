@@ -1,44 +1,43 @@
 // components/results/results.component.ts
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { SearchService } from '../../services/search.service';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-results',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="min-h-screen w-full flex flex-col font-sans text-white">
       <header
         class="sticky top-0 z-50 w-full bg-[#318429]/80 backdrop-blur-xl border-b border-white/10 px-4 md:px-8 py-4"
       >
-        <div class="flex flex-wrap items-center gap-6 max-w-[1600px]">
+        <div class="flex flex-wrap items-end gap-6 max-w-[1600px]">
           <h2
-            class="font-josefin text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0"
+            routerLink="/"
+            class="font-josefin text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0 mb-1.5"
           >
             Green<span class="text-ui-green">Find</span>
           </h2>
 
           <div class="flex-grow max-w-3xl relative group">
             <div
-              class="absolute -inset-0.5 bg-ui-green/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-300"
-            ></div>
-            <div
-              class="relative flex items-center bg-white/10 border border-white/10 rounded-xl overflow-hidden focus-within:border-ui-green/50 transition-all"
+              class="relative flex items-center bg-white/10 border border-white/10 rounded-xl overflow-hidden focus-within:border-white/40  transition-all duration-300"
             >
               <input
                 type="text"
-                placeholder="Search the green web..."
+                placeholder="Search the web..."
                 [(ngModel)]="query"
                 (keydown.enter)="doSearch()"
                 class="w-full bg-transparent px-5 py-2.5 text-white placeholder:text-white/30 outline-none text-lg"
               />
               <button
                 (click)="doSearch()"
-                class="px-5 text-ui-green hover:bg-white/5 transition-colors"
+                class="cursor-pointer px-5 text-ui-green hover:bg-white/10 transition-colors self-stretch flex items-center justify-center border-l border-white/10"
               >
                 <svg
                   width="20"
@@ -59,78 +58,8 @@ import { SearchService } from '../../services/search.service';
         </div>
       </header>
 
-      <div class="flex flex-col md:flex-row w-full max-w-[1600px] mx-auto">
-        <main class="w-full md:w-[65%] lg:w-[60%] px-4 md:pl-24 md:pr-12 py-8">
-          <div
-            class="mb-8 p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl shadow-xl"
-          >
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div class="space-y-1">
-                <label class="text-[10px] uppercase tracking-widest text-white/40 ml-2"
-                  >Site Scope</label
-                >
-                <input
-                  type="text"
-                  placeholder="site:example.com"
-                  [(ngModel)]="filters.site"
-                  class="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2 text-sm text-white outline-none focus:border-ui-green/50 transition-all"
-                />
-              </div>
-              <div class="space-y-1">
-                <label class="text-[10px] uppercase tracking-widest text-white/40 ml-2"
-                  >Exclude Words</label
-                >
-                <div class="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Word..."
-                    [(ngModel)]="excludeInput"
-                    (keydown.enter)="addExcludeWord()"
-                    class="flex-grow bg-black/20 border border-white/5 rounded-xl px-4 py-2 text-sm text-white outline-none focus:border-ui-green/50"
-                  />
-                  <button
-                    (click)="addExcludeWord()"
-                    class="bg-white/10 hover:bg-white/20 px-3 rounded-xl transition-colors text-xs"
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2 mb-4" *ngIf="hasActiveFilters()">
-              <span
-                *ngIf="activeSite"
-                class="flex items-center gap-2 bg-ui-green/20 text-ui-green border border-ui-green/30 px-3 py-1 rounded-full text-xs animate-in zoom-in"
-              >
-                site:{{ activeSite.domain }}
-                <button (click)="removeSiteFilter()" class="hover:text-white">✕</button>
-              </span>
-              <span
-                *ngFor="let w of excludeWords"
-                class="flex items-center gap-2 bg-red-500/20 text-red-300 border border-red-500/30 px-3 py-1 rounded-full text-xs animate-in zoom-in"
-              >
-                -{{ w }}
-                <button (click)="removeExcludeWord(w)" class="hover:text-white">✕</button>
-              </span>
-            </div>
-
-            <div class="flex flex-wrap gap-2 pt-4 border-t border-white/5">
-              <button
-                *ngFor="let t of fileTypes"
-                (click)="toggleFileType(t)"
-                [class]="
-                  fileTypesSelected.includes(t)
-                    ? 'bg-ui-green text-ui-dark shadow-[0_0_15px_rgba(74,222,128,0.4)]'
-                    : 'bg-white/5 text-white/40 hover:bg-white/10'
-                "
-                class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tighter transition-all"
-              >
-                {{ t }}
-              </button>
-            </div>
-          </div>
-
+      <div class="flex flex-col md:flex-row w-full max-w-[1600px] ml-37">
+        <main class="w-full md:w-[65%] lg:w-[60%] px-4 md:pr-12 py-8">
           <div class="py-12 flex flex-col items-center justify-center" *ngIf="loading$ | async">
             <div
               class="w-10 h-10 border-2 border-ui-green/20 border-t-ui-green rounded-full animate-spin"
@@ -143,9 +72,9 @@ import { SearchService } from '../../services/search.service';
           <div class="space-y-10">
             <div
               *ngIf="!(results$ | async)?.length && !(loading$ | async)"
-              class="text-white/20 py-20 font-light"
+              class="text-white/60 py-20 font-light"
             >
-              No green trails found. Try different keywords.
+              No trails found.
             </div>
 
             <div
@@ -160,7 +89,8 @@ import { SearchService } from '../../services/search.service';
                     *ngIf="item.favicon"
                     [src]="item.favicon"
                     class="w-5 h-5 grayscale group-hover:grayscale-0 transition-all"
-                    (error)="item.favicon = 'assets/default-favicon.png'"
+                    (error)="item.favicon = './default-favicon.png'"
+                    alt="Favicon"
                   />
                 </div>
 
@@ -213,7 +143,7 @@ import { SearchService } from '../../services/search.service';
     </div>
   `,
 })
-export class ResultsComponent {
+export class ResultsComponent implements OnInit {
   results$: Observable<any[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
@@ -230,10 +160,17 @@ export class ResultsComponent {
   fileTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
   fileTypesSelected: string[] = [];
 
-  constructor(private searchService: SearchService) {
+  constructor(
+    private searchService: SearchService,
+    private route: ActivatedRoute,
+  ) {
     this.results$ = this.searchService.results$;
     this.loading$ = this.searchService.loading$;
     this.error$ = this.searchService.error$;
+  }
+
+  ngOnInit() {
+    this.query = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
   }
 
   doSearch() {

@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import emojiFlags from 'emoji-flags';
-import { SearchService } from '../../services/search.service';
 import { Router } from '@angular/router';
+import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
+import emojiFlags from 'emoji-flags';
 import {
   LucideAngularModule,
   Search,
+  Mic,
   Sliders,
   Globe,
   Link,
@@ -19,7 +20,8 @@ import {
   Leaf,
   ArrowRight,
 } from 'lucide-angular';
-import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
+import { SearchService } from '../../services/search.service';
+import { VoiceService } from '../../services/voice.service';
 
 interface Country {
   code: string;
@@ -59,14 +61,12 @@ export const cardAnim = trigger('cardAnim', [
 
 export const filtersAnim = trigger('filtersAnim', [
   transition(':enter', [
-    // 1. Начальное состояние контейнера
     style({
       opacity: 0,
       transform: 'translateY(-20px) scale(0.98)',
       filter: 'blur(10px)',
     }),
     group([
-      // 2. Плавное проявление самого контейнера
       animate(
         '400ms cubic-bezier(0.25, 0.8, 0.25, 1)',
         style({
@@ -75,8 +75,6 @@ export const filtersAnim = trigger('filtersAnim', [
           filter: 'blur(0px)',
         }),
       ),
-      // 3. Каскадное появление внутренних элементов (опционально)
-      // Ищем элементы с классом .filter-item и заставляем их "всплывать"
       query(
         '.filter-item',
         [
@@ -89,10 +87,8 @@ export const filtersAnim = trigger('filtersAnim', [
       ),
     ]),
   ]),
-
   transition(':leave', [
     group([
-      // Контейнер исчезает чуть быстрее
       animate(
         '250ms ease-in',
         style({
@@ -101,7 +97,6 @@ export const filtersAnim = trigger('filtersAnim', [
           filter: 'blur(5px)',
         }),
       ),
-      // Элементы внутри слегка "тонут" при закрытии
       query(
         '.filter-item',
         [animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(5px)' }))],
@@ -116,10 +111,11 @@ export const filtersAnim = trigger('filtersAnim', [
   standalone: true,
   templateUrl: './main.component.html',
   imports: [CommonModule, FormsModule, LucideAngularModule],
-  animations: [fadeIn, slideUp, cardAnim, filtersAnim], // 👈 добавили
+  animations: [fadeIn, slideUp, cardAnim, filtersAnim],
 })
-export class MainComponent implements OnInit {
+export class MainComponent implements OnInit, OnDestroy {
   readonly SearchIcon = Search;
+  readonly MicIcon = Mic;
   readonly SlidersIcon = Sliders;
   readonly GlobeIcon = Globe;
   readonly LinkIcon = Link;
@@ -131,10 +127,6 @@ export class MainComponent implements OnInit {
   readonly FileTextIcon = FileText;
   readonly LeafIcon = Leaf;
   readonly ArrowRightIcon = ArrowRight;
-
-  // ========================
-  // CORE STATE
-  // ========================
 
   query = '';
 
@@ -167,19 +159,40 @@ export class MainComponent implements OnInit {
   private autoDetectedCountryCode: string | null = null;
 
   readonly fileTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
+  private readonly speechLanguage = typeof navigator !== 'undefined' ? navigator.language : 'en-US';
+  private readonly searchService = inject(SearchService);
+  private readonly router = inject(Router);
+  private readonly voiceService = inject(VoiceService);
 
-  constructor(
-    private searchService: SearchService,
-    private router: Router,
-  ) {}
+  readonly speechSupported = this.voiceService.supported;
+  readonly isListening = this.voiceService.listening;
+  readonly finalTranscript = this.voiceService.finalTranscript;
+  readonly liveTranscript = this.voiceService.interimTranscript;
+  readonly voiceError = this.voiceService.error;
 
-  // ========================
-  // INIT
-  // ========================
+  private readonly syncVoiceTranscript = effect(() => {
+    const transcript = this.voiceService.transcript();
+    if (transcript) {
+      this.query = transcript;
+    }
+  });
 
   ngOnInit() {
     this.loadCountries();
     this.detectCountry();
+    this.voiceService.initialize({
+      lang: this.speechLanguage,
+      continuous: true,
+      interimResults: true,
+      autoStopOnSilence: true,
+      silenceTimeoutMs: 3500,
+      restartOnEnd: true,
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.voiceService.stop();
+    this.voiceService.resetTranscript();
   }
 
   private loadCountries() {
@@ -189,10 +202,6 @@ export class MainComponent implements OnInit {
       svg: `3x2/${c.code}.svg`,
     }));
   }
-
-  // ========================
-  // COUNTRY AUTO-DETECT
-  // ========================
 
   async detectCountry() {
     if (this.isCountryManuallySelected || this.countryAutoDetected) return;
@@ -245,10 +254,6 @@ export class MainComponent implements OnInit {
     this.isCountryManuallySelected = true;
   }
 
-  // ========================
-  // WORD MANAGEMENT
-  // ========================
-
   addWord(type: 'exact' | 'exclude') {
     const input = type === 'exact' ? this.exactInput : this.excludeInput;
     const word = input.trim();
@@ -256,7 +261,6 @@ export class MainComponent implements OnInit {
     if (!word) return;
 
     const target = type === 'exact' ? this.exactWords : this.excludeWords;
-
     if (!target.includes(word)) {
       target.push(word);
     }
@@ -268,14 +272,11 @@ export class MainComponent implements OnInit {
   removeWord(type: 'exact' | 'exclude', word: string) {
     if (type === 'exact') {
       this.exactWords = this.exactWords.filter((w) => w !== word);
-    } else {
-      this.excludeWords = this.excludeWords.filter((w) => w !== word);
+      return;
     }
-  }
 
-  // ========================
-  // DOMAIN LOGIC
-  // ========================
+    this.excludeWords = this.excludeWords.filter((w) => w !== word);
+  }
 
   private normalizeDomain(domain: string): string {
     return domain
@@ -330,28 +331,21 @@ export class MainComponent implements OnInit {
     this.similarInput = '';
   }
 
-  // ========================
-  // FILE TYPES
-  // ========================
-
   toggleFileType(type: string) {
     if (this.fileTypesSelected.includes(type)) {
       this.fileTypesSelected = this.fileTypesSelected.filter((t) => t !== type);
-    } else {
-      this.fileTypesSelected.push(type);
+      return;
     }
+
+    this.fileTypesSelected.push(type);
   }
 
   removeFileType(type: string) {
     this.fileTypesSelected = this.fileTypesSelected.filter((t) => t !== type);
   }
 
-  // ========================
-  // SEARCH
-  // ========================
-
-  private cleanArray(arr: string[]): string[] | undefined {
-    return arr.length ? arr : undefined;
+  toggleVoiceInput() {
+    this.voiceService.toggle();
   }
 
   private buildPayload(): SearchFilters | null {
@@ -360,7 +354,7 @@ export class MainComponent implements OnInit {
     return {
       query: this.query.trim(),
       country: this.selectedCountry?.code?.toLowerCase(),
-      city: this.regionQuery || undefined, // ✅ вернуть
+      city: this.regionQuery || undefined,
       site: this.activeSite || undefined,
       similar: this.activeSimilar || undefined,
       exclude: this.excludeWords,
@@ -374,7 +368,9 @@ export class MainComponent implements OnInit {
     if (!payload) return;
 
     this.searchService.search(payload);
-    this.router.navigate(['/results']);
+    this.router.navigate(['/results'], {
+      queryParams: { q: payload.query },
+    });
   }
 
   get hasFilters(): boolean {
