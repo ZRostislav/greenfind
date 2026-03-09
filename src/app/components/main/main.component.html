@@ -55,6 +55,34 @@
         {{ voiceError() }}
       </div>
     </div>
+    <div *ngIf="isListening()" class="hidden">
+      <div
+        class="inline-flex items-center gap-2 rounded-xl border border-red-300/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-100"
+      >
+        <span
+          class="w-2 h-2 rounded-full bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.95)]"
+        ></span>
+        Listening...
+      </div>
+      <div
+        *ngIf="finalTranscript() || liveTranscript()"
+        class="mt-2 text-sm text-white/80 bg-white/10 border border-white/15 rounded-xl px-4 py-2 backdrop-blur"
+      >
+        <span class="text-white">
+          {{ finalTranscript() }}
+        </span>
+
+        <span class="text-white/60 italic">
+          {{ liveTranscript() }}
+        </span>
+      </div>
+    </div>
+    <div
+      *ngIf="voiceError() && !isListening()"
+      class="mt-2 px-2 text-xs text-red-200 bg-red-500/10 border border-red-400/20 rounded-xl py-2"
+    >
+      {{ voiceError() }}
+    </div>
 
     <button
       (click)="showFilters = !showFilters"

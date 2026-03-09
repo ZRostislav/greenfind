@@ -20,25 +20,13 @@ import {
   Leaf,
   ArrowRight,
 } from 'lucide-angular';
-import { SearchService } from '../../services/search.service';
+import { SearchFilters, SearchService } from '../../services/search.service';
 import { VoiceService } from '../../services/voice.service';
 
 interface Country {
   code: string;
   name: string;
   svg: string;
-}
-
-export interface SearchFilters {
-  query: string;
-  country?: string;
-  region?: string;
-  city?: string;
-  site?: string;
-  similar?: string;
-  exclude?: string[];
-  exact?: string[];
-  fileTypes?: string[];
 }
 
 export const fadeIn = trigger('fadeIn', [
@@ -64,7 +52,6 @@ export const filtersAnim = trigger('filtersAnim', [
     style({
       opacity: 0,
       transform: 'translateY(-20px) scale(0.98)',
-      filter: 'blur(10px)',
     }),
     group([
       animate(
@@ -72,7 +59,6 @@ export const filtersAnim = trigger('filtersAnim', [
         style({
           opacity: 1,
           transform: 'translateY(0) scale(1)',
-          filter: 'blur(0px)',
         }),
       ),
       query(
@@ -93,8 +79,7 @@ export const filtersAnim = trigger('filtersAnim', [
         '250ms ease-in',
         style({
           opacity: 0,
-          transform: 'translateY(-15px) scale(0.98)',
-          filter: 'blur(5px)',
+          transform: 'translateY(-20px) scale(0.98)',
         }),
       ),
       query(
@@ -179,7 +164,11 @@ export class MainComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadCountries();
+    this.resetState();
     this.detectCountry();
+    this.searchService.setFilters({ query: '' });
+    this.searchService.clear();
+    this.voiceService.resetTranscript();
     this.voiceService.initialize({
       lang: this.speechLanguage,
       continuous: true,
@@ -201,6 +190,35 @@ export class MainComponent implements OnInit, OnDestroy {
       name: c.name,
       svg: `3x2/${c.code}.svg`,
     }));
+  }
+
+  private resetState(): void {
+    this.query = '';
+    this.siteInput = '';
+    this.similarInput = '';
+    this.excludeInput = '';
+    this.exactInput = '';
+
+    this.excludeWords = [];
+    this.exactWords = [];
+    this.fileTypesSelected = [];
+
+    this.activeSite = null;
+    this.activeSimilar = null;
+
+    this.siteError = null;
+    this.similarError = null;
+
+    this.selectedCountry = null;
+    this.regionQuery = '';
+    this.selectedCity = null;
+
+    this.showFilters = false;
+    this.activeFilter = null;
+
+    this.isCountryManuallySelected = false;
+    this.countryAutoDetected = false;
+    this.autoDetectedCountryCode = null;
   }
 
   async detectCountry() {
@@ -348,13 +366,25 @@ export class MainComponent implements OnInit, OnDestroy {
     this.voiceService.toggle();
   }
 
+  private getCityFilter(): string | undefined {
+    const city = this.regionQuery.trim();
+    if (!city) return undefined;
+
+    if (this.selectedCountry && city.toLowerCase() === this.selectedCountry.name.toLowerCase()) {
+      return undefined;
+    }
+
+    return city;
+  }
+
   private buildPayload(): SearchFilters | null {
-    if (!this.query.trim()) return null;
+    const query = this.query.trim();
+    if (!query) return null;
 
     return {
-      query: this.query.trim(),
+      query,
       country: this.selectedCountry?.code?.toLowerCase(),
-      city: this.regionQuery || undefined,
+      city: this.getCityFilter(),
       site: this.activeSite || undefined,
       similar: this.activeSimilar || undefined,
       exclude: this.excludeWords,
@@ -378,6 +408,7 @@ export class MainComponent implements OnInit, OnDestroy {
     const hasCountryFilter = this.isCountryManuallySelected
       ? selectedCountryCode !== this.autoDetectedCountryCode
       : false;
+    const hasCityFilter = !!this.getCityFilter();
 
     return !!(
       this.activeSite ||
@@ -385,7 +416,8 @@ export class MainComponent implements OnInit, OnDestroy {
       this.excludeWords.length ||
       this.exactWords.length ||
       this.fileTypesSelected.length ||
-      hasCountryFilter
+      hasCountryFilter ||
+      hasCityFilter
     );
   }
 }
