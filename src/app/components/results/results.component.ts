@@ -4,14 +4,43 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { SearchFilters, SearchService } from '../../services/search.service';
-
+import {
+  LucideAngularModule,
+  Search,
+  Mic,
+  Sliders,
+  Globe,
+  Link,
+  Check,
+  X,
+  Plus,
+  Minus,
+  Type,
+  FileText,
+  Leaf,
+  ArrowRight,
+} from 'lucide-angular';
 @Component({
   selector: 'app-results',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './results.component.html',
 })
 export class ResultsComponent implements OnInit {
+  readonly SearchIcon = Search;
+  readonly MicIcon = Mic;
+  readonly SlidersIcon = Sliders;
+  readonly GlobeIcon = Globe;
+  readonly LinkIcon = Link;
+  readonly CheckIcon = Check;
+  readonly XIcon = X;
+  readonly PlusIcon = Plus;
+  readonly MinusIcon = Minus;
+  readonly TypeIcon = Type;
+  readonly FileTextIcon = FileText;
+  readonly LeafIcon = Leaf;
+  readonly ArrowRightIcon = ArrowRight;
+
   results$: Observable<any[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;

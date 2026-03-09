@@ -1,12 +1,12 @@
 <div class="min-h-screen w-full flex flex-col font-sans text-white">
   <header
-    class="sticky top-0 z-50 w-full bg-[#318429]/85 backdrop-blur-xl border-b border-white/10 px-4 md:px-8 py-4"
+    class="fixed top-0 z-50 w-full bg-[#318429]/85 backdrop-blur-xl border-b border-white/10 px-4 md:px-8 py-4"
   >
-    <div class="max-w-[1600px] mx-auto">
-      <div class="flex flex-wrap items-end gap-4">
+    <div class="max-w-[1600px]">
+      <div class="flex flex-wrap items-end gap-3">
         <h2
           routerLink="/"
-          class="font-josefin text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0 mb-1"
+          class="font-josefin text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0 mb-1 mr-4"
         >
           Green<span class="text-ui-green">Find</span>
         </h2>
@@ -45,14 +45,19 @@
 
         <button
           (click)="showFilters = !showFilters"
-          class="h-[42px] px-4 rounded-xl border text-sm font-semibold transition-all cursor-pointer"
+          class="cursor-pointer px-5 py-2.5 border transition-all duration-200 self-stretch flex items-center justify-center rounded-xl active:scale-95"
           [ngClass]="
             hasActiveFilters()
               ? 'border-white/35 bg-white/15 text-white'
-              : 'border-white/15 bg-white/5 text-white/70 hover:text-white hover:border-white/30'
+              : 'border-white/15 bg-white/5 text-white/70 hover:text-white hover:border-white/30 hover:bg-white/10'
           "
         >
-          {{ showFilters ? 'Hide filters' : 'Show filters' }}
+          <lucide-icon
+            [img]="SlidersIcon"
+            class="transition-transform duration-500"
+            [class.rotate-180]="showFilters"
+            [size]="20"
+          ></lucide-icon>
         </button>
       </div>
 
@@ -89,9 +94,14 @@
               </button>
             </div>
             <p *ngIf="siteError" class="text-red-200 text-xs">{{ siteError }}</p>
-            <div *ngIf="activeSite" class="inline-flex items-center gap-2 text-xs bg-white/10 rounded-xl px-3 py-1.5">
+            <div
+              *ngIf="activeSite"
+              class="inline-flex items-center gap-2 text-xs bg-white/10 rounded-xl px-3 py-1.5"
+            >
               <span>site:{{ activeSite }}</span>
-              <button (click)="removeSiteFilter()" class="text-white/50 hover:text-red-300">x</button>
+              <button (click)="removeSiteFilter()" class="text-white/50 hover:text-red-300">
+                x
+              </button>
             </div>
           </div>
 
@@ -116,7 +126,9 @@
               class="inline-flex items-center gap-2 text-xs bg-white/10 rounded-xl px-3 py-1.5"
             >
               <span>related:{{ activeSimilar }}</span>
-              <button (click)="removeSimilarFilter()" class="text-white/50 hover:text-red-300">x</button>
+              <button (click)="removeSimilarFilter()" class="text-white/50 hover:text-red-300">
+                x
+              </button>
             </div>
           </div>
         </div>
@@ -145,7 +157,12 @@
                 class="inline-flex items-center gap-2 text-xs bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-2.5 py-1"
               >
                 "{{ word }}"
-                <button (click)="removeWord('exact', word)" class="text-white/60 hover:text-red-300">x</button>
+                <button
+                  (click)="removeWord('exact', word)"
+                  class="text-white/60 hover:text-red-300"
+                >
+                  x
+                </button>
               </span>
             </div>
           </div>
@@ -171,7 +188,12 @@
                 class="inline-flex items-center gap-2 text-xs bg-red-500/10 border border-red-500/30 rounded-xl px-2.5 py-1"
               >
                 -{{ word }}
-                <button (click)="removeWord('exclude', word)" class="text-white/60 hover:text-red-300">x</button>
+                <button
+                  (click)="removeWord('exclude', word)"
+                  class="text-white/60 hover:text-red-300"
+                >
+                  x
+                </button>
               </span>
             </div>
           </div>
@@ -207,7 +229,7 @@
     </div>
   </header>
 
-  <div class="w-full max-w-[1600px] mx-auto flex flex-col md:flex-row">
+  <div class="w-full max-w-[1600px] mx-auto flex flex-col md:flex-row pt-20">
     <main class="w-full md:w-[65%] lg:w-[60%] px-4 md:pr-12 py-8">
       <div class="py-12 flex flex-col items-center justify-center" *ngIf="loading$ | async">
         <div
