@@ -3,7 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
-import { SearchFilters, SearchService } from '../../services/search.service';
+import {
+  KnowledgeGraph,
+  KnowledgeGraphFact,
+  KnowledgeGraphRelation,
+  SearchFilters,
+  SearchService,
+} from '../../services/search.service';
 import {
   LucideAngularModule,
   Search,
@@ -44,6 +50,9 @@ export class ResultsComponent implements OnInit {
   results$: Observable<any[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
+  relatedSearches$: Observable<any[]>;
+  pagination$: Observable<any>;
+  knowledgeGraph$: Observable<KnowledgeGraph | null>;
 
   query = '';
   country = '';
@@ -74,6 +83,9 @@ export class ResultsComponent implements OnInit {
     this.results$ = this.searchService.results$;
     this.loading$ = this.searchService.loading$;
     this.error$ = this.searchService.error$;
+    this.relatedSearches$ = this.searchService.relatedSearches$;
+    this.pagination$ = this.searchService.pagination$;
+    this.knowledgeGraph$ = this.searchService.knowledgeGraph$;
   }
 
   ngOnInit() {
@@ -203,6 +215,22 @@ export class ResultsComponent implements OnInit {
     return item.link ?? `${index}`;
   }
 
+  trackByValue(index: number, value: string): string {
+    return value || `${index}`;
+  }
+
+  trackByFact(index: number, fact: KnowledgeGraphFact): string {
+    return `${fact.label}-${fact.value}-${index}`;
+  }
+
+  trackByRelation(index: number, relation: KnowledgeGraphRelation): string {
+    return relation.link ?? `${relation.name}-${index}`;
+  }
+
+  trackBySource(index: number, source: string): string {
+    return source || `${index}`;
+  }
+
   private patchFromFilters(filters: SearchFilters) {
     this.query = filters.query ?? '';
     this.country = filters.country ?? '';
@@ -245,5 +273,16 @@ export class ResultsComponent implements OnInit {
   private isValidDomain(domain: string): boolean {
     const regex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
     return regex.test(domain.trim());
+  }
+
+  goToPage(page: number) {
+    const currentFilters = this.searchService.getCurrentFilters();
+    const newFilters = { ...currentFilters, page };
+    this.searchService.search(newFilters);
+  }
+
+  searchRelated(query: string) {
+    this.query = query;
+    this.doSearch();
   }
 }

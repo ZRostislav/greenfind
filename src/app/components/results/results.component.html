@@ -291,24 +291,186 @@
           </div>
         </div>
       </div>
+
+      <!-- Related Searches -->
+      <div *ngIf="(relatedSearches$ | async)?.length" class="mt-12">
+        <h4 class="text-white/70 text-sm font-semibold mb-4 uppercase tracking-[0.1em]">
+          Related Searches
+        </h4>
+        <div class="flex flex-wrap gap-2">
+          <button
+            *ngFor="let related of relatedSearches$ | async"
+            (click)="searchRelated(related.query)"
+            class="cursor-pointer px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white hover:border-white/20 transition-all text-sm"
+          >
+            {{ related.query }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="pagination$ | async as pagination" class="mt-12 flex flex-col gap-6">
+        <div class="flex items-center gap-1 sm:gap-2">
+          <button
+            *ngIf="pagination.current > 1"
+            (click)="goToPage(pagination.current - 1)"
+            class="cursor-pointer group flex items-center px-3 py-2 text-white/50 hover:text-white transition-colors"
+          >
+            <span class="mr-2">←</span>
+            <span class="hidden sm:inline">back</span>
+          </button>
+
+          <div class="flex items-center gap-1">
+            <button
+              *ngFor="let page of [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+              (click)="goToPage(page)"
+              [class.text-white]="pagination.current === page"
+              [class.border-b-2]="pagination.current === page"
+              [class.border-white]="pagination.current === page"
+              class="cursor-pointer min-w-[32px] h-10 flex items-center justify-center text-sm font-medium transition-all hover:bg-white/5 rounded-t-lg text-white/40 hover:text-white"
+            >
+              {{ page }}
+            </button>
+          </div>
+
+          <button
+            *ngIf="pagination.next"
+            (click)="goToPage(pagination.current + 1)"
+            class="cursor-pointer group flex items-center px-3 py-2 text-white/50 hover:text-white transition-colors"
+          >
+            <span class="hidden sm:inline">next</span>
+            <span class="ml-2">→</span>
+          </button>
+        </div>
+      </div>
     </main>
 
     <aside class="hidden lg:block w-[35%] pt-8 pr-8">
       <div class="sticky top-28 space-y-6">
         <div class="p-6 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-sm">
-          <h4 class="text-ui-green font-josefin font-bold mb-4 uppercase text-xs tracking-widest">
-            Search Insights
-          </h4>
-          <p class="text-white/50 text-xs leading-loose">
-            You are using <strong>GreenFind</strong>, an eco-conscious search layer. All results are
-            filtered to prioritize sustainability and open-source intelligence.
-          </p>
-          <div
-            class="mt-6 pt-6 border-t border-white/5 flex items-center justify-between text-[10px] text-white/30 font-mono"
-          >
-            <span>Nodes: 128</span>
-            <span>Status: Optimized</span>
+          <div *ngIf="knowledgeGraph$ | async as kg; else defaultInsights">
+            <div *ngIf="kg.image" class="mb-5 overflow-hidden rounded-2xl border border-white/10">
+              <img
+                [src]="kg.image"
+                [alt]="kg.title || 'Knowledge Graph Image'"
+                class="w-full h-auto max-h-[320px] object-cover"
+                (error)="$event.target.style.display = 'none'"
+              />
+            </div>
+
+            <div *ngIf="kg.title" class="mb-3">
+              <h4 class="text-white font-semibold text-2xl mb-1">{{ kg.title }}</h4>
+              <p *ngIf="kg.type" class="text-ui-green text-xs uppercase tracking-wider">
+                {{ kg.type }}
+              </p>
+            </div>
+
+            <div *ngIf="kg.description" class="text-white/70 text-xs leading-loose mb-5">
+              {{ kg.description }}
+            </div>
+
+            <div *ngIf="kg.images.length > 1" class="grid grid-cols-2 gap-2 mb-5">
+              <div
+                *ngFor="let image of kg.images.slice(1, 7); trackBy: trackByValue"
+                class="overflow-hidden rounded-xl border border-white/10 bg-white/5"
+              >
+                <img
+                  [src]="image"
+                  [alt]="kg.title || 'Knowledge Graph Image'"
+                  class="w-full h-24 object-cover"
+                  (error)="$event.target.style.display = 'none'"
+                />
+              </div>
+            </div>
+
+            <div *ngIf="kg.facts.length" class="space-y-3 mb-5">
+              <h6 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-2">
+                Overview
+              </h6>
+              <div
+                *ngFor="let fact of kg.facts; trackBy: trackByFact"
+                class="flex items-start justify-between gap-4 rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2"
+              >
+                <span class="text-white/45 text-[11px] uppercase tracking-[0.12em]">{{
+                  fact.label
+                }}</span>
+                <span class="text-white/75 text-xs text-right leading-relaxed">{{
+                  fact.value
+                }}</span>
+              </div>
+            </div>
+
+            <div *ngIf="kg.people_also_search_for.length" class="space-y-3 mb-4">
+              <h6 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-2">
+                People Also Search For
+              </h6>
+              <div class="grid grid-cols-1 gap-2">
+                <a
+                  *ngFor="let person of kg.people_also_search_for; trackBy: trackByRelation"
+                  [href]="person.link || null"
+                  [attr.target]="person.link ? '_blank' : null"
+                  class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-white/70 transition-colors hover:border-white/20 hover:text-white"
+                >
+                  <img
+                    *ngIf="person.image"
+                    [src]="person.image"
+                    [alt]="person.name"
+                    class="w-10 h-10 rounded-xl object-cover border border-white/10"
+                    (error)="$event.target.style.display = 'none'"
+                  />
+                  <div class="min-w-0">
+                    <div class="text-sm text-white truncate">{{ person.name }}</div>
+                    <div
+                      *ngIf="person.type"
+                      class="text-[11px] uppercase tracking-[0.12em] text-white/40"
+                    >
+                      {{ person.type }}
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            <div *ngIf="kg.sursele_includ.length" class="mt-4 pt-4 border-t border-white/5">
+              <div class="text-white/40 text-[10px] uppercase tracking-[0.18em] mb-3">
+                Sursele Includ
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  *ngFor="let item of kg.sursele_includ; trackBy: trackByValue"
+                  class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-white/65"
+                >
+                  {{ item }}
+                </span>
+              </div>
+            </div>
+
+            <div *ngIf="kg.sources.length" class="mt-4 pt-4 border-t border-white/5">
+              <div class="text-white/40 text-[10px] uppercase tracking-[0.18em] mb-3">Sources</div>
+              <div class="flex flex-wrap gap-2">
+                <a
+                  *ngFor="let source of kg.sources; trackBy: trackBySource"
+                  [href]="source"
+                  target="_blank"
+                  class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-white/65 hover:text-white hover:border-white/20 transition-colors"
+                >
+                  {{ source }}
+                </a>
+              </div>
+            </div>
           </div>
+          <ng-template #defaultInsights>
+            <p class="text-white/50 text-xs leading-loose">
+              You are using <strong>GreenFind</strong>, an eco-conscious search layer. All results
+              are filtered to prioritize sustainability and open-source intelligence.
+            </p>
+            <div
+              class="mt-6 pt-6 border-t border-white/5 flex items-center justify-between text-[10px] text-white/30 font-mono"
+            >
+              <span>Nodes: 128</span>
+              <span>Status: Optimized</span>
+            </div>
+          </ng-template>
         </div>
       </div>
     </aside>

@@ -14,6 +14,37 @@ export interface SearchFilters {
   exclude?: string[];
   exact?: string[];
   fileTypes?: string[];
+  page?: number;
+}
+
+export interface KnowledgeGraphFact {
+  label: string;
+  value: string;
+}
+
+export interface KnowledgeGraphSource {
+  name: string | null;
+  link: string | null;
+}
+
+export interface KnowledgeGraphRelation {
+  name: string;
+  link: string | null;
+  image: string | null;
+  type: string | null;
+}
+
+export interface KnowledgeGraph {
+  title: string | null;
+  type: string | null;
+  description: string | null;
+  image: string | null;
+  images: string[];
+  source: KnowledgeGraphSource | null;
+  sources: string[];
+  sursele_includ: string[];
+  facts: KnowledgeGraphFact[];
+  people_also_search_for: KnowledgeGraphRelation[];
 }
 
 const FILTERS_STORAGE_KEY = 'greenfind.search-filters';
@@ -28,11 +59,17 @@ export class SearchService {
   private _loading = new BehaviorSubject<boolean>(false);
   private _error = new BehaviorSubject<string | null>(null);
   private _filters = new BehaviorSubject<SearchFilters>(this.loadSavedFilters());
+  private _relatedSearches = new BehaviorSubject<any[]>([]);
+  private _pagination = new BehaviorSubject<any>(null);
+  private _knowledgeGraph = new BehaviorSubject<KnowledgeGraph | null>(null);
 
   results$ = this._results.asObservable();
   loading$ = this._loading.asObservable();
   error$ = this._error.asObservable();
   filters$ = this._filters.asObservable();
+  relatedSearches$ = this._relatedSearches.asObservable();
+  pagination$ = this._pagination.asObservable();
+  knowledgeGraph$ = this._knowledgeGraph.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -42,26 +79,42 @@ export class SearchService {
 
     if (!normalizedFilters.query) {
       this._results.next([]);
+      this._relatedSearches.next([]);
+      this._pagination.next(null);
       return;
     }
+
+    this.clear();
 
     const q = this.buildQuery(normalizedFilters);
     let params = new HttpParams().set('q', q);
 
     if (normalizedFilters.country) params = params.set('country', normalizedFilters.country);
     if (normalizedFilters.city) params = params.set('city', normalizedFilters.city);
+    if (normalizedFilters.page && normalizedFilters.page > 1) {
+      params = params.set('start', ((normalizedFilters.page - 1) * 10).toString());
+    }
 
     this._loading.next(true);
     this._error.next(null);
 
     this.http
-      .get<any[]>(`${this.apiUrl}/search`, { params })
+      .get<any>(`${this.apiUrl}/search`, { params })
       .pipe(
-        tap((res) => this._results.next(res)),
+        tap((res) => {
+          this._results.next(res.results || []);
+          this._relatedSearches.next(res.related_searches || []);
+          this._knowledgeGraph.next(this.normalizeKnowledgeGraph(res.knowledge_graph));
+          this._pagination.next(res.pagination || null);
+        }),
         catchError((err) => {
           console.error(err);
           this._error.next('Search failed');
-          return of([]);
+          this._results.next([]);
+          this._relatedSearches.next([]);
+          this._knowledgeGraph.next(null);
+          this._pagination.next(null);
+          return of({ results: [], related_searches: [], knowledge_graph: null, pagination: null });
         }),
         finalize(() => this._loading.next(false)),
       )
@@ -88,7 +141,74 @@ export class SearchService {
 
   clear(): void {
     this._results.next([]);
+    this._relatedSearches.next([]);
+    this._knowledgeGraph.next(null);
+    this._pagination.next(null);
     this._error.next(null);
+  }
+
+  private normalizeKnowledgeGraph(value: any): KnowledgeGraph | null {
+    if (!value || typeof value !== 'object') {
+      return null;
+    }
+
+    const images = this.normalizeStringList(value.images);
+    const image = this.normalizeText(value.image) ?? images[0] ?? null;
+    const sources = Array.isArray(value.sources)
+      ? this.normalizeStringList(value.sources)
+      : [];
+    const surseleInclud = Array.isArray(value.sursele_includ)
+      ? this.normalizeStringList(value.sursele_includ)
+      : [];
+
+    const facts = Array.isArray(value.facts)
+      ? value.facts
+          .map((fact: any) => ({
+            label: this.normalizeText(fact?.label),
+            value: this.normalizeText(fact?.value),
+          }))
+          .filter(
+            (fact: { label?: string; value?: string }): fact is KnowledgeGraphFact =>
+              typeof fact.label === 'string' && typeof fact.value === 'string',
+          )
+      : [];
+
+    const peopleAlsoSearchFor = Array.isArray(value.people_also_search_for)
+      ? value.people_also_search_for
+          .map((item: any) => {
+            const name = this.normalizeText(item?.name);
+            if (!name) return null;
+
+            return {
+              name,
+              link: this.normalizeText(item?.link) ?? null,
+              image: this.normalizeText(item?.image) ?? null,
+              type: this.normalizeText(item?.type) ?? null,
+            };
+          })
+          .filter((item: KnowledgeGraphRelation | null): item is KnowledgeGraphRelation => item !== null)
+      : [];
+
+    const source =
+      value.source && typeof value.source === 'object'
+        ? {
+            name: this.normalizeText(value.source.name) ?? null,
+            link: this.normalizeText(value.source.link) ?? null,
+          }
+        : null;
+
+    return {
+      title: this.normalizeText(value.title) ?? null,
+      type: this.normalizeText(value.type) ?? null,
+      description: this.normalizeText(value.description) ?? null,
+      image,
+      images: image ? [image, ...images.filter((item) => item !== image)] : images,
+      source: source?.name || source?.link ? source : null,
+      sources,
+      sursele_includ: surseleInclud,
+      facts,
+      people_also_search_for: peopleAlsoSearchFor,
+    };
   }
 
   private buildQuery(filters: SearchFilters): string {
@@ -149,6 +269,7 @@ export class SearchService {
       exclude: this.normalizeList(filters.exclude),
       exact: this.normalizeList(filters.exact),
       fileTypes: this.normalizeList(filters.fileTypes)?.map((type) => type.toLowerCase()),
+      page: filters.page || 1,
     };
   }
 
@@ -161,7 +282,10 @@ export class SearchService {
     const normalized = this.normalizeText(value);
     if (!normalized) return undefined;
 
-    return normalized.replace(/^https?:\/\//, '').replace(/^www\./, '').toLowerCase();
+    return normalized
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .toLowerCase();
   }
 
   private normalizeList(values?: string[]): string[] | undefined {
@@ -171,5 +295,17 @@ export class SearchService {
     if (!normalized.length) return undefined;
 
     return Array.from(new Set(normalized));
+  }
+
+  private normalizeStringList(values?: unknown[]): string[] {
+    if (!Array.isArray(values)) return [];
+
+    return Array.from(
+      new Set(
+        values
+          .map((item) => (typeof item === 'string' ? item.trim() : ''))
+          .filter((item) => item.length > 0),
+      ),
+    );
   }
 }
