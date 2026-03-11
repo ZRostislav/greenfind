@@ -1,0 +1,57 @@
+<div class="min-h-screen w-full flex items-center justify-center px-4 py-10">
+  <div class="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 backdrop-blur p-8">
+    <h1 class="text-3xl font-extrabold text-white tracking-tight">Verify email</h1>
+    <p class="text-white/60 text-sm mt-2">Enter the 6-digit code we sent to your email.</p>
+
+    <div
+      *ngIf="info"
+      class="mt-4 rounded-2xl border border-white/15 bg-white/5 p-3 text-sm text-white/70"
+    >
+      {{ info }}
+    </div>
+
+    <div *ngIf="error" class="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+      {{ error }}
+    </div>
+
+    <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="verify()">
+      <div>
+        <label class="block text-xs font-bold text-white/70 mb-2">Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 text-white outline-none focus:border-white/30"
+          placeholder="you@example.com"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-white/70 mb-2">Code</label>
+        <input
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          formControlName="code"
+          class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 text-white outline-none focus:border-white/30 tracking-[0.35em] text-center font-extrabold"
+          placeholder="123456"
+        />
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="verifying || form.invalid"
+        class="w-full h-12 rounded-2xl bg-ui-green text-ui-base font-extrabold disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ verifying ? 'Verifying…' : 'Verify' }}
+      </button>
+    </form>
+
+    <div class="mt-6 flex items-center justify-between text-sm text-white/60">
+      <button (click)="resend()" class="hover:text-white font-bold" [disabled]="resending">
+        {{ resending ? 'Sending…' : 'Resend code' }}
+      </button>
+      <a routerLink="/login" class="hover:text-white">Back to sign in</a>
+    </div>
+  </div>
+</div>
+

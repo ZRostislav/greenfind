@@ -1,17 +1,19 @@
-<div class="min-h-screen w-full flex flex-col font-sans text-white">
+<div class="min-h-[100dvh] w-full flex flex-col font-sans text-white overflow-x-hidden">
   <header
-    class="fixed top-0 z-50 w-full bg-[#318429]/85 backdrop-blur-xl border-b border-white/10 px-4 md:px-8 py-4"
+    class="fixed top-0 z-50 w-full bg-[#318429]/85 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 md:px-8 py-3 sm:py-4"
   >
-    <div class="max-w-[1600px]">
-      <div class="flex flex-wrap items-end gap-3">
+    <div class="max-w-[1600px] mx-auto w-full">
+      <div class="flex flex-wrap sm:flex-nowrap items-end gap-3">
         <h2
           routerLink="/"
-          class="font-josefin text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0 mb-1 mr-4"
+          class="order-1 sm:order-none font-josefin text-xl sm:text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0 mb-1 mr-2 sm:mr-4"
         >
           Green<span class="text-ui-green">Find</span>
         </h2>
 
-        <div class="flex-grow min-w-[240px] max-w-4xl">
+        <div
+          class="order-3 sm:order-none w-full sm:w-auto flex-grow min-w-0 sm:min-w-[240px] max-w-4xl"
+        >
           <div
             class="relative flex items-center bg-white/10 border border-white/10 rounded-xl overflow-hidden focus-within:border-white/40 transition-all duration-300"
           >
@@ -20,11 +22,11 @@
               placeholder="Search the web..."
               [(ngModel)]="query"
               (keydown.enter)="doSearch()"
-              class="w-full bg-transparent px-5 py-2.5 text-white placeholder:text-white/30 outline-none text-lg"
+              class="w-full bg-transparent px-4 sm:px-5 py-2 sm:py-2.5 text-white placeholder:text-white/30 outline-none text-base sm:text-lg"
             />
             <button
               (click)="doSearch()"
-              class="cursor-pointer px-5 text-ui-green hover:bg-white/10 transition-colors self-stretch flex items-center justify-center border-l border-white/10"
+              class="cursor-pointer px-4 sm:px-5 text-ui-green hover:bg-white/10 transition-colors self-stretch flex items-center justify-center border-l border-white/10"
             >
               <svg
                 width="20"
@@ -45,7 +47,7 @@
 
         <button
           (click)="showFilters = !showFilters"
-          class="cursor-pointer px-5 py-2.5 border transition-all duration-200 self-stretch flex items-center justify-center rounded-xl active:scale-95"
+          class="order-2 sm:order-none ml-auto sm:ml-0 cursor-pointer px-4 sm:px-5 py-2 sm:py-2.5 border transition-all duration-200 self-center sm:self-stretch flex items-center justify-center rounded-xl active:scale-95"
           [ngClass]="
             hasActiveFilters()
               ? 'border-white/35 bg-white/15 text-white'
@@ -61,7 +63,10 @@
         </button>
       </div>
 
-      <div *ngIf="showFilters" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <div
+        *ngIf="showFilters"
+        class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm max-h-[75dvh] overflow-y-auto custom-scrollbar pr-1 pb-4 overscroll-contain"
+      >
         <div class="bg-black/10 border border-white/10 rounded-2xl p-4 space-y-3">
           <p class="text-white/70 text-xs uppercase tracking-[0.18em]">Location & Domains</p>
 
@@ -79,7 +84,7 @@
           </div>
 
           <div class="space-y-2">
-            <div class="flex gap-2">
+            <div class="flex flex-col sm:flex-row gap-2">
               <input
                 [(ngModel)]="siteInput"
                 (keydown.enter)="applySiteFilter()"
@@ -88,7 +93,7 @@
               />
               <button
                 (click)="applySiteFilter()"
-                class="px-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 transition-colors"
+                class="w-full sm:w-auto px-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 transition-colors"
               >
                 Apply
               </button>
@@ -106,7 +111,7 @@
           </div>
 
           <div class="space-y-2">
-            <div class="flex gap-2">
+            <div class="flex flex-col sm:flex-row gap-2">
               <input
                 [(ngModel)]="similarInput"
                 (keydown.enter)="applySimilarFilter()"
@@ -115,7 +120,7 @@
               />
               <button
                 (click)="applySimilarFilter()"
-                class="px-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 transition-colors"
+                class="w-full sm:w-auto px-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 transition-colors"
               >
                 Apply
               </button>
@@ -217,10 +222,10 @@
           </div>
         </div>
 
-        <div class="md:col-span-2 flex justify-end">
+        <div class="md:col-span-2 flex justify-stretch sm:justify-end">
           <button
             (click)="doSearch()"
-            class="px-5 py-2 rounded-xl border border-white/25 bg-white/15 hover:bg-white/25 text-sm font-semibold transition-colors"
+            class="w-full sm:w-auto px-5 py-2 rounded-xl border border-white/25 bg-white/15 hover:bg-white/25 text-sm font-semibold transition-colors"
           >
             Apply filters
           </button>
@@ -229,8 +234,8 @@
     </div>
   </header>
 
-  <div class="w-full max-w-[1600px] mx-auto flex flex-col md:flex-row pt-20">
-    <main class="w-full md:w-[65%] lg:w-[60%] px-4 md:pr-12 py-8">
+  <div class="w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row pt-28 sm:pt-24 lg:pt-20">
+    <main class="w-full lg:w-[60%] px-4 lg:pr-12 py-6 sm:py-8">
       <div class="py-12 flex flex-col items-center justify-center" *ngIf="loading$ | async">
         <div
           class="w-10 h-10 border-2 border-ui-green/20 border-t-ui-green rounded-full animate-spin"
@@ -256,9 +261,9 @@
           *ngFor="let item of results$ | async; trackBy: trackByLink"
           class="group relative animate-in fade-in slide-in-from-bottom-4 duration-500"
         >
-          <div class="flex items-start gap-4">
+          <div class="flex items-start gap-3 sm:gap-4">
             <div
-              class="mt-1.5 p-2 bg-white/5 rounded-xl border border-white/10 group-hover:border-ui-green/30 transition-all duration-300"
+              class="shrink-0 mt-1.5 p-2 bg-white/5 rounded-xl border border-white/10 group-hover:border-ui-green/30 transition-all duration-300"
             >
               <img
                 *ngIf="item.favicon"
@@ -269,13 +274,13 @@
               />
             </div>
 
-            <div class="flex-grow">
+            <div class="flex-grow min-w-0">
               <cite
-                class="not-italic text-ui-green/60 text-[11px] font-mono tracking-tight block mb-1"
+                class="not-italic text-ui-green/60 text-[11px] font-mono tracking-tight block mb-1 break-words"
               >
                 {{ item.link }}
               </cite>
-              <h3 class="text-xl font-josefin font-semibold mb-2">
+              <h3 class="text-lg sm:text-xl font-josefin font-semibold mb-2 leading-snug">
                 <a
                   [href]="item.link"
                   target="_blank"
@@ -310,7 +315,7 @@
 
       <!-- Pagination -->
       <div *ngIf="pagination$ | async as pagination" class="mt-12 flex flex-col gap-6">
-        <div class="flex items-center gap-1 sm:gap-2">
+        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1 sm:gap-2">
           <button
             *ngIf="pagination.current > 1"
             (click)="goToPage(pagination.current - 1)"
@@ -320,7 +325,7 @@
             <span class="hidden sm:inline">back</span>
           </button>
 
-          <div class="flex items-center gap-1">
+          <div class="flex flex-wrap items-center justify-center gap-1">
             <button
               *ngFor="let page of [1, 2, 3, 4, 5, 6, 7, 8, 9]"
               (click)="goToPage(page)"

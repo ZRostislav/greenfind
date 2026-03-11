@@ -1,0 +1,37 @@
+<div class="min-h-screen w-full flex items-center justify-center px-4 py-10">
+  <div class="w-full max-w-3xl rounded-3xl border border-white/10 bg-white/5 backdrop-blur p-8">
+    <div class="flex items-center justify-between gap-4">
+      <h1 class="text-3xl font-extrabold text-white tracking-tight">Search history</h1>
+      <a routerLink="/me" class="text-sm text-white/60 hover:text-white font-bold">Profile</a>
+    </div>
+
+    <p *ngIf="loading()" class="mt-4 text-white/60 text-sm">Loading…</p>
+
+    <div
+      *ngIf="error()"
+      class="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"
+    >
+      {{ error() }}
+    </div>
+
+    <div *ngIf="!loading() && !error() && !items().length" class="mt-6 text-white/60 text-sm">
+      No history yet. Run a search while logged in.
+    </div>
+
+    <div class="mt-6 space-y-3" *ngIf="items().length">
+      <button
+        *ngFor="let item of items()"
+        (click)="open(item)"
+        class="w-full text-left rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 p-4 transition"
+      >
+        <div class="text-white font-extrabold truncate">{{ item.query }}</div>
+        <div class="mt-1 text-xs text-white/50 flex flex-wrap gap-3">
+          <span *ngIf="item.region">region: {{ item.region }}</span>
+          <span *ngIf="item.language">lang: {{ item.language }}</span>
+          <span *ngIf="item.siteFilter">site: {{ item.siteFilter }}</span>
+          <span>{{ item.createdAt | date: 'short' }}</span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>

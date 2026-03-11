@@ -1,0 +1,48 @@
+<div class="min-h-screen w-full flex items-center justify-center px-4 py-10">
+  <div class="w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 backdrop-blur p-8">
+    <h1 class="text-3xl font-extrabold text-white tracking-tight">Profile</h1>
+
+    <ng-container *ngIf="user$ | async as user; else loadingTpl">
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div class="text-xs text-white/60 font-bold">Username</div>
+          <div class="text-white font-extrabold mt-1">{{ user.username }}</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div class="text-xs text-white/60 font-bold">Email</div>
+          <div class="text-white font-extrabold mt-1">{{ user.email }}</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div class="text-xs text-white/60 font-bold">Provider</div>
+          <div class="text-white font-extrabold mt-1">{{ user.authProvider }}</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div class="text-xs text-white/60 font-bold">Email verified</div>
+          <div class="text-white font-extrabold mt-1">
+            {{ user.emailVerified ? 'Yes' : 'No' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          routerLink="/history"
+          class="h-12 px-5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-white flex items-center justify-center font-bold"
+        >
+          Search history
+        </a>
+        <button
+          (click)="logout()"
+          class="h-12 px-5 rounded-2xl bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 text-red-100 font-extrabold"
+        >
+          Logout
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-template #loadingTpl>
+      <p class="mt-4 text-white/60 text-sm">Loading…</p>
+    </ng-template>
+  </div>
+</div>
+
