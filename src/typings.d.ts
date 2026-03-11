@@ -19,3 +19,9 @@ declare module 'emoji-flags' {
 
   export default emojiFlags;
 }
+
+interface Window {
+  __env?: {
+    apiUrl?: string;
+  };
+}
