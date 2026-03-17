@@ -211,8 +211,16 @@
 
         <button
           type="submit"
-          [disabled]="loading || form.invalid || form.pending"
-          class="cursor-pointer w-full h-14 mt-4 rounded-2xl bg-ui-base text-white font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed shadow-[0_10px_20px_rgba(87,200,77,0.2)] hover:shadow-[0_15px_30px_rgba(87,200,77,0.3)] flex items-center justify-center gap-2"
+          [disabled]="loading"
+          [class.opacity-40]="!loading && (form.invalid || form.pending)"
+          [class.grayscale]="!loading && (form.invalid || form.pending)"
+          [class.cursor-not-allowed]="!loading && (form.invalid || form.pending)"
+          [class.cursor-pointer]="!loading && !(form.invalid || form.pending)"
+          [attr.aria-disabled]="!loading && (form.invalid || form.pending) ? true : null"
+          [attr.title]="
+            !loading && (form.invalid || form.pending) ? 'Fill in the form correctly to continue' : null
+          "
+          class="w-full h-14 mt-4 rounded-2xl bg-ui-base text-white font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed shadow-[0_10px_20px_rgba(87,200,77,0.2)] hover:shadow-[0_15px_30px_rgba(87,200,77,0.3)] flex items-center justify-center gap-2"
         >
           <span *ngIf="!loading">Create account</span>
           <div
