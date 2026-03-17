@@ -1,57 +1,124 @@
-<div class="min-h-screen w-full flex items-center justify-center px-4 py-10">
-  <div class="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 backdrop-blur p-8">
-    <h1 class="text-3xl font-extrabold text-white tracking-tight">Verify email</h1>
-    <p class="text-white/60 text-sm mt-2">Enter the 6-digit code we sent to your email.</p>
+<div
+  class="min-h-screen w-full flex items-center justify-center px-4 py-10 relative overflow-hidden"
+>
+  <div
+    class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-ui-green/10 rounded-full blur-[140px] pointer-events-none"
+  ></div>
+  <div
+    class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[140px] pointer-events-none"
+  ></div>
+
+  <div class="w-full max-w-md z-10 animate-slide-up">
+    <a
+      routerLink="/login"
+      class="group flex items-center gap-2 text-white/40 hover:text-white transition-all font-bold text-sm mb-8 justify-center"
+    >
+      <lucide-icon
+        [img]="ArrowLeftIcon"
+        [size]="18"
+        class="group-hover:-translate-x-1 transition-transform"
+      ></lucide-icon>
+      Back to Sign In
+    </a>
 
     <div
-      *ngIf="info"
-      class="mt-4 rounded-2xl border border-white/15 bg-white/5 p-3 text-sm text-white/70"
+      class="w-full rounded-[2.5rem] border border-white/15 bg-white/5 backdrop-blur-2xl p-10 shadow-2xl relative"
     >
-      {{ info }}
-    </div>
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-ui-green rounded-b-full shadow-[0_0_15px_#57c84d]"
+      ></div>
 
-    <div *ngIf="error" class="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
-      {{ error }}
-    </div>
-
-    <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="verify()">
-      <div>
-        <label class="block text-xs font-bold text-white/70 mb-2">Email</label>
-        <input
-          type="email"
-          formControlName="email"
-          class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 text-white outline-none focus:border-white/30"
-          placeholder="you@example.com"
-        />
+      <div class="text-center mb-8">
+        <div
+          class="w-16 h-16 bg-ui-green/10 border border-ui-green/20 rounded-2xl flex items-center justify-center mx-auto mb-6"
+        >
+          <lucide-icon [img]="ShieldCheckIcon" [size]="32" class="text-ui-green"></lucide-icon>
+        </div>
+        <h1 class="text-4xl font-black text-white tracking-tight">Security Check</h1>
+        <p class="text-white text-sm mt-3 font-medium px-4">
+          We've sent a 6-digit verification code to your inbox.
+        </p>
       </div>
 
-      <div>
-        <label class="block text-xs font-bold text-white/70 mb-2">Code</label>
-        <input
-          type="text"
-          inputmode="numeric"
-          maxlength="6"
-          formControlName="code"
-          class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 text-white outline-none focus:border-white/30 tracking-[0.35em] text-center font-extrabold"
-          placeholder="123456"
-        />
-      </div>
-
-      <button
-        type="submit"
-        [disabled]="verifying || form.invalid"
-        class="w-full h-12 rounded-2xl bg-ui-green text-ui-base font-extrabold disabled:opacity-50 disabled:cursor-not-allowed"
+      <div
+        *ngIf="info"
+        class="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/70 flex items-start gap-3 animate-fade-in"
       >
-        {{ verifying ? 'Verifying…' : 'Verify' }}
-      </button>
-    </form>
+        <lucide-icon
+          [img]="InfoIcon"
+          [size]="16"
+          class="shrink-0 mt-0.5 text-ui-green"
+        ></lucide-icon>
+        <span>{{ info }}</span>
+      </div>
 
-    <div class="mt-6 flex items-center justify-between text-sm text-white/60">
-      <button (click)="resend()" class="hover:text-white font-bold" [disabled]="resending">
-        {{ resending ? 'Sending…' : 'Resend code' }}
-      </button>
-      <a routerLink="/login" class="hover:text-white">Back to sign in</a>
+      <div
+        *ngIf="error"
+        class="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs text-red-300 flex items-start gap-3 animate-shake"
+      >
+        <lucide-icon [img]="AlertCircleIcon" [size]="16" class="shrink-0 mt-0.5"></lucide-icon>
+        <span>{{ error }}</span>
+      </div>
+
+      <form class="space-y-6" [formGroup]="form" (ngSubmit)="verify()">
+        <div class="space-y-2 opacity-60">
+          <label class="block text-[10px] font-black text-white uppercase tracking-[0.15em] ml-1"
+            >Account</label
+          >
+          <div class="relative">
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-white/20">
+              <lucide-icon [img]="MailIcon" [size]="18"></lucide-icon>
+            </div>
+            <input
+              type="email"
+              formControlName="email"
+              class="w-full h-12 rounded-xl bg-white/[0.02] border border-white/5 pl-12 pr-4 text-white/50 font-bold outline-none cursor-not-allowed"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block text-[10px] font-black text-white uppercase tracking-[0.15em] ml-1"
+            >Verification Code</label
+          >
+          <input
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            formControlName="code"
+            class="w-full h-16 rounded-2xl bg-white/5 border border-white/10 text-white outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all text-center font-black text-3xl tracking-[0.5em] placeholder:text-white/5 placeholder:tracking-normal"
+            placeholder="000000"
+          />
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="verifying || form.invalid"
+          class="cursor-pointer w-full h-14 mt-4 rounded-2xl bg-ui-base text-white font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed shadow-[0_10px_20px_rgba(87,200,77,0.2)] hover:shadow-[0_15px_30px_rgba(87,200,77,0.3)] flex items-center justify-center gap-2"
+        >
+          <span *ngIf="!verifying">Confirm Access</span>
+          <div
+            *ngIf="verifying"
+            class="w-5 h-5 border-2 border-ui-base/30 border-t-ui-base rounded-full animate-spin"
+          ></div>
+        </button>
+      </form>
+
+      <div class="mt-8 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
+        <button
+          (click)="resend()"
+          class="cursor-pointer text-sm font-bold text-white/40 hover:text-ui-green-light transition-colors flex items-center gap-2 disabled:opacity-30"
+          [disabled]="resending"
+        >
+          <lucide-icon
+            [img]="RotateCcwIcon"
+            [size]="14"
+            [class.animate-spin]="resending"
+          ></lucide-icon>
+          {{ resending ? 'Resending Code...' : "Didn't get the code? Resend" }}
+        </button>
+      </div>
     </div>
   </div>
 </div>
-

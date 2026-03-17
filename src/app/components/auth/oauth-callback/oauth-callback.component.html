@@ -1,12 +1,80 @@
-<div class="min-h-screen w-full flex items-center justify-center px-4 py-10">
-  <div class="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 backdrop-blur p-8">
-    <h1 class="text-2xl font-extrabold text-white tracking-tight">Signing you in…</h1>
+<div
+  class="min-h-screen w-full flex items-center justify-center px-4 py-10 relative overflow-hidden"
+>
+  <div
+    class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-ui-green/10 rounded-full blur-[140px] pointer-events-none"
+  ></div>
+  <div
+    class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[140px] pointer-events-none"
+  ></div>
 
-    <p *ngIf="loading" class="mt-3 text-white/60 text-sm">Completing OAuth login.</p>
+  <div class="w-full max-w-md z-10 animate-slide-up">
+    <div
+      class="w-full rounded-[2.5rem] border border-white/15 bg-white/5 backdrop-blur-2xl p-10 shadow-2xl relative overflow-hidden"
+    >
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-ui-green rounded-b-full shadow-[0_0_15px_#57c84d]"
+      ></div>
 
-    <div *ngIf="error" class="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
-      {{ error }}
+      <div class="flex flex-col items-center text-center">
+        <ng-container *ngIf="loading && !error">
+          <div class="relative w-24 h-24 mb-8">
+            <div
+              class="absolute inset-0 rounded-full border-4 border-ui-green/20 animate-ping"
+            ></div>
+            <div
+              class="absolute inset-0 rounded-full border-4 border-transparent border-t-ui-green animate-spin"
+            ></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <lucide-icon
+                [img]="FingerprintIcon"
+                [size]="32"
+                class="text-ui-green/80"
+              ></lucide-icon>
+            </div>
+          </div>
+
+          <h1 class="text-3xl font-black text-white tracking-tight mb-3">Identity Sync</h1>
+          <p class="text-white/40 text-sm font-medium animate-pulse">
+            Securely completing your login...
+          </p>
+
+          <div class="mt-8 w-full h-1 bg-white/5 rounded-full overflow-hidden">
+            <div class="h-full bg-ui-green w-1/2 animate-shimmer"></div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="error">
+          <div
+            class="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mb-6 animate-shake"
+          >
+            <lucide-icon [img]="ShieldAlertIcon" [size]="36" class="text-red-400"></lucide-icon>
+          </div>
+
+          <h1 class="text-3xl font-black text-white tracking-tight mb-3">Access Denied</h1>
+          <div class="rounded-2xl bg-red-500/5 border border-red-500/20 p-4 mb-8">
+            <p class="text-red-300 text-xs font-bold leading-relaxed">
+              {{ error }}
+            </p>
+          </div>
+
+          <a
+            routerLink="/login"
+            class="cursor-pointer w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-sm flex items-center justify-center gap-2 hover:bg-white/10 transition-all active:scale-[0.98]"
+          >
+            <lucide-icon [img]="ArrowLeftIcon" [size]="18"></lucide-icon>
+            Return to Login
+          </a>
+        </ng-container>
+      </div>
+    </div>
+
+    <div
+      class="mt-8 flex items-center justify-center gap-4 text-[10px] font-black text-white uppercase tracking-[0.2em]"
+    >
+      <span>OAuth 2.0</span>
+      <span class="w-1 h-1 rounded-full bg-white/10"></span>
+      <span>Encrypted Session</span>
     </div>
   </div>
 </div>
-
