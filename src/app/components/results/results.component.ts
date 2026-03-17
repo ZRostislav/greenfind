@@ -17,6 +17,7 @@ import {
   Sliders,
   Globe,
   Link,
+  Star,
   Check,
   X,
   Plus,
@@ -26,6 +27,7 @@ import {
   Leaf,
   ArrowRight,
 } from 'lucide-angular';
+import { SavedLink, SavedLinksService } from '../../services/saved-links.service';
 @Component({
   selector: 'app-results',
   standalone: true,
@@ -38,6 +40,7 @@ export class ResultsComponent implements OnInit {
   readonly SlidersIcon = Sliders;
   readonly GlobeIcon = Globe;
   readonly LinkIcon = Link;
+  readonly StarIcon = Star;
   readonly CheckIcon = Check;
   readonly XIcon = X;
   readonly PlusIcon = Plus;
@@ -53,6 +56,7 @@ export class ResultsComponent implements OnInit {
   relatedSearches$: Observable<any[]>;
   pagination$: Observable<any>;
   knowledgeGraph$: Observable<KnowledgeGraph | null>;
+  savedLinks$: Observable<SavedLink[]>;
 
   query = '';
   country = '';
@@ -79,6 +83,7 @@ export class ResultsComponent implements OnInit {
     private searchService: SearchService,
     private route: ActivatedRoute,
     private router: Router,
+    private savedLinks: SavedLinksService,
   ) {
     this.results$ = this.searchService.results$;
     this.loading$ = this.searchService.loading$;
@@ -86,6 +91,7 @@ export class ResultsComponent implements OnInit {
     this.relatedSearches$ = this.searchService.relatedSearches$;
     this.pagination$ = this.searchService.pagination$;
     this.knowledgeGraph$ = this.searchService.knowledgeGraph$;
+    this.savedLinks$ = this.savedLinks.links$;
   }
 
   ngOnInit() {
@@ -284,5 +290,19 @@ export class ResultsComponent implements OnInit {
   searchRelated(query: string) {
     this.query = query;
     this.doSearch();
+  }
+
+  isSaved(url: string): boolean {
+    return this.savedLinks.isSaved(url);
+  }
+
+  toggleSaved(item: any, event?: MouseEvent) {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const res = this.savedLinks.toggle(item?.link, item?.title);
+    if (!res.ok && res.reason === 'AUTH_REQUIRED') {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+    }
   }
 }

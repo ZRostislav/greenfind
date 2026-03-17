@@ -249,7 +249,8 @@
         {{ errorMessage }}
       </p>
 
-      <div class="space-y-10">
+      <ng-container *ngIf="savedLinks$ | async as savedLinks">
+        <div class="space-y-10">
         <div
           *ngIf="!(results$ | async)?.length && !(loading$ | async)"
           class="text-white/60 py-20 font-light"
@@ -263,8 +264,20 @@
         >
           <div class="flex items-start gap-3 sm:gap-4">
             <div
-              class="shrink-0 mt-1.5 p-2 bg-white/5 rounded-xl border border-white/10 group-hover:border-ui-green/30 transition-all duration-300"
+              class="shrink-0 mt-1.5 p-2 bg-white/5 rounded-xl border border-white/10 group-hover:border-ui-green/30 transition-all duration-300 relative"
             >
+              <button
+                (click)="toggleSaved(item, $event)"
+                class="absolute -top-2 -right-2 w-7 h-7 rounded-xl border bg-black/40 backdrop-blur hover:bg-black/60 transition-colors flex items-center justify-center"
+                [ngClass]="
+                  isSaved(item.link)
+                    ? 'text-ui-green border-ui-green/30'
+                    : 'text-white/30 border-white/10 hover:text-white/60'
+                "
+                [title]="isSaved(item.link) ? 'Remove from saved' : 'Save link'"
+              >
+                <lucide-icon [img]="StarIcon" [size]="16"></lucide-icon>
+              </button>
               <img
                 *ngIf="item.favicon"
                 [src]="item.favicon"
@@ -295,7 +308,8 @@
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </ng-container>
 
       <!-- Related Searches -->
       <div *ngIf="(relatedSearches$ | async)?.length" class="mt-12">

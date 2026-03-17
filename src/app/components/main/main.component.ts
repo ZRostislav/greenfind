@@ -26,6 +26,7 @@ import { VoiceService } from '../../services/voice.service';
 import { LoaderService } from '../../services/loader.service';
 import { AuthService } from '../../services/auth.service';
 import { AuthStateService } from '../../services/auth-state.service';
+import { SavedLink, SavedLinksService } from '../../services/saved-links.service';
 
 interface Country {
   code: string;
@@ -150,8 +151,17 @@ export class MainComponent implements OnInit, OnDestroy {
 
   private auth = inject(AuthService);
   private authState = inject(AuthStateService);
+  private savedLinks = inject(SavedLinksService);
 
   user$ = this.authState.user$;
+  savedLinks$ = this.savedLinks.links$;
+
+  newSavedUrl = '';
+  newSavedTitle = '';
+  savedLinksError: string | null = null;
+
+  editingUrl: string | null = null;
+  editingTitle = '';
 
   logout() {
     this.auth.logout().subscribe();
@@ -433,5 +443,63 @@ export class MainComponent implements OnInit, OnDestroy {
       hasCountryFilter ||
       hasCityFilter
     );
+  }
+
+  trackBySavedLink(_index: number, item: SavedLink): string {
+    return item.url;
+  }
+
+  addSavedLink() {
+    this.savedLinksError = null;
+
+    const res = this.savedLinks.add(this.newSavedUrl, this.newSavedTitle);
+    if (!res.ok) {
+      this.savedLinksError =
+        res.reason === 'INVALID_URL'
+          ? 'Enter a valid URL.'
+          : res.reason === 'AUTH_REQUIRED'
+            ? 'Please log in to save links.'
+            : 'Unable to save link.';
+      return;
+    }
+
+    this.newSavedUrl = '';
+    this.newSavedTitle = '';
+  }
+
+  startEditSavedLink(link: SavedLink) {
+    this.savedLinksError = null;
+    this.editingUrl = link.url;
+    this.editingTitle = link.title;
+  }
+
+  cancelEditSavedLink() {
+    this.editingUrl = null;
+    this.editingTitle = '';
+  }
+
+  saveSavedLinkTitle(url: string) {
+    this.savedLinksError = null;
+    const res = this.savedLinks.updateTitle(url, this.editingTitle);
+    if (!res.ok) {
+      this.savedLinksError =
+        res.reason === 'EMPTY_TITLE'
+          ? 'Title cannot be empty.'
+          : res.reason === 'AUTH_REQUIRED'
+            ? 'Please log in to edit saved links.'
+            : 'Unable to update title.';
+      return;
+    }
+
+    this.cancelEditSavedLink();
+  }
+
+  removeSavedLink(url: string) {
+    this.savedLinksError = null;
+    const res = this.savedLinks.remove(url);
+    if (!res.ok) {
+      this.savedLinksError =
+        res.reason === 'AUTH_REQUIRED' ? 'Please log in to remove saved links.' : 'Unable to remove link.';
+    }
   }
 }
