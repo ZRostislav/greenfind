@@ -1,48 +1,160 @@
-<div class="min-h-screen w-full flex items-center justify-center px-4 py-10">
-  <div class="w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 backdrop-blur p-8">
-    <h1 class="text-3xl font-extrabold text-white tracking-tight">Profile</h1>
+<div
+  class="min-h-screen w-full flex items-center justify-center px-4 py-10 relative overflow-hidden"
+>
+  <div
+    class="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-ui-green/10 rounded-full blur-[120px] pointer-events-none"
+  ></div>
+  <div
+    class="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-white/5 rounded-full blur-[120px] pointer-events-none"
+  ></div>
 
-    <ng-container *ngIf="user$ | async as user; else loadingTpl">
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div class="text-xs text-white/60 font-bold">Username</div>
-          <div class="text-white font-extrabold mt-1">{{ user.username }}</div>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div class="text-xs text-white/60 font-bold">Email</div>
-          <div class="text-white font-extrabold mt-1">{{ user.email }}</div>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div class="text-xs text-white/60 font-bold">Provider</div>
-          <div class="text-white font-extrabold mt-1">{{ user.authProvider }}</div>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div class="text-xs text-white/60 font-bold">Email verified</div>
-          <div class="text-white font-extrabold mt-1">
-            {{ user.emailVerified ? 'Yes' : 'No' }}
+  <div class="w-full max-w-2xl z-10 animate-slide-up">
+    <a
+      routerLink="/"
+      class="inline-flex items-center gap-2 text-white/40 hover:text-white mb-6 transition-colors font-bold text-sm group"
+    >
+      <lucide-icon
+        [img]="ArrowLeftIcon"
+        [size]="18"
+        class="group-hover:-translate-x-1 transition-transform"
+      ></lucide-icon>
+      Back to Search
+    </a>
+
+    <div
+      class="w-full rounded-[2.5rem] border border-white/15 bg-white/5 backdrop-blur-2xl p-10 shadow-2xl relative overflow-hidden"
+    >
+      <div
+        class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-ui-green to-transparent opacity-50"
+      ></div>
+
+      <ng-container *ngIf="user$ | async as user; else loadingTpl">
+        <div
+          class="flex flex-col md:flex-row items-center gap-6 mb-10 pb-10 border-b border-white/10"
+        >
+          <div
+            class="w-24 h-24 rounded-3xl bg-gradient-to-br from-ui-green to-emerald-600 flex items-center justify-center text-ui-base text-4xl font-black shadow-[0_0_30px_rgba(87,200,77,0.3)]"
+          >
+            {{ user.username[0].toUpperCase() }}
+          </div>
+          <div class="text-center md:text-left">
+            <h1 class="text-4xl font-bold text-white tracking-tight">{{ user.username }}</h1>
+            <p class="text-white/50 font-medium mt-1">{{ user.email }}</p>
+          </div>
+          <div class="md:ml-auto">
+            <span
+              class="px-4 py-1.5 rounded-full bg-ui-green/10 border border-ui-green/20 text-ui-green-light text-xs font-black uppercase tracking-widest"
+            >
+              Active User
+            </span>
           </div>
         </div>
-      </div>
 
-      <div class="mt-8 flex flex-wrap gap-3">
-        <a
-          routerLink="/history"
-          class="h-12 px-5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-white flex items-center justify-center font-bold"
-        >
-          Search history
-        </a>
-        <button
-          (click)="logout()"
-          class="h-12 px-5 rounded-2xl bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 text-red-100 font-extrabold"
-        >
-          Logout
-        </button>
-      </div>
-    </ng-container>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            class="group rounded-2xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition-all duration-300"
+          >
+            <div class="flex items-center gap-3 mb-2">
+              <lucide-icon
+                [img]="UserIcon"
+                [size]="16"
+                class="text-white/30 group-hover:text-ui-green transition-colors"
+              ></lucide-icon>
+              <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
+                >Username</span
+              >
+            </div>
+            <div class="text-white font-bold text-lg">{{ user.username }}</div>
+          </div>
 
-    <ng-template #loadingTpl>
-      <p class="mt-4 text-white/60 text-sm">Loading…</p>
-    </ng-template>
+          <div
+            class="group rounded-2xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition-all duration-300"
+          >
+            <div class="flex items-center gap-3 mb-2">
+              <lucide-icon
+                [img]="MailIcon"
+                [size]="16"
+                class="text-white/30 group-hover:text-ui-green transition-colors"
+              ></lucide-icon>
+              <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
+                >Email Address</span
+              >
+            </div>
+            <div class="text-white font-bold text-lg truncate">{{ user.email }}</div>
+          </div>
+
+          <div
+            class="group rounded-2xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition-all duration-300"
+          >
+            <div class="flex items-center gap-3 mb-2">
+              <lucide-icon
+                [img]="ShieldIcon"
+                [size]="16"
+                class="text-white/30 group-hover:text-ui-green transition-colors"
+              ></lucide-icon>
+              <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
+                >Auth Provider</span
+              >
+            </div>
+            <div class="text-white font-bold text-lg capitalize">{{ user.authProvider }}</div>
+          </div>
+
+          <div
+            class="group rounded-2xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition-all duration-300"
+          >
+            <div class="flex items-center gap-3 mb-2">
+              <lucide-icon
+                [img]="CheckCircleIcon"
+                [size]="16"
+                class="text-white/30 group-hover:text-ui-green transition-colors"
+              ></lucide-icon>
+              <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
+                >Security Status</span
+              >
+            </div>
+            <div class="flex items-center gap-2 mt-1">
+              <div
+                [class]="
+                  user.emailVerified
+                    ? 'w-2 h-2 rounded-full bg-ui-green animate-pulse'
+                    : 'w-2 h-2 rounded-full bg-amber-500'
+                "
+              ></div>
+              <span class="text-white font-bold text-lg">{{
+                user.emailVerified ? 'Email Verified' : 'Unverified'
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center gap-4"
+        >
+          <a
+            routerLink="/history"
+            class="w-full sm:w-auto h-14 px-8 rounded-2xl bg-white text-ui-base hover:bg-ui-green-light hover:text-ui-base transition-all duration-300 flex items-center justify-center font-black text-sm uppercase tracking-wider shadow-lg hover:shadow-ui-green/20"
+          >
+            <lucide-icon [img]="HistoryIcon" [size]="18" class="mr-2"></lucide-icon>
+            Search history
+          </a>
+
+          <button
+            (click)="logout()"
+            class="w-full sm:w-auto h-14 px-8 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-black text-sm uppercase tracking-wider transition-all"
+          >
+            Logout account
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-template #loadingTpl>
+        <div class="flex flex-col items-center py-20">
+          <div
+            class="w-10 h-10 border-4 border-ui-green/30 border-t-ui-green rounded-full animate-spin mb-4"
+          ></div>
+          <p class="text-white/40 font-bold animate-pulse">Synchronizing Profile...</p>
+        </div>
+      </ng-template>
+    </div>
   </div>
 </div>
-

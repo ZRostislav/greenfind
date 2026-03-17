@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
 import emojiFlags from 'emoji-flags';
 import {
@@ -19,9 +19,13 @@ import {
   FileText,
   Leaf,
   ArrowRight,
+  LogOutIcon,
 } from 'lucide-angular';
 import { SearchFilters, SearchService } from '../../services/search.service';
 import { VoiceService } from '../../services/voice.service';
+import { LoaderService } from '../../services/loader.service';
+import { AuthService } from '../../services/auth.service';
+import { AuthStateService } from '../../services/auth-state.service';
 
 interface Country {
   code: string;
@@ -95,7 +99,7 @@ export const filtersAnim = trigger('filtersAnim', [
   selector: 'app-main',
   standalone: true,
   templateUrl: './main.component.html',
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, RouterLink],
   animations: [fadeIn, slideUp, cardAnim, filtersAnim],
 })
 export class MainComponent implements OnInit, OnDestroy {
@@ -112,6 +116,7 @@ export class MainComponent implements OnInit, OnDestroy {
   readonly FileTextIcon = FileText;
   readonly LeafIcon = Leaf;
   readonly ArrowRightIcon = ArrowRight;
+  readonly LogOutIcon = LogOutIcon;
 
   query = '';
 
@@ -142,6 +147,15 @@ export class MainComponent implements OnInit, OnDestroy {
   isCountryManuallySelected = false;
   private countryAutoDetected = false;
   private autoDetectedCountryCode: string | null = null;
+
+  private auth = inject(AuthService);
+  private authState = inject(AuthStateService);
+
+  user$ = this.authState.user$;
+
+  logout() {
+    this.auth.logout().subscribe();
+  }
 
   readonly fileTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
   private readonly speechLanguage = typeof navigator !== 'undefined' ? navigator.language : 'en-US';

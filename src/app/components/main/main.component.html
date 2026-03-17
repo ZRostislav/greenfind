@@ -1,4 +1,63 @@
 <div class="min-h-screen flex flex-col items-center pt-[15vh] px-4 relative w-full overflow-y-auto">
+  <header class="fixed top-6 right-6 z-[100]">
+    <div class="flex items-center gap-3">
+      <div
+        class="flex items-center gap-1 p-1.5 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl"
+      >
+        <ng-container *ngIf="user$ | async as user; else guestTpl">
+          <a
+            routerLink="/history"
+            class="px-4 py-2 text-sm font-bold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+          >
+            History
+          </a>
+          <div class="w-[1px] h-4 bg-white/10 mx-1"></div>
+          <a
+            routerLink="/me"
+            class="px-4 py-2 text-sm font-bold text-white/90 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2"
+          >
+            <div
+              class="w-6 h-6 rounded-full bg-ui-green/20 flex items-center justify-center border border-ui-green/30"
+            >
+              <span class="text-[10px] text-ui-green-light">{{
+                user.username[0].toUpperCase()
+              }}</span>
+            </div>
+            {{ user.username }}
+          </a>
+        </ng-container>
+
+        <ng-template #guestTpl>
+          <a
+            routerLink="/login"
+            class="px-5 py-2 text-sm font-bold text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+          >
+            Login
+          </a>
+        </ng-template>
+      </div>
+
+      <ng-container *ngIf="user$ | async; else registerBtn">
+        <button
+          (click)="logout()"
+          class="h-11 px-5 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm font-extrabold transition-all hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] flex items-center gap-2"
+        >
+          <lucide-icon [img]="LogOutIcon" [size]="16"></lucide-icon>
+          Logout
+        </button>
+      </ng-container>
+
+      <ng-template #registerBtn>
+        <a
+          routerLink="/register"
+          class="h-11 px-6 rounded-2xl bg-ui-green text-white/70 hover:text-white text-sm font-black transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(87,200,77,0.4)] flex items-center"
+        >
+          Register
+        </a>
+      </ng-template>
+    </div>
+  </header>
+
   <div class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
     <div
       class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-white rounded-full blur-[160px] opacity-20 animate-pulse-slow"

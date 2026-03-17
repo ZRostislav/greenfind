@@ -4,5 +4,4 @@
 //   http://192.168.100.8:3000/api
 //   https://api.yourdomain.com/api
 window.__env = window.__env || {};
-window.__env.apiUrl = 'http://localhost:3000/api';
-
+window.__env.apiUrl = 'https://greenfind-backend.onrender.com/api';
