@@ -70,8 +70,11 @@ export class ResultsComponent implements OnInit {
   imageResults$: Observable<ImageResult[]>;
   savedLinks$: Observable<SavedLink[]>;
   user$: Observable<User | null>;
+  activeImage: ImageResult | null = null;
+  activeImageSize: { width: number; height: number } | null = null;
 
   query = '';
+  mode: 'web' | 'images' = 'web';
   country = '';
   city = '';
 
@@ -262,8 +265,41 @@ export class ResultsComponent implements OnInit {
     return item?.link || `${index}`;
   }
 
+  openImagePreview(image: ImageResult, event?: MouseEvent) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.activeImage = image;
+    this.activeImageSize = null;
+  }
+
+  closeImagePreview() {
+    this.activeImage = null;
+    this.activeImageSize = null;
+  }
+
+  onPreviewImageLoad(event: Event) {
+    const img = event.target as HTMLImageElement | null;
+    if (!img) return;
+
+    this.activeImageSize = {
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+    };
+  }
+
+  downloadActiveImage() {
+    if (!this.activeImage?.original) return;
+    const a = document.createElement('a');
+    a.href = this.activeImage.original;
+    a.download = 'image';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.click();
+  }
+
   private patchFromFilters(filters: SearchFilters) {
     this.query = filters.query ?? '';
+    this.mode = filters.mode === 'images' ? 'images' : 'web';
     this.country = filters.country ?? '';
     this.city = filters.city ?? '';
 
@@ -283,6 +319,7 @@ export class ResultsComponent implements OnInit {
 
     return {
       query,
+      mode: this.mode,
       country: this.country.trim().toLowerCase() || undefined,
       city: this.city.trim() || undefined,
       site: this.activeSite || undefined,
@@ -319,6 +356,12 @@ export class ResultsComponent implements OnInit {
 
   searchRelated(query: string) {
     this.query = query;
+    this.doSearch();
+  }
+
+  setMode(mode: 'web' | 'images') {
+    if (this.mode === mode) return;
+    this.mode = mode;
     this.doSearch();
   }
 
@@ -360,6 +403,7 @@ export class ResultsComponent implements OnInit {
 
     return {
       query: qp.get('q')?.trim() || '',
+      mode: qp.get('mode') === 'images' ? 'images' : 'web',
       country: qp.get('country')?.trim().toLowerCase() || undefined,
       city: qp.get('city')?.trim() || undefined,
       site: qp.get('site')?.trim() || undefined,
@@ -386,6 +430,7 @@ export class ResultsComponent implements OnInit {
 
     return {
       q: clean(filters.query),
+      mode: filters.mode === 'images' ? 'images' : undefined,
       country: clean(filters.country),
       city: clean(filters.city),
       site: clean(filters.site),

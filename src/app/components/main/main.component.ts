@@ -20,6 +20,7 @@ import {
   Leaf,
   ArrowRight,
   LogOutIcon,
+  ImageIcon,
 } from 'lucide-angular';
 import { SearchFilters, SearchService } from '../../services/search.service';
 import { VoiceService } from '../../services/voice.service';
@@ -143,6 +144,7 @@ export class MainComponent implements OnInit, OnDestroy {
   readonly LeafIcon = Leaf;
   readonly ArrowRightIcon = ArrowRight;
   readonly LogOutIcon = LogOutIcon;
+  readonly ImageIcon = ImageIcon;
 
   query = '';
 
@@ -443,13 +445,14 @@ export class MainComponent implements OnInit, OnDestroy {
     };
   }
 
-  search() {
+  search(mode: 'web' | 'images' = 'web') {
     const payload = this.buildPayload();
     if (!payload) return;
 
-    this.searchService.search(payload);
+    const nextPayload: SearchFilters = { ...payload, mode };
+    this.searchService.search(nextPayload);
     this.router.navigate(['/results'], {
-      queryParams: this.buildResultQueryParams(payload),
+      queryParams: this.buildResultQueryParams(nextPayload),
     });
   }
 
@@ -578,6 +581,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
     return {
       q: clean(filters.query),
+      mode: filters.mode === 'images' ? 'images' : undefined,
       country: clean(filters.country),
       city: clean(filters.city),
       site: clean(filters.site),

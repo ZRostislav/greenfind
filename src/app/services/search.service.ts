@@ -7,6 +7,7 @@ import { environment } from '../environments/environment';
 
 export interface SearchFilters {
   query: string;
+  mode?: 'web' | 'images';
   country?: string;
   city?: string;
   site?: string;
@@ -63,6 +64,8 @@ export interface ImageResult {
   title: string | null;
   source: string | null;
   thumbnail: string;
+  original: string;
+  sourceLink: string | null;
   link: string;
 }
 
@@ -111,6 +114,7 @@ export class SearchService {
 
     const q = this.buildQuery(normalizedFilters);
     let params = new HttpParams().set('q', q);
+    if (normalizedFilters.mode) params = params.set('mode', normalizedFilters.mode);
 
     if (normalizedFilters.country) params = params.set('country', normalizedFilters.country);
     if (normalizedFilters.city) params = params.set('city', normalizedFilters.city);
@@ -196,6 +200,8 @@ export class SearchService {
           title: this.normalizeText(item?.title) ?? null,
           source: this.normalizeText(item?.source) ?? null,
           thumbnail,
+          original: this.normalizeText(item?.original) || thumbnail,
+          sourceLink: this.normalizeText(item?.source_link) ?? null,
           link,
         };
       })
@@ -345,6 +351,7 @@ export class SearchService {
   private normalizeFilters(filters: SearchFilters): SearchFilters {
     return {
       query: (filters.query || '').trim(),
+      mode: filters.mode === 'images' ? 'images' : 'web',
       country: this.normalizeText(filters.country)?.toLowerCase(),
       city: this.normalizeText(filters.city),
       site: this.normalizeDomain(filters.site),
