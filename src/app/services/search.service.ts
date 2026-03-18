@@ -99,8 +99,9 @@ export class SearchService {
 
   constructor(private http: HttpClient) {}
 
-  search(filters: SearchFilters): void {
+  search(filters: SearchFilters, options?: { appendImages?: boolean }): void {
     const normalizedFilters = this.normalizeFilters(filters);
+    const appendImages = !!options?.appendImages && normalizedFilters.mode === 'images';
     this.setFilters(normalizedFilters);
 
     if (!normalizedFilters.query) {
@@ -110,7 +111,12 @@ export class SearchService {
       return;
     }
 
-    this.clear();
+    if (!appendImages) {
+      this.clear();
+    } else {
+      this._loading.next(true);
+      this._error.next(null);
+    }
 
     const q = this.buildQuery(normalizedFilters);
     let params = new HttpParams().set('q', q);
@@ -118,8 +124,11 @@ export class SearchService {
 
     if (normalizedFilters.country) params = params.set('country', normalizedFilters.country);
     if (normalizedFilters.city) params = params.set('city', normalizedFilters.city);
-    if (normalizedFilters.page && normalizedFilters.page > 1) {
+    if (normalizedFilters.mode === 'web' && normalizedFilters.page && normalizedFilters.page > 1) {
       params = params.set('start', ((normalizedFilters.page - 1) * 10).toString());
+    }
+    if (normalizedFilters.mode === 'images' && normalizedFilters.page && normalizedFilters.page > 1) {
+      params = params.set('page', String(normalizedFilters.page));
     }
 
     this._loading.next(true);
@@ -133,7 +142,17 @@ export class SearchService {
           this._relatedSearches.next(res.related_searches || []);
           this._knowledgeGraph.next(this.normalizeKnowledgeGraph(res.knowledge_graph));
           this._aiOverview.next(this.normalizeAiOverview(res.ai_overview));
-          this._imageResults.next(this.normalizeImageResults(res.image_results));
+          const incomingImages = this.normalizeImageResults(res.image_results);
+          if (appendImages) {
+            const merged = [...this._imageResults.value, ...incomingImages];
+            const deduped = merged.filter(
+              (item, index, arr) =>
+                arr.findIndex((candidate) => candidate.original === item.original) === index,
+            );
+            this._imageResults.next(deduped);
+          } else {
+            this._imageResults.next(incomingImages);
+          }
           this._pagination.next(res.pagination || null);
         }),
         catchError((err) => {

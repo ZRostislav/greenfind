@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import {
   AiOverview,
   ImageResult,
@@ -35,13 +35,14 @@ import {
 import { SavedLink, SavedLinksService } from '../../services/saved-links.service';
 import { AuthService } from '../../services/auth.service';
 import { AuthStateService, User } from '../../services/auth-state.service';
+import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-results',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
   templateUrl: './results.component.html',
 })
-export class ResultsComponent implements OnInit {
+export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly SearchIcon = Search;
   readonly MicIcon = Mic;
   readonly SlidersIcon = Sliders;
@@ -72,6 +73,10 @@ export class ResultsComponent implements OnInit {
   user$: Observable<User | null>;
   activeImage: ImageResult | null = null;
   activeImageSize: { width: number; height: number } | null = null;
+  @ViewChild('imageLoadSentinel') imageLoadSentinel?: ElementRef<HTMLElement>;
+  private imageObserver: IntersectionObserver | null = null;
+  private paginationSub?: Subscription;
+  private currentPagination: any = null;
 
   query = '';
   mode: 'web' | 'images' = 'web';
@@ -113,6 +118,9 @@ export class ResultsComponent implements OnInit {
     this.imageResults$ = this.searchService.imageResults$;
     this.savedLinks$ = this.savedLinks.links$;
     this.user$ = this.authState.user$;
+    this.paginationSub = this.pagination$.subscribe((value) => {
+      this.currentPagination = value;
+    });
   }
 
   ngOnInit() {
@@ -132,6 +140,15 @@ export class ResultsComponent implements OnInit {
     if (shouldRunInitialSearch) {
       this.doSearch();
     }
+  }
+
+  ngAfterViewInit() {
+    this.setupImageInfiniteScroll();
+  }
+
+  ngOnDestroy() {
+    this.imageObserver?.disconnect();
+    this.paginationSub?.unsubscribe();
   }
 
   doSearch() {
@@ -290,10 +307,9 @@ export class ResultsComponent implements OnInit {
   downloadActiveImage() {
     if (!this.activeImage?.original) return;
     const a = document.createElement('a');
-    a.href = this.activeImage.original;
+    const apiBase = `${environment.apiUrl}`.replace(/\/$/, '');
+    a.href = `${apiBase}/search/download-image?url=${encodeURIComponent(this.activeImage.original)}`;
     a.download = 'image';
-    a.target = '_blank';
-    a.rel = 'noopener';
     a.click();
   }
 
@@ -363,6 +379,7 @@ export class ResultsComponent implements OnInit {
     if (this.mode === mode) return;
     this.mode = mode;
     this.doSearch();
+    setTimeout(() => this.setupImageInfiniteScroll(), 0);
   }
 
   isSaved(url: string): boolean {
@@ -440,5 +457,37 @@ export class ResultsComponent implements OnInit {
       fileTypes: join(filters.fileTypes),
       page: (filters.page || 1) > 1 ? String(filters.page) : undefined,
     };
+  }
+
+  private setupImageInfiniteScroll() {
+    if (!this.imageLoadSentinel?.nativeElement) return;
+
+    this.imageObserver?.disconnect();
+    this.imageObserver = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry?.isIntersecting) return;
+        if (this.mode !== 'images') return;
+        if (this.searchService.isLoading()) return;
+        if (!this.currentPagination?.next) return;
+
+        const currentFilters = this.searchService.getCurrentFilters();
+        const nextFilters: SearchFilters = {
+          ...currentFilters,
+          mode: 'images',
+          page: (currentFilters.page || 1) + 1,
+        };
+
+        this.searchService.search(nextFilters, { appendImages: true });
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: this.buildQueryParams(nextFilters),
+          replaceUrl: true,
+        });
+      },
+      { rootMargin: '350px 0px' },
+    );
+
+    this.imageObserver.observe(this.imageLoadSentinel.nativeElement);
   }
 }

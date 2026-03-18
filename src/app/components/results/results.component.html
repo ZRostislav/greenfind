@@ -292,7 +292,10 @@
   </header>
 
   <div class="w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row pt-28 sm:pt-24 lg:pt-20">
-    <main class="w-full lg:w-[60%] px-4 lg:pr-12 py-6 sm:py-8">
+    <main
+      class="w-full px-4 py-6 sm:py-8"
+      [ngClass]="mode === 'images' ? 'lg:w-full lg:px-8' : 'lg:w-[60%] lg:pr-12'"
+    >
       <div class="py-12 flex flex-col items-center justify-center" *ngIf="loading$ | async">
         <div
           class="w-10 h-10 border-2 border-ui-green/20 border-t-ui-green rounded-full animate-spin"
@@ -367,6 +370,7 @@
               />
             </button>
           </div>
+          <div #imageLoadSentinel class="h-10"></div>
         </div>
         <div
           *ngIf="mode === 'images' && !imageResults.length && !(loading$ | async)"
