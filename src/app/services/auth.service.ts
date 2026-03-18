@@ -82,6 +82,12 @@ export class AuthService {
     );
   }
 
+  deleteAccount(): Observable<{ deleted: boolean }> {
+    return this.http
+      .delete<{ deleted: boolean }>(`${this.apiUrl}/user/me`)
+      .pipe(tap(() => this.state.clearSession()));
+  }
+
   requestPasswordReset(payload: { email: string }): Observable<{ sent: boolean }> {
     return this.http.post<{ sent: boolean }>(`${this.apiUrl}/auth/request-password-reset`, payload);
   }

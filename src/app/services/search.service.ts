@@ -47,6 +47,18 @@ export interface KnowledgeGraph {
   people_also_search_for: KnowledgeGraphRelation[];
 }
 
+export interface AiOverviewSource {
+  title: string;
+  link: string;
+}
+
+export interface AiOverview {
+  title: string;
+  summary: string | null;
+  points: string[];
+  sources: AiOverviewSource[];
+}
+
 const FILTERS_STORAGE_KEY = 'greenfind.search-filters';
 
 @Injectable({
@@ -62,6 +74,7 @@ export class SearchService {
   private _relatedSearches = new BehaviorSubject<any[]>([]);
   private _pagination = new BehaviorSubject<any>(null);
   private _knowledgeGraph = new BehaviorSubject<KnowledgeGraph | null>(null);
+  private _aiOverview = new BehaviorSubject<AiOverview | null>(null);
 
   results$ = this._results.asObservable();
   loading$ = this._loading.asObservable();
@@ -70,6 +83,7 @@ export class SearchService {
   relatedSearches$ = this._relatedSearches.asObservable();
   pagination$ = this._pagination.asObservable();
   knowledgeGraph$ = this._knowledgeGraph.asObservable();
+  aiOverview$ = this._aiOverview.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -105,6 +119,7 @@ export class SearchService {
           this._results.next(res.results || []);
           this._relatedSearches.next(res.related_searches || []);
           this._knowledgeGraph.next(this.normalizeKnowledgeGraph(res.knowledge_graph));
+          this._aiOverview.next(this.normalizeAiOverview(res.ai_overview));
           this._pagination.next(res.pagination || null);
         }),
         catchError((err) => {
@@ -113,8 +128,15 @@ export class SearchService {
           this._results.next([]);
           this._relatedSearches.next([]);
           this._knowledgeGraph.next(null);
+          this._aiOverview.next(null);
           this._pagination.next(null);
-          return of({ results: [], related_searches: [], knowledge_graph: null, pagination: null });
+          return of({
+            results: [],
+            related_searches: [],
+            knowledge_graph: null,
+            ai_overview: null,
+            pagination: null,
+          });
         }),
         finalize(() => this._loading.next(false)),
       )
@@ -143,8 +165,37 @@ export class SearchService {
     this._results.next([]);
     this._relatedSearches.next([]);
     this._knowledgeGraph.next(null);
+    this._aiOverview.next(null);
     this._pagination.next(null);
     this._error.next(null);
+  }
+
+  private normalizeAiOverview(value: any): AiOverview | null {
+    if (!value || typeof value !== 'object') return null;
+
+    const title = this.normalizeText(value.title) || 'AI Overview';
+    const summary = this.normalizeText(value.summary) ?? null;
+    const points = this.normalizeStringList(value.points);
+
+    const sources = Array.isArray(value.sources)
+      ? value.sources
+          .map((item: any) => {
+            const sourceTitle = this.normalizeText(item?.title);
+            const link = this.normalizeText(item?.link);
+            if (!sourceTitle || !link) return null;
+            return { title: sourceTitle, link };
+          })
+          .filter((item: AiOverviewSource | null): item is AiOverviewSource => item !== null)
+      : [];
+
+    if (!summary && !points.length && !sources.length) return null;
+
+    return {
+      title,
+      summary,
+      points,
+      sources,
+    };
   }
 
   private normalizeKnowledgeGraph(value: any): KnowledgeGraph | null {

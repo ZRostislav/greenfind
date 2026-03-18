@@ -96,12 +96,37 @@ export const filtersAnim = trigger('filtersAnim', [
   ]),
 ]);
 
+export const favoritesPanelAnim = trigger('favoritesPanelAnim', [
+  transition(':enter', [
+    style({
+      opacity: 0,
+      transform: 'translateY(-10px) scale(0.98)',
+    }),
+    animate(
+      '240ms cubic-bezier(0.22, 1, 0.36, 1)',
+      style({
+        opacity: 1,
+        transform: 'translateY(0) scale(1)',
+      }),
+    ),
+  ]),
+  transition(':leave', [
+    animate(
+      '180ms ease-in',
+      style({
+        opacity: 0,
+        transform: 'translateY(-8px) scale(0.985)',
+      }),
+    ),
+  ]),
+]);
+
 @Component({
   selector: 'app-main',
   standalone: true,
   templateUrl: './main.component.html',
   imports: [CommonModule, FormsModule, LucideAngularModule, RouterLink],
-  animations: [fadeIn, slideUp, cardAnim, filtersAnim],
+  animations: [fadeIn, slideUp, cardAnim, filtersAnim, favoritesPanelAnim],
 })
 export class MainComponent implements OnInit, OnDestroy {
   readonly SearchIcon = Search;
@@ -143,6 +168,7 @@ export class MainComponent implements OnInit, OnDestroy {
   selectedCity: string | null = null;
 
   showFilters = false;
+  showAddSavedPanel = false;
   activeFilter: string | null = null;
 
   isCountryManuallySelected = false;
@@ -500,6 +526,40 @@ export class MainComponent implements OnInit, OnDestroy {
     if (!res.ok) {
       this.savedLinksError =
         res.reason === 'AUTH_REQUIRED' ? 'Please log in to remove saved links.' : 'Unable to remove link.';
+    }
+  }
+
+  getPrimaryFaviconUrl(url: string): string {
+    try {
+      return `${new URL(url).origin}/favicon.ico`;
+    } catch {
+      return this.getFallbackFaviconUrl(url);
+    }
+  }
+
+  private getFallbackFaviconUrl(url: string): string {
+    return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(url)}&sz=64`;
+  }
+
+  onFaviconError(event: Event, url: string): void {
+    const img = event.target as HTMLImageElement | null;
+    if (!img) return;
+
+    const fallback = this.getFallbackFaviconUrl(url);
+    if (img.dataset['fallbackApplied'] !== 'true') {
+      img.dataset['fallbackApplied'] = 'true';
+      img.src = fallback;
+      return;
+    }
+
+    img.style.display = 'none';
+  }
+
+  getHostname(url: string): string {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      return url;
     }
   }
 }

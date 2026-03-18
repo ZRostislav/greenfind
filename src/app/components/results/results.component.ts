@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import {
+  AiOverview,
   KnowledgeGraph,
   KnowledgeGraphFact,
   KnowledgeGraphRelation,
@@ -26,8 +27,13 @@ import {
   FileText,
   Leaf,
   ArrowRight,
+  LogOutIcon,
+  HistoryIcon,
+  UserIcon,
 } from 'lucide-angular';
 import { SavedLink, SavedLinksService } from '../../services/saved-links.service';
+import { AuthService } from '../../services/auth.service';
+import { AuthStateService, User } from '../../services/auth-state.service';
 @Component({
   selector: 'app-results',
   standalone: true,
@@ -49,6 +55,9 @@ export class ResultsComponent implements OnInit {
   readonly FileTextIcon = FileText;
   readonly LeafIcon = Leaf;
   readonly ArrowRightIcon = ArrowRight;
+  readonly LogOutIcon = LogOutIcon;
+  readonly HistoryIcon = HistoryIcon;
+  readonly UserIcon = UserIcon;
 
   results$: Observable<any[]>;
   loading$: Observable<boolean>;
@@ -56,7 +65,9 @@ export class ResultsComponent implements OnInit {
   relatedSearches$: Observable<any[]>;
   pagination$: Observable<any>;
   knowledgeGraph$: Observable<KnowledgeGraph | null>;
+  aiOverview$: Observable<AiOverview | null>;
   savedLinks$: Observable<SavedLink[]>;
+  user$: Observable<User | null>;
 
   query = '';
   country = '';
@@ -84,6 +95,8 @@ export class ResultsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private savedLinks: SavedLinksService,
+    private auth: AuthService,
+    private authState: AuthStateService,
   ) {
     this.results$ = this.searchService.results$;
     this.loading$ = this.searchService.loading$;
@@ -91,7 +104,9 @@ export class ResultsComponent implements OnInit {
     this.relatedSearches$ = this.searchService.relatedSearches$;
     this.pagination$ = this.searchService.pagination$;
     this.knowledgeGraph$ = this.searchService.knowledgeGraph$;
+    this.aiOverview$ = this.searchService.aiOverview$;
     this.savedLinks$ = this.savedLinks.links$;
+    this.user$ = this.authState.user$;
   }
 
   ngOnInit() {
@@ -237,6 +252,10 @@ export class ResultsComponent implements OnInit {
     return source || `${index}`;
   }
 
+  trackByAiSource(index: number, source: { title: string; link: string }): string {
+    return source?.link || `${index}`;
+  }
+
   private patchFromFilters(filters: SearchFilters) {
     this.query = filters.query ?? '';
     this.country = filters.country ?? '';
@@ -304,5 +323,13 @@ export class ResultsComponent implements OnInit {
     if (!res.ok && res.reason === 'AUTH_REQUIRED') {
       this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
     }
+  }
+
+  logout() {
+    this.auth.logout().subscribe(() => this.router.navigateByUrl('/'));
+  }
+
+  getReturnUrl(): string {
+    return this.router.url || '/';
   }
 }
