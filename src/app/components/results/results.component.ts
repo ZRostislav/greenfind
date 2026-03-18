@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import {
   AiOverview,
+  ImageResult,
   KnowledgeGraph,
   KnowledgeGraphFact,
   KnowledgeGraphRelation,
@@ -66,6 +67,7 @@ export class ResultsComponent implements OnInit {
   pagination$: Observable<any>;
   knowledgeGraph$: Observable<KnowledgeGraph | null>;
   aiOverview$: Observable<AiOverview | null>;
+  imageResults$: Observable<ImageResult[]>;
   savedLinks$: Observable<SavedLink[]>;
   user$: Observable<User | null>;
 
@@ -105,23 +107,24 @@ export class ResultsComponent implements OnInit {
     this.pagination$ = this.searchService.pagination$;
     this.knowledgeGraph$ = this.searchService.knowledgeGraph$;
     this.aiOverview$ = this.searchService.aiOverview$;
+    this.imageResults$ = this.searchService.imageResults$;
     this.savedLinks$ = this.savedLinks.links$;
     this.user$ = this.authState.user$;
   }
 
   ngOnInit() {
+    const filtersFromRoute = this.parseFiltersFromRoute();
     const savedFilters = this.searchService.getCurrentFilters();
-    this.patchFromFilters(savedFilters);
+    const hasQueryInRoute = !!filtersFromRoute.query;
 
-    const queryFromRoute = this.route.snapshot.queryParamMap.get('q')?.trim() ?? '';
-    if (queryFromRoute) {
-      this.query = queryFromRoute;
-    }
+    this.patchFromFilters(hasQueryInRoute ? filtersFromRoute : savedFilters);
 
     const shouldRunInitialSearch =
       !!this.query &&
       !this.searchService.isLoading() &&
-      (!this.searchService.hasResults() || this.query !== savedFilters.query);
+      (!this.searchService.hasResults() ||
+        this.query !== savedFilters.query ||
+        JSON.stringify(filtersFromRoute) !== JSON.stringify(savedFilters));
 
     if (shouldRunInitialSearch) {
       this.doSearch();
@@ -135,8 +138,7 @@ export class ResultsComponent implements OnInit {
     this.searchService.search(payload);
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { q: payload.query },
-      queryParamsHandling: 'merge',
+      queryParams: this.buildQueryParams(payload),
       replaceUrl: true,
     });
   }
@@ -256,6 +258,10 @@ export class ResultsComponent implements OnInit {
     return source?.link || `${index}`;
   }
 
+  trackByImageResult(index: number, item: ImageResult): string {
+    return item?.link || `${index}`;
+  }
+
   private patchFromFilters(filters: SearchFilters) {
     this.query = filters.query ?? '';
     this.country = filters.country ?? '';
@@ -304,6 +310,11 @@ export class ResultsComponent implements OnInit {
     const currentFilters = this.searchService.getCurrentFilters();
     const newFilters = { ...currentFilters, page };
     this.searchService.search(newFilters);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: this.buildQueryParams(newFilters),
+      replaceUrl: true,
+    });
   }
 
   searchRelated(query: string) {
@@ -331,5 +342,58 @@ export class ResultsComponent implements OnInit {
 
   getReturnUrl(): string {
     return this.router.url || '/';
+  }
+
+  private parseFiltersFromRoute(): SearchFilters {
+    const qp = this.route.snapshot.queryParamMap;
+    const split = (key: string): string[] | undefined => {
+      const value = qp.get(key)?.trim();
+      if (!value) return undefined;
+      return value
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
+    };
+
+    const pageRaw = Number(qp.get('page'));
+    const page = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
+
+    return {
+      query: qp.get('q')?.trim() || '',
+      country: qp.get('country')?.trim().toLowerCase() || undefined,
+      city: qp.get('city')?.trim() || undefined,
+      site: qp.get('site')?.trim() || undefined,
+      similar: qp.get('similar')?.trim() || undefined,
+      exclude: split('exclude'),
+      exact: split('exact'),
+      fileTypes: split('fileTypes'),
+      page,
+    };
+  }
+
+  private buildQueryParams(filters: SearchFilters): Params {
+    const clean = (value?: string | null): string | undefined => {
+      const normalized = (value || '').trim();
+      return normalized || undefined;
+    };
+
+    const join = (values?: string[]): string | undefined => {
+      if (!values?.length) return undefined;
+      const normalized = values.map((item) => item.trim()).filter((item) => item.length > 0);
+      if (!normalized.length) return undefined;
+      return Array.from(new Set(normalized)).join(',');
+    };
+
+    return {
+      q: clean(filters.query),
+      country: clean(filters.country),
+      city: clean(filters.city),
+      site: clean(filters.site),
+      similar: clean(filters.similar),
+      exclude: join(filters.exclude),
+      exact: join(filters.exact),
+      fileTypes: join(filters.fileTypes),
+      page: (filters.page || 1) > 1 ? String(filters.page) : undefined,
+    };
   }
 }

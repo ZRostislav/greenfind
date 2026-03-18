@@ -59,6 +59,13 @@ export interface AiOverview {
   sources: AiOverviewSource[];
 }
 
+export interface ImageResult {
+  title: string | null;
+  source: string | null;
+  thumbnail: string;
+  link: string;
+}
+
 const FILTERS_STORAGE_KEY = 'greenfind.search-filters';
 
 @Injectable({
@@ -75,6 +82,7 @@ export class SearchService {
   private _pagination = new BehaviorSubject<any>(null);
   private _knowledgeGraph = new BehaviorSubject<KnowledgeGraph | null>(null);
   private _aiOverview = new BehaviorSubject<AiOverview | null>(null);
+  private _imageResults = new BehaviorSubject<ImageResult[]>([]);
 
   results$ = this._results.asObservable();
   loading$ = this._loading.asObservable();
@@ -84,6 +92,7 @@ export class SearchService {
   pagination$ = this._pagination.asObservable();
   knowledgeGraph$ = this._knowledgeGraph.asObservable();
   aiOverview$ = this._aiOverview.asObservable();
+  imageResults$ = this._imageResults.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -120,6 +129,7 @@ export class SearchService {
           this._relatedSearches.next(res.related_searches || []);
           this._knowledgeGraph.next(this.normalizeKnowledgeGraph(res.knowledge_graph));
           this._aiOverview.next(this.normalizeAiOverview(res.ai_overview));
+          this._imageResults.next(this.normalizeImageResults(res.image_results));
           this._pagination.next(res.pagination || null);
         }),
         catchError((err) => {
@@ -129,9 +139,11 @@ export class SearchService {
           this._relatedSearches.next([]);
           this._knowledgeGraph.next(null);
           this._aiOverview.next(null);
+          this._imageResults.next([]);
           this._pagination.next(null);
           return of({
             results: [],
+            image_results: [],
             related_searches: [],
             knowledge_graph: null,
             ai_overview: null,
@@ -166,8 +178,28 @@ export class SearchService {
     this._relatedSearches.next([]);
     this._knowledgeGraph.next(null);
     this._aiOverview.next(null);
+    this._imageResults.next([]);
     this._pagination.next(null);
     this._error.next(null);
+  }
+
+  private normalizeImageResults(value: any): ImageResult[] {
+    if (!Array.isArray(value)) return [];
+
+    return value
+      .map((item: any) => {
+        const thumbnail = this.normalizeText(item?.thumbnail);
+        const link = this.normalizeText(item?.link);
+        if (!thumbnail || !link) return null;
+
+        return {
+          title: this.normalizeText(item?.title) ?? null,
+          source: this.normalizeText(item?.source) ?? null,
+          thumbnail,
+          link,
+        };
+      })
+      .filter((item: ImageResult | null): item is ImageResult => item !== null);
   }
 
   private normalizeAiOverview(value: any): AiOverview | null {

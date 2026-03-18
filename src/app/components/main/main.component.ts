@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Params, Router, RouterLink } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
 import emojiFlags from 'emoji-flags';
 import {
@@ -449,7 +449,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
     this.searchService.search(payload);
     this.router.navigate(['/results'], {
-      queryParams: { q: payload.query },
+      queryParams: this.buildResultQueryParams(payload),
     });
   }
 
@@ -561,5 +561,31 @@ export class MainComponent implements OnInit, OnDestroy {
     } catch {
       return url;
     }
+  }
+
+  private buildResultQueryParams(filters: SearchFilters): Params {
+    const clean = (value?: string | null): string | undefined => {
+      const normalized = (value || '').trim();
+      return normalized || undefined;
+    };
+
+    const join = (values?: string[]): string | undefined => {
+      if (!values?.length) return undefined;
+      const normalized = values.map((item) => item.trim()).filter((item) => item.length > 0);
+      if (!normalized.length) return undefined;
+      return Array.from(new Set(normalized)).join(',');
+    };
+
+    return {
+      q: clean(filters.query),
+      country: clean(filters.country),
+      city: clean(filters.city),
+      site: clean(filters.site),
+      similar: clean(filters.similar),
+      exclude: join(filters.exclude),
+      exact: join(filters.exact),
+      fileTypes: join(filters.fileTypes),
+      page: (filters.page || 1) > 1 ? String(filters.page) : undefined,
+    };
   }
 }
