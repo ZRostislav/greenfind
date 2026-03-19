@@ -139,7 +139,13 @@ export class SearchService {
       .pipe(
         tap((res) => {
           this._results.next(res.results || []);
-          this._relatedSearches.next(res.related_searches || []);
+          const incomingRelated = res.related_searches || [];
+          if (appendImages && !incomingRelated.length) {
+            // Keep initial related searches visible during image infinite-scroll pages.
+            this._relatedSearches.next(this._relatedSearches.value);
+          } else {
+            this._relatedSearches.next(incomingRelated);
+          }
           this._knowledgeGraph.next(this.normalizeKnowledgeGraph(res.knowledge_graph));
           this._aiOverview.next(this.normalizeAiOverview(res.ai_overview));
           const incomingImages = this.normalizeImageResults(res.image_results);

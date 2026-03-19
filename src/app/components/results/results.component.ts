@@ -76,7 +76,11 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('imageLoadSentinel') imageLoadSentinel?: ElementRef<HTMLElement>;
   private imageObserver: IntersectionObserver | null = null;
   private paginationSub?: Subscription;
+  private imageResultsSub?: Subscription;
   private currentPagination: any = null;
+  private imageResultCount = 0;
+  private pendingAppendBaselineCount: number | null = null;
+  private hasMoreImagePages = true;
 
   query = '';
   mode: 'web' | 'images' = 'web';
@@ -121,6 +125,23 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.paginationSub = this.pagination$.subscribe((value) => {
       this.currentPagination = value;
     });
+    this.imageResultsSub = this.imageResults$.subscribe((items) => {
+      const nextCount = items.length;
+
+      if (this.pendingAppendBaselineCount !== null) {
+        // If count did not grow after requesting a new page, we reached the end.
+        this.hasMoreImagePages = nextCount > this.pendingAppendBaselineCount;
+        this.pendingAppendBaselineCount = null;
+      }
+
+      this.imageResultCount = nextCount;
+
+      // The sentinel is rendered under *ngIf, so it may appear after view init.
+      // Re-bind observer when image results arrive in image mode.
+      if (this.mode === 'images' && nextCount > 0) {
+        setTimeout(() => this.setupImageInfiniteScroll(), 0);
+      }
+    });
   }
 
   ngOnInit() {
@@ -149,12 +170,15 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.imageObserver?.disconnect();
     this.paginationSub?.unsubscribe();
+    this.imageResultsSub?.unsubscribe();
   }
 
   doSearch() {
     const payload = this.buildPayload();
     if (!payload) return;
 
+    this.hasMoreImagePages = true;
+    this.pendingAppendBaselineCount = null;
     this.searchService.search(payload);
     this.router.navigate([], {
       relativeTo: this.route,
@@ -469,7 +493,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!entry?.isIntersecting) return;
         if (this.mode !== 'images') return;
         if (this.searchService.isLoading()) return;
-        if (!this.currentPagination?.next) return;
+        if (!this.currentPagination?.next && !this.hasMoreImagePages) return;
 
         const currentFilters = this.searchService.getCurrentFilters();
         const nextFilters: SearchFilters = {
@@ -478,6 +502,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
           page: (currentFilters.page || 1) + 1,
         };
 
+        this.pendingAppendBaselineCount = this.imageResultCount;
         this.searchService.search(nextFilters, { appendImages: true });
         this.router.navigate([], {
           relativeTo: this.route,
