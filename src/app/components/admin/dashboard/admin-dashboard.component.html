@@ -1,0 +1,225 @@
+<div class="min-h-screen w-full px-4 py-8 sm:px-6 lg:px-8">
+  <div class="max-w-[1500px] mx-auto space-y-6">
+    <header class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ui-green-light">
+            <lucide-icon [img]="ShieldIcon" [size]="14"></lucide-icon>
+            Admin panel
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight mt-2">Analytics & Control</h1>
+          <p class="text-white/50 text-sm mt-1">
+            View search analytics, export reports, and manage user accounts.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            (click)="reloadAll()"
+            class="h-10 px-4 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 text-white/80 text-sm font-bold inline-flex items-center gap-2"
+          >
+            <lucide-icon [img]="RefreshCcwIcon" [size]="14"></lucide-icon>
+            Refresh
+          </button>
+          <button
+            (click)="goToResults()"
+            class="h-10 px-4 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 text-white/80 text-sm font-bold"
+          >
+            Back to search
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div
+          *ngFor="let card of summaryCards(); trackBy: trackByLabel"
+          class="rounded-2xl border border-white/10 bg-black/20 px-4 py-3"
+        >
+          <div class="text-white/45 text-[11px] uppercase tracking-[0.14em]">{{ card.label }}</div>
+          <div class="text-white text-2xl font-black mt-1">{{ card.value }}</div>
+        </div>
+      </div>
+    </header>
+
+    <div *ngIf="error()" class="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-200 text-sm">
+      <div class="inline-flex items-center gap-2">
+        <lucide-icon [img]="AlertCircleIcon" [size]="16"></lucide-icon>
+        {{ error() }}
+      </div>
+    </div>
+
+    <section class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6 space-y-4">
+      <div class="flex flex-wrap items-end gap-3">
+        <div class="flex flex-col">
+          <label class="text-xs text-white/50 mb-1">From</label>
+          <input
+            type="date"
+            [(ngModel)]="fromDate"
+            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-white/85"
+          />
+        </div>
+        <div class="flex flex-col">
+          <label class="text-xs text-white/50 mb-1">To</label>
+          <input
+            type="date"
+            [(ngModel)]="toDate"
+            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-white/85"
+          />
+        </div>
+        <button
+          (click)="onFilterApply()"
+          class="h-10 px-4 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 text-white/80 text-sm font-bold"
+        >
+          Apply range
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60 mb-3">Top queries</h3>
+          <div class="space-y-2 max-h-72 overflow-auto custom-scrollbar pr-1">
+            <div *ngFor="let item of overview()?.topQueries || []" class="flex items-center justify-between gap-3 text-sm">
+              <span class="text-white/80 truncate">{{ item.query }}</span>
+              <span class="text-ui-green-light font-bold">{{ item.count }}</span>
+            </div>
+            <div *ngIf="!(overview()?.topQueries || []).length && !loadingOverview()" class="text-white/40 text-xs">
+              No data
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60 mb-3">Daily trend</h3>
+          <div class="space-y-2 max-h-72 overflow-auto custom-scrollbar pr-1">
+            <div *ngFor="let item of overview()?.dailyTrend || []" class="flex items-center justify-between gap-3 text-sm">
+              <span class="text-white/80">{{ item.day | date: 'MMM d' }}</span>
+              <span class="text-ui-green-light font-bold">{{ item.count }}</span>
+            </div>
+            <div *ngIf="!(overview()?.dailyTrend || []).length && !loadingOverview()" class="text-white/40 text-xs">
+              No data
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60 mb-3">Top sites</h3>
+          <div class="space-y-2 max-h-72 overflow-auto custom-scrollbar pr-1">
+            <div *ngFor="let item of overview()?.topSites || []" class="flex items-center justify-between gap-3 text-sm">
+              <span class="text-white/80 truncate">{{ item.domain }}</span>
+              <span class="text-ui-green-light font-bold">{{ item.count }}</span>
+            </div>
+            <div *ngIf="!(overview()?.topSites || []).length && !loadingOverview()" class="text-white/40 text-xs">
+              No data
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="text-lg font-black text-white tracking-tight">Report export</h2>
+        <div class="flex flex-wrap items-center gap-2">
+          <select
+            [(ngModel)]="reportType"
+            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85"
+          >
+            <option value="search_stats">Search stats</option>
+            <option value="top_queries">Top queries</option>
+            <option value="daily_trend">Daily trend</option>
+            <option value="top_sites">Top sites</option>
+          </select>
+          <select
+            [(ngModel)]="reportFormat"
+            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85"
+          >
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+          </select>
+          <button
+            (click)="exportReport()"
+            [disabled]="exporting()"
+            class="h-10 px-4 rounded-xl border border-ui-green/40 bg-ui-green/20 text-ui-green-light hover:bg-ui-green/30 text-sm font-black disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+          >
+            <lucide-icon [img]="DownloadIcon" [size]="14"></lucide-icon>
+            {{ exporting() ? 'Exporting...' : 'Export' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+        <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60 mb-3">Recent exports</h3>
+        <div class="space-y-2 max-h-56 overflow-auto custom-scrollbar pr-1">
+          <div *ngFor="let report of reports(); trackBy: trackByReport" class="text-sm border border-white/10 rounded-xl px-3 py-2 bg-white/[0.02]">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-white/85">{{ report.fileName || report.reportType }}</span>
+              <span class="text-white/45">{{ report.createdAt | date: 'MMM d, HH:mm' }}</span>
+            </div>
+            <div class="text-xs text-white/45 mt-1">
+              {{ report.reportType }} • {{ report.outputFormat }} • {{ report.status }}
+            </div>
+          </div>
+          <div *ngIf="!reports().length && !loadingReports()" class="text-white/40 text-xs">No exports yet</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="text-lg font-black text-white tracking-tight">Users</h2>
+        <div class="flex items-center gap-2 rounded-xl border border-white/20 bg-black/25 px-3 h-10">
+          <lucide-icon [img]="SearchIcon" [size]="14" class="text-white/40"></lucide-icon>
+          <input
+            [(ngModel)]="userQuery"
+            (keydown.enter)="onUserSearch()"
+            placeholder="Search by username/email"
+            class="bg-transparent outline-none text-sm text-white/85 placeholder:text-white/35 w-56"
+          />
+          <button
+            (click)="onUserSearch()"
+            class="text-xs font-bold text-white/70 hover:text-white"
+          >
+            Find
+          </button>
+        </div>
+      </div>
+
+      <ng-container *ngIf="me$ | async as me">
+        <div class="space-y-2">
+          <div
+            *ngFor="let user of users(); trackBy: trackByUser"
+            class="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3"
+          >
+            <div class="min-w-0 flex-1">
+              <div class="text-white font-bold truncate">{{ user.username }} <span class="text-white/40 text-xs">({{ user.role }})</span></div>
+              <div class="text-white/45 text-xs truncate">{{ user.email }}</div>
+              <div class="text-white/45 text-xs mt-1">
+                Searches: {{ user.searchesCount }} • Clicks: {{ user.clicksCount }}
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                *ngIf="user.id !== me.id"
+                (click)="toggleUserRole(user)"
+                [disabled]="isRoleUpdating(user.id)"
+                class="h-9 px-3 rounded-xl border border-white/25 bg-white/10 text-white/80 hover:bg-white/20 text-xs font-black disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ isRoleUpdating(user.id) ? 'Saving...' : (user.role === 'admin' ? 'Make user' : 'Make admin') }}
+              </button>
+              <button
+                *ngIf="user.role !== 'admin'"
+                (click)="deleteUser(user)"
+                [disabled]="isDeleting(user.id)"
+                class="h-9 px-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20 text-xs font-black disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+              >
+                <lucide-icon [img]="Trash2Icon" [size]="13"></lucide-icon>
+                {{ isDeleting(user.id) ? 'Deleting...' : 'Delete' }}
+              </button>
+            </div>
+          </div>
+          <div *ngIf="!users().length && !loadingUsers()" class="text-white/40 text-xs">No users found.</div>
+        </div>
+      </ng-container>
+    </section>
+  </div>
+</div>

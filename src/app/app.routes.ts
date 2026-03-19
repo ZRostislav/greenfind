@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { MainComponent } from './components/main/main.component';
 import { ResultsComponent } from './components/results/results.component';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: MainComponent },
@@ -55,6 +56,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./components/user/history/history.component').then((m) => m.HistoryComponent),
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () =>
+      import('./components/admin/dashboard/admin-dashboard.component').then(
+        (m) => m.AdminDashboardComponent,
+      ),
   },
   { path: '**', redirectTo: '' },
 ];

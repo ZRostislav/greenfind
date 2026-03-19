@@ -70,6 +70,17 @@ export interface ImageResult {
   link: string;
 }
 
+export interface SearchTrackingMeta {
+  searchId: number;
+  historyId: number;
+}
+
+export interface SearchClickPayload {
+  url: string;
+  title?: string | null;
+  position?: number | null;
+}
+
 const FILTERS_STORAGE_KEY = 'greenfind.search-filters';
 
 @Injectable({
@@ -87,6 +98,7 @@ export class SearchService {
   private _knowledgeGraph = new BehaviorSubject<KnowledgeGraph | null>(null);
   private _aiOverview = new BehaviorSubject<AiOverview | null>(null);
   private _imageResults = new BehaviorSubject<ImageResult[]>([]);
+  private _tracking = new BehaviorSubject<SearchTrackingMeta | null>(null);
 
   results$ = this._results.asObservable();
   loading$ = this._loading.asObservable();
@@ -97,6 +109,7 @@ export class SearchService {
   knowledgeGraph$ = this._knowledgeGraph.asObservable();
   aiOverview$ = this._aiOverview.asObservable();
   imageResults$ = this._imageResults.asObservable();
+  tracking$ = this._tracking.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -126,6 +139,7 @@ export class SearchService {
       this._results.next([]);
       this._relatedSearches.next([]);
       this._pagination.next(null);
+      this._tracking.next(null);
       return;
     }
 
@@ -157,6 +171,20 @@ export class SearchService {
       .get<any>(`${this.apiUrl}/search`, { params })
       .pipe(
         tap((res) => {
+          const tracking =
+            Number(res?.tracking?.searchId) > 0 && Number(res?.tracking?.historyId) > 0
+              ? {
+                  searchId: Number(res.tracking.searchId),
+                  historyId: Number(res.tracking.historyId),
+                }
+              : null;
+
+          if (tracking) {
+            this._tracking.next(tracking);
+          } else if (!appendImages) {
+            this._tracking.next(null);
+          }
+
           const incomingWebResults = Array.isArray(res.results) ? res.results : [];
           const filteredWebResults = this.isAdultFilterEnabled()
             ? incomingWebResults.filter((item: any) => !this.isAdultCandidate(item))
@@ -265,7 +293,27 @@ export class SearchService {
     this._aiOverview.next(null);
     this._imageResults.next([]);
     this._pagination.next(null);
+    this._tracking.next(null);
     this._error.next(null);
+  }
+
+  trackResultClick(payload: SearchClickPayload): void {
+    const url = this.normalizeText(payload.url);
+    if (!url) return;
+
+    const tracking = this._tracking.value;
+    const body = {
+      url,
+      title: this.normalizeText(payload.title || undefined) ?? null,
+      position: Number.isFinite(Number(payload.position)) ? Number(payload.position) : null,
+      searchId: tracking?.searchId ?? null,
+      historyId: tracking?.historyId ?? null,
+    };
+
+    this.http
+      .post(`${this.apiUrl}/search/click`, body)
+      .pipe(catchError(() => of(null)))
+      .subscribe();
   }
 
   private normalizeImageResults(value: any): ImageResult[] {

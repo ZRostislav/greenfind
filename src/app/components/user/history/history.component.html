@@ -159,6 +159,24 @@
                   >
                     filetype:{{ type }}
                   </span>
+                  <span
+                    *ngIf="(item.clicksCount || 0) > 0"
+                    class="px-2 py-0.5 rounded-lg border border-ui-green/25 bg-ui-green/10 text-[10px] font-bold text-ui-green-light uppercase"
+                  >
+                    clicks: {{ item.clicksCount }}
+                  </span>
+                  <span
+                    *ngFor="let site of (item.clickedSites || []).slice(0, 4)"
+                    class="px-2 py-0.5 rounded-lg border border-white/20 bg-white/10 text-[10px] font-bold text-white/75"
+                  >
+                    ↗ {{ site }}
+                  </span>
+                  <span
+                    *ngIf="(item.clickedSites || []).length > 4"
+                    class="px-2 py-0.5 rounded-lg border border-white/20 bg-white/10 text-[10px] font-bold text-white/75"
+                  >
+                    +{{ (item.clickedSites || []).length - 4 }} more
+                  </span>
                 </div>
               </div>
 

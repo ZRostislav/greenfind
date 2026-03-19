@@ -31,6 +31,7 @@ import {
   LogOutIcon,
   HistoryIcon,
   UserIcon,
+  Shield,
 } from 'lucide-angular';
 import { SavedLink, SavedLinksService } from '../../services/saved-links.service';
 import { AuthService } from '../../services/auth.service';
@@ -60,6 +61,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly LogOutIcon = LogOutIcon;
   readonly HistoryIcon = HistoryIcon;
   readonly UserIcon = UserIcon;
+  readonly ShieldIcon = Shield;
 
   results$: Observable<any[]>;
   loading$: Observable<boolean>;
@@ -421,7 +423,12 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   guardExternalNavigation(
-    payload: { url?: string | null; title?: string | null; snippet?: string | null; source?: string | null },
+    payload: {
+      url?: string | null;
+      title?: string | null;
+      snippet?: string | null;
+      source?: string | null;
+    },
     event?: MouseEvent,
   ): boolean {
     if (!this.searchService.shouldBlockNavigation(payload)) return true;
@@ -430,6 +437,27 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     event?.stopPropagation();
     window.alert('Blocked by 18+ safety mode.');
     return false;
+  }
+
+  handleExternalClick(
+    payload: {
+      url?: string | null;
+      title?: string | null;
+      snippet?: string | null;
+      source?: string | null;
+      position?: number | null;
+    },
+    event?: MouseEvent,
+  ) {
+    if (!this.guardExternalNavigation(payload, event)) return;
+
+    if (payload.url) {
+      this.searchService.trackResultClick({
+        url: payload.url,
+        title: payload.title ?? null,
+        position: payload.position ?? null,
+      });
+    }
   }
 
   logout() {

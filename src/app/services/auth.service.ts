@@ -12,6 +12,8 @@ export interface SearchHistoryItem {
   region: string | null;
   language: string | null;
   siteFilter: string | null;
+  clicksCount?: number;
+  clickedSites?: string[];
   createdAt: string;
 }
 

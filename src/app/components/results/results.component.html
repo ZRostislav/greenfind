@@ -102,6 +102,14 @@
               History
             </a>
             <a
+              *ngIf="user.role === 'admin'"
+              routerLink="/admin"
+              class="px-3 py-2 text-xs font-black text-ui-green-light hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-1.5"
+            >
+              <lucide-icon [img]="ShieldIcon" [size]="14"></lucide-icon>
+              Admin
+            </a>
+            <a
               routerLink="/me"
               [queryParams]="{ returnUrl: getReturnUrl() }"
               class="px-3 py-2 text-xs font-black text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-1.5"
@@ -342,7 +350,7 @@
             *ngFor="let source of aiOverview.sources; trackBy: trackByAiSource"
             [href]="source.link"
             target="_blank"
-            (click)="guardExternalNavigation({ url: source.link, title: source.title }, $event)"
+            (click)="handleExternalClick({ url: source.link, title: source.title }, $event)"
             class="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-white/30 transition-colors"
           >
             {{ source.title }}
@@ -429,7 +437,7 @@
                 <a
                   [href]="item.link"
                   target="_blank"
-                  (click)="guardExternalNavigation({ url: item.link, title: item.title, snippet: item.snippet }, $event)"
+                  (click)="handleExternalClick({ url: item.link, title: item.title, snippet: item.snippet, position: item.position }, $event)"
                   class="text-white group-hover:text-ui-green transition-colors underline-offset-4 decoration-ui-green/0 group-hover:decoration-ui-green/30 underline"
                 >
                   {{ item.title }}
@@ -561,7 +569,7 @@
                   *ngFor="let person of kg.people_also_search_for; trackBy: trackByRelation"
                   [href]="person.link || null"
                   [attr.target]="person.link ? '_blank' : null"
-                  (click)="guardExternalNavigation({ url: person.link, title: person.name, source: person.type }, $event)"
+                  (click)="handleExternalClick({ url: person.link, title: person.name, source: person.type }, $event)"
                   class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-white/70 transition-colors hover:border-white/20 hover:text-white"
                 >
                   <img
@@ -605,7 +613,7 @@
                   *ngFor="let source of kg.sources; trackBy: trackBySource"
                   [href]="source"
                   target="_blank"
-                  (click)="guardExternalNavigation({ url: source }, $event)"
+                  (click)="handleExternalClick({ url: source }, $event)"
                   class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-white/65 hover:text-white hover:border-white/20 transition-colors"
                 >
                   {{ source }}
@@ -668,7 +676,7 @@
         <a
           [href]="activeImage.sourceLink || activeImage.link"
           target="_blank"
-          (click)="guardExternalNavigation({ url: activeImage.sourceLink || activeImage.link, title: activeImage.title, source: activeImage.source }, $event)"
+          (click)="handleExternalClick({ url: activeImage.sourceLink || activeImage.link, title: activeImage.title, source: activeImage.source }, $event)"
           class="h-10 px-4 rounded-xl border border-white/20 bg-white/5 text-white/80 hover:text-white hover:bg-white/10 transition-colors flex items-center"
         >
           Open source

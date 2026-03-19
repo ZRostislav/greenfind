@@ -8,6 +8,7 @@ export interface User {
   authProvider: 'local' | 'google' | 'github' | string;
   emailVerified: boolean;
   allowAdultContent?: boolean;
+  role?: 'user' | 'admin' | string;
   createdAt: string;
 }
 
