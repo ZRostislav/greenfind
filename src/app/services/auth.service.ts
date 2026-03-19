@@ -123,6 +123,14 @@ export class AuthService {
       .pipe(map((res) => res.items || []));
   }
 
+  deleteSearchHistoryItem(historyId: number): Observable<{ deleted: boolean }> {
+    return this.http.delete<{ deleted: boolean }>(`${this.apiUrl}/user/search-history/${historyId}`);
+  }
+
+  clearSearchHistory(): Observable<{ deleted: number }> {
+    return this.http.delete<{ deleted: number }>(`${this.apiUrl}/user/search-history`);
+  }
+
   clearSession() {
     this.state.clearSession();
   }
