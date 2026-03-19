@@ -62,6 +62,9 @@ export class ProfileComponent {
 
   readonly user$ = this.authState.user$;
   returnUrl = '/';
+  allowAdultContent = false;
+  updatingAdultContent = false;
+  adultContentError: string | null = null;
   showDeleteConfirm = false;
   deletingAccount = false;
   deleteError: string | null = null;
@@ -69,6 +72,33 @@ export class ProfileComponent {
   constructor() {
     const rawReturnUrl = (this.route.snapshot.queryParamMap.get('returnUrl') || '').trim();
     this.returnUrl = rawReturnUrl.startsWith('/') ? rawReturnUrl : '/';
+    this.allowAdultContent = Boolean(this.authState.user?.allowAdultContent);
+
+    this.user$.subscribe((user) => {
+      this.allowAdultContent = Boolean(user?.allowAdultContent);
+    });
+  }
+
+  toggleAdultContent() {
+    if (this.updatingAdultContent) return;
+
+    this.adultContentError = null;
+    const nextValue = !this.allowAdultContent;
+    const prevValue = this.allowAdultContent;
+
+    this.allowAdultContent = nextValue;
+    this.updatingAdultContent = true;
+
+    this.auth.updatePreferences({ allowAdultContent: nextValue }).subscribe({
+      next: () => {
+        this.updatingAdultContent = false;
+      },
+      error: () => {
+        this.allowAdultContent = prevValue;
+        this.updatingAdultContent = false;
+        this.adultContentError = 'Failed to update 18+ setting. Please try again.';
+      },
+    });
   }
 
   logout() {

@@ -122,6 +122,44 @@
                 <div class="text-white/40 text-xs mt-0.5">
                   {{ item.createdDate | date: 'HH:mm' }}
                 </div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  <span
+                    *ngIf="item.region"
+                    class="px-2 py-0.5 rounded-lg border border-emerald-400/25 bg-emerald-500/10 text-[10px] font-bold text-emerald-300 uppercase"
+                  >
+                    region: {{ item.region }}
+                  </span>
+                  <span
+                    *ngIf="item.parsed.site || item.siteFilter"
+                    class="px-2 py-0.5 rounded-lg border border-blue-400/25 bg-blue-500/10 text-[10px] font-bold text-blue-300"
+                  >
+                    site: {{ item.parsed.site || item.siteFilter }}
+                  </span>
+                  <span
+                    *ngIf="item.parsed.similar"
+                    class="px-2 py-0.5 rounded-lg border border-cyan-400/25 bg-cyan-500/10 text-[10px] font-bold text-cyan-200"
+                  >
+                    related: {{ item.parsed.similar }}
+                  </span>
+                  <span
+                    *ngFor="let word of item.parsed.exact"
+                    class="px-2 py-0.5 rounded-lg border border-white/20 bg-white/10 text-[10px] font-bold text-white/75"
+                  >
+                    "{{ word }}"
+                  </span>
+                  <span
+                    *ngFor="let word of item.parsed.exclude"
+                    class="px-2 py-0.5 rounded-lg border border-red-400/25 bg-red-500/10 text-[10px] font-bold text-red-200"
+                  >
+                    -{{ word }}
+                  </span>
+                  <span
+                    *ngFor="let type of item.parsed.fileTypes"
+                    class="px-2 py-0.5 rounded-lg border border-purple-400/25 bg-purple-500/10 text-[10px] font-bold text-purple-200 uppercase"
+                  >
+                    filetype:{{ type }}
+                  </span>
+                </div>
               </div>
 
               <button

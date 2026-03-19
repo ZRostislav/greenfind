@@ -125,6 +125,47 @@
               }}</span>
             </div>
           </div>
+
+          <div
+            class="group rounded-2xl border border-white/10 bg-white/5 p-5 hover:bg-white/10 transition-all duration-300 md:col-span-2"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-3 mb-1">
+                  <lucide-icon
+                    [img]="ShieldIcon"
+                    [size]="16"
+                    class="text-white/30 group-hover:text-ui-green transition-colors"
+                  ></lucide-icon>
+                  <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
+                    >18+ Content</span
+                  >
+                </div>
+                <div class="text-white font-bold text-lg">
+                  {{ allowAdultContent ? 'Allowed (18+)' : 'Blocked (Safe mode)' }}
+                </div>
+                <p class="text-white/45 text-sm mt-1">
+                  When blocked, 18+ results are hidden and opening suspicious links is denied.
+                </p>
+                <p *ngIf="adultContentError" class="text-red-300 text-sm mt-2">
+                  {{ adultContentError }}
+                </p>
+              </div>
+
+              <button
+                (click)="toggleAdultContent()"
+                [disabled]="updatingAdultContent"
+                class="h-11 px-4 rounded-xl border font-black text-xs uppercase tracking-wider transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                [ngClass]="
+                  allowAdultContent
+                    ? 'border-amber-400/35 bg-amber-500/15 text-amber-200 hover:bg-amber-500/25'
+                    : 'border-ui-green/35 bg-ui-green/15 text-ui-green-light hover:bg-ui-green/25'
+                "
+              >
+                {{ updatingAdultContent ? 'Saving...' : (allowAdultContent ? 'Disable block' : 'Enable block') }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div

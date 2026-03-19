@@ -7,6 +7,7 @@ export interface User {
   email: string;
   authProvider: 'local' | 'google' | 'github' | string;
   emailVerified: boolean;
+  allowAdultContent?: boolean;
   createdAt: string;
 }
 
@@ -23,6 +24,10 @@ export class AuthStateService {
 
   get accessToken(): string | null {
     return this.tokenSubject.value;
+  }
+
+  get user(): User | null {
+    return this.userSubject.value;
   }
 
   isAuthenticated(): boolean {
@@ -65,4 +70,3 @@ export class AuthStateService {
     return window.localStorage.getItem(TOKEN_KEY);
   }
 }
-

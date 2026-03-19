@@ -420,6 +420,18 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  guardExternalNavigation(
+    payload: { url?: string | null; title?: string | null; snippet?: string | null; source?: string | null },
+    event?: MouseEvent,
+  ): boolean {
+    if (!this.searchService.shouldBlockNavigation(payload)) return true;
+
+    event?.preventDefault();
+    event?.stopPropagation();
+    window.alert('Blocked by 18+ safety mode.');
+    return false;
+  }
+
   logout() {
     this.auth.logout().subscribe(() => this.router.navigateByUrl('/'));
   }

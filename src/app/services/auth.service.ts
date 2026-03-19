@@ -111,6 +111,13 @@ export class AuthService {
     );
   }
 
+  updatePreferences(payload: { allowAdultContent: boolean }): Observable<User> {
+    return this.http.patch<{ user: User }>(`${this.apiUrl}/user/preferences`, payload).pipe(
+      tap((res) => this.state.setUser(res.user)),
+      map((res) => res.user),
+    );
+  }
+
   fetchSearchHistory(params?: { limit?: number; offset?: number }): Observable<SearchHistoryItem[]> {
     let httpParams = new HttpParams();
     if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));

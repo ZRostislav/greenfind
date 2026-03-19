@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, of } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
 import { environment } from '../environments/environment';
+import { AuthStateService } from './auth-state.service';
 
 export interface SearchFilters {
   query: string;
@@ -97,7 +98,24 @@ export class SearchService {
   aiOverview$ = this._aiOverview.asObservable();
   imageResults$ = this._imageResults.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authState: AuthStateService,
+  ) {}
+
+  isAdultFilterEnabled(): boolean {
+    return !Boolean(this.authState.user?.allowAdultContent);
+  }
+
+  shouldBlockNavigation(payload: {
+    url?: string | null;
+    title?: string | null;
+    snippet?: string | null;
+    source?: string | null;
+  }): boolean {
+    if (!this.isAdultFilterEnabled()) return false;
+    return this.isAdultCandidate(payload);
+  }
 
   search(filters: SearchFilters, options?: { appendImages?: boolean }): void {
     const normalizedFilters = this.normalizeFilters(filters);
@@ -130,6 +148,7 @@ export class SearchService {
     if (normalizedFilters.mode === 'images' && normalizedFilters.page && normalizedFilters.page > 1) {
       params = params.set('page', String(normalizedFilters.page));
     }
+    params = params.set('safe', this.isAdultFilterEnabled() ? 'active' : 'off');
 
     this._loading.next(true);
     this._error.next(null);
@@ -138,17 +157,54 @@ export class SearchService {
       .get<any>(`${this.apiUrl}/search`, { params })
       .pipe(
         tap((res) => {
-          this._results.next(res.results || []);
-          const incomingRelated = res.related_searches || [];
+          const incomingWebResults = Array.isArray(res.results) ? res.results : [];
+          const filteredWebResults = this.isAdultFilterEnabled()
+            ? incomingWebResults.filter((item: any) => !this.isAdultCandidate(item))
+            : incomingWebResults;
+
+          this._results.next(filteredWebResults);
+
+          const incomingRelatedRaw = Array.isArray(res.related_searches) ? res.related_searches : [];
+          const incomingRelated = this.isAdultFilterEnabled()
+            ? incomingRelatedRaw.filter((item: any) => !this.isAdultText(item?.query))
+            : incomingRelatedRaw;
+
           if (appendImages && !incomingRelated.length) {
             // Keep initial related searches visible during image infinite-scroll pages.
             this._relatedSearches.next(this._relatedSearches.value);
           } else {
             this._relatedSearches.next(incomingRelated);
           }
-          this._knowledgeGraph.next(this.normalizeKnowledgeGraph(res.knowledge_graph));
-          this._aiOverview.next(this.normalizeAiOverview(res.ai_overview));
-          const incomingImages = this.normalizeImageResults(res.image_results);
+          const normalizedKnowledgeGraph = this.normalizeKnowledgeGraph(res.knowledge_graph);
+          const normalizedAiOverview = this.normalizeAiOverview(res.ai_overview);
+
+          if (this.isAdultFilterEnabled()) {
+            const shouldHideKnowledgeGraph =
+              !!normalizedKnowledgeGraph &&
+              this.isAdultCandidate({
+                title: normalizedKnowledgeGraph.title,
+                snippet: normalizedKnowledgeGraph.description,
+                source: normalizedKnowledgeGraph.type,
+                url: normalizedKnowledgeGraph.image,
+              });
+
+            const shouldHideAiOverview =
+              !!normalizedAiOverview &&
+              this.isAdultCandidate({
+                title: normalizedAiOverview.title,
+                snippet: normalizedAiOverview.summary || normalizedAiOverview.points.join(' '),
+                url: normalizedAiOverview.sources?.[0]?.link,
+              });
+
+            this._knowledgeGraph.next(shouldHideKnowledgeGraph ? null : normalizedKnowledgeGraph);
+            this._aiOverview.next(shouldHideAiOverview ? null : normalizedAiOverview);
+          } else {
+            this._knowledgeGraph.next(normalizedKnowledgeGraph);
+            this._aiOverview.next(normalizedAiOverview);
+          }
+          const incomingImages = this.normalizeImageResults(res.image_results).filter(
+            (item) => !this.shouldBlockNavigation(item),
+          );
           if (appendImages) {
             const merged = [...this._imageResults.value, ...incomingImages];
             const deduped = merged.filter(
@@ -422,5 +478,59 @@ export class SearchService {
           .filter((item) => item.length > 0),
       ),
     );
+  }
+
+  private isAdultCandidate(payload: {
+    url?: string | null;
+    title?: string | null;
+    snippet?: string | null;
+    source?: string | null;
+    link?: string | null;
+  }): boolean {
+    const url = payload.url || payload.link || '';
+    return (
+      this.isAdultText(payload.title) ||
+      this.isAdultText(payload.snippet) ||
+      this.isAdultText(payload.source) ||
+      this.isAdultText(url) ||
+      this.isAdultUrl(url)
+    );
+  }
+
+  private isAdultText(value?: string | null): boolean {
+    const text = (value || '').trim().toLowerCase();
+    if (!text) return false;
+
+    const adultKeywords = [
+      'porn',
+      'xxx',
+      'sex',
+      'erotic',
+      'nude',
+      'nudity',
+      'nsfw',
+      'hentai',
+      'onlyfans',
+      'escort',
+      'camgirl',
+      'adult video',
+      'adult content',
+      'порно',
+      'эрот',
+      'секс',
+      'ню',
+      'nsfw',
+      '18+',
+    ];
+
+    return adultKeywords.some((keyword) => text.includes(keyword));
+  }
+
+  private isAdultUrl(value?: string | null): boolean {
+    const url = (value || '').trim().toLowerCase();
+    if (!url) return false;
+
+    const adultDomainHints = ['porn', 'xxx', 'xvideos', 'xnxx', 'xhamster', 'onlyfans', 'redtube'];
+    return adultDomainHints.some((hint) => url.includes(hint));
   }
 }
