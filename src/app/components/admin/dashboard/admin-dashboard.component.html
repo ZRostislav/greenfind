@@ -1,145 +1,309 @@
-<div class="min-h-screen w-full px-4 py-8 sm:px-6 lg:px-8">
-  <div class="max-w-[1500px] mx-auto space-y-6">
-    <header class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6">
-      <div class="flex flex-wrap items-center justify-between gap-4">
+<div class="relative min-h-screen w-full overflow-hidden px-4 py-8 sm:px-6 lg:px-8">
+  <div class="pointer-events-none absolute -top-24 left-[32%] h-72 w-72 rounded-full bg-ui-green-light/20 blur-3xl"></div>
+  <div class="pointer-events-none absolute -left-16 top-[35%] h-64 w-64 rounded-full bg-lime-200/10 blur-3xl"></div>
+  <div class="pointer-events-none absolute -right-20 bottom-16 h-72 w-72 rounded-full bg-emerald-200/10 blur-3xl"></div>
+
+  <div class="relative mx-auto max-w-[1500px] space-y-6">
+    <header class="rounded-[2rem] border border-white/15 bg-[linear-gradient(145deg,rgba(87,200,77,0.26),rgba(8,18,8,0.58))] p-5 shadow-[0_30px_80px_-40px_rgba(87,200,77,0.8)] backdrop-blur-xl sm:p-7">
+      <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ui-green-light">
+          <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/20 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-ui-green-light">
             <lucide-icon [img]="ShieldIcon" [size]="14"></lucide-icon>
             Admin panel
           </div>
-          <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight mt-2">Analytics & Control</h1>
-          <p class="text-white/50 text-sm mt-1">
-            View search analytics, export reports, and manage user accounts.
-          </p>
+          <h1 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Analytics &amp; Control Center</h1>
+          <p class="mt-2 max-w-2xl text-sm text-white/70">Track product usage, monitor engagement trends, and manage accounts from one dashboard.</p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button
             (click)="reloadAll()"
-            class="h-10 px-4 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 text-white/80 text-sm font-bold inline-flex items-center gap-2"
+            class="inline-flex h-10 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white/85 transition hover:-translate-y-0.5 hover:bg-white/15"
           >
             <lucide-icon [img]="RefreshCcwIcon" [size]="14"></lucide-icon>
             Refresh
           </button>
           <button
             (click)="goToResults()"
-            class="h-10 px-4 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 text-white/80 text-sm font-bold"
+            class="h-10 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white/85 transition hover:-translate-y-0.5 hover:bg-white/15"
           >
             Back to search
           </button>
         </div>
       </div>
 
-      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div
           *ngFor="let card of summaryCards(); trackBy: trackByLabel"
-          class="rounded-2xl border border-white/10 bg-black/20 px-4 py-3"
+          class="rounded-2xl border border-white/15 bg-black/25 px-4 py-3 backdrop-blur-sm"
         >
-          <div class="text-white/45 text-[11px] uppercase tracking-[0.14em]">{{ card.label }}</div>
-          <div class="text-white text-2xl font-black mt-1">{{ card.value }}</div>
+          <div class="text-[11px] uppercase tracking-[0.14em] text-white/60">{{ card.label }}</div>
+          <div class="mt-1 text-2xl font-black text-white">{{ formatNumber(card.value) }}</div>
         </div>
       </div>
     </header>
 
-    <div *ngIf="error()" class="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-200 text-sm">
+    <div *ngIf="error()" class="rounded-2xl border border-red-500/35 bg-red-500/10 p-4 text-sm text-red-100">
       <div class="inline-flex items-center gap-2">
         <lucide-icon [img]="AlertCircleIcon" [size]="16"></lucide-icon>
         {{ error() }}
       </div>
     </div>
 
-    <section class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6 space-y-4">
-      <div class="flex flex-wrap items-end gap-3">
-        <div class="flex flex-col">
-          <label class="text-xs text-white/50 mb-1">From</label>
-          <input
-            type="date"
-            [(ngModel)]="fromDate"
-            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-white/85"
-          />
+    <section class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div class="flex flex-wrap items-end gap-3">
+          <div class="flex flex-col">
+            <label class="mb-1 text-xs text-white/50">From</label>
+            <input type="date" [(ngModel)]="fromDate" class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-white/85" />
+          </div>
+          <div class="flex flex-col">
+            <label class="mb-1 text-xs text-white/50">To</label>
+            <input type="date" [(ngModel)]="toDate" class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-white/85" />
+          </div>
+          <button
+            (click)="onFilterApply()"
+            class="h-10 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-bold text-white/85 transition hover:-translate-y-0.5 hover:bg-white/15"
+          >
+            Apply range
+          </button>
         </div>
-        <div class="flex flex-col">
-          <label class="text-xs text-white/50 mb-1">To</label>
-          <input
-            type="date"
-            [(ngModel)]="toDate"
-            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-white/85"
-          />
-        </div>
-        <button
-          (click)="onFilterApply()"
-          class="h-10 px-4 rounded-xl border border-white/20 bg-white/10 hover:bg-white/15 text-white/80 text-sm font-bold"
-        >
-          Apply range
-        </button>
+        <div class="text-xs uppercase tracking-[0.16em] text-white/45">Visual analytics</div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
-          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60 mb-3">Top queries</h3>
-          <div class="space-y-2 max-h-72 overflow-auto custom-scrollbar pr-1">
-            <div *ngFor="let item of overview()?.topQueries || []" class="flex items-center justify-between gap-3 text-sm">
-              <span class="text-white/80 truncate">{{ item.query }}</span>
-              <span class="text-ui-green-light font-bold">{{ item.count }}</span>
+      <article class="mt-5 rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-white/55">
+              <lucide-icon [img]="BarChart3Icon" [size]="13"></lucide-icon>
+              Search behavior
             </div>
-            <div *ngIf="!(overview()?.topQueries || []).length && !loadingOverview()" class="text-white/40 text-xs">
-              No data
-            </div>
+            <h3 class="mt-1 text-lg font-black tracking-tight text-white">Who searched, which mode, and who visited sites</h3>
+          </div>
+          <div class="text-xs uppercase tracking-[0.14em] text-white/45">Users + modes + clicks</div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <div *ngFor="let card of usageCards(); trackBy: trackByUsageCard" class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3">
+            <div class="text-[10px] uppercase tracking-[0.13em] text-white/45">{{ card.label }}</div>
+            <div class="mt-1 text-xl font-black text-white">{{ formatMetricValue(card.value) }}</div>
+            <div class="mt-1 text-[11px] leading-snug text-white/45">{{ card.hint }}</div>
           </div>
         </div>
 
-        <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
-          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60 mb-3">Daily trend</h3>
-          <div class="space-y-2 max-h-72 overflow-auto custom-scrollbar pr-1">
-            <div *ngFor="let item of overview()?.dailyTrend || []" class="flex items-center justify-between gap-3 text-sm">
-              <span class="text-white/80">{{ item.day | date: 'MMM d' }}</span>
-              <span class="text-ui-green-light font-bold">{{ item.count }}</span>
-            </div>
-            <div *ngIf="!(overview()?.dailyTrend || []).length && !loadingOverview()" class="text-white/40 text-xs">
-              No data
-            </div>
-          </div>
-        </div>
+        <div class="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
+          <div class="text-xs uppercase tracking-[0.13em] text-white/55">Search mode split</div>
+          <div class="mt-1 text-sm text-white/55">How many searches were made in each mode (web, images, etc).</div>
 
-        <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
-          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60 mb-3">Top sites</h3>
-          <div class="space-y-2 max-h-72 overflow-auto custom-scrollbar pr-1">
-            <div *ngFor="let item of overview()?.topSites || []" class="flex items-center justify-between gap-3 text-sm">
-              <span class="text-white/80 truncate">{{ item.domain }}</span>
-              <span class="text-ui-green-light font-bold">{{ item.count }}</span>
-            </div>
-            <div *ngIf="!(overview()?.topSites || []).length && !loadingOverview()" class="text-white/40 text-xs">
-              No data
+          <div *ngIf="modeBreakdown().length; else noModeBreakdownData" class="mt-3 space-y-3">
+            <div *ngFor="let mode of modeBreakdown(); trackBy: trackByModeBreakdown">
+              <div class="flex items-center justify-between gap-3 text-sm">
+                <span class="text-white/85">{{ mode.label }}</span>
+                <span class="text-white/75">
+                  {{ formatNumber(mode.count) }}
+                  <span *ngIf="mode.users !== null" class="text-white/45">• {{ formatNumber(mode.users) }} users</span>
+                </span>
+              </div>
+              <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div class="h-full rounded-full bg-gradient-to-r" [ngClass]="mode.gradientClass" [style.width.%]="mode.share"></div>
+              </div>
             </div>
           </div>
         </div>
+      </article>
+
+      <div class="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]">
+        <article class="rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-white/55">
+                <lucide-icon [img]="BarChart3Icon" [size]="13"></lucide-icon>
+                Daily trend
+              </div>
+              <h3 class="mt-1 text-lg font-black tracking-tight text-white">Search activity over time</h3>
+            </div>
+            <ng-container *ngIf="dailyTrendChart().peak as peak">
+              <div class="rounded-xl border border-white/15 bg-white/[0.04] px-3 py-2 text-right">
+                <div class="text-[10px] uppercase tracking-[0.14em] text-white/45">Peak day</div>
+                <div class="text-sm font-bold text-white">{{ peak.label }}</div>
+                <div class="text-xs text-ui-green-light">{{ formatNumber(peak.value) }} searches</div>
+              </div>
+            </ng-container>
+          </div>
+
+          <div *ngIf="loadingOverview()" class="mt-4 grid h-64 place-items-center rounded-2xl border border-white/10 bg-black/20 text-sm text-white/60">
+            Loading chart...
+          </div>
+
+          <ng-container *ngIf="!loadingOverview() && dailyTrendChart() as chart">
+            <div *ngIf="chart.points.length; else noDailyTrendData" class="mt-4">
+              <svg class="h-64 w-full rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-black/20 p-2" [attr.viewBox]="'0 0 ' + chart.width + ' ' + chart.height" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="adminTrendLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#9be15d"></stop>
+                    <stop offset="100%" stop-color="#57c84d"></stop>
+                  </linearGradient>
+                  <linearGradient id="adminTrendFill" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(155,225,93,0.38)"></stop>
+                    <stop offset="100%" stop-color="rgba(87,200,77,0.02)"></stop>
+                  </linearGradient>
+                </defs>
+
+                <g *ngFor="let tick of chart.ticks; trackBy: trackByTrendTick">
+                  <line
+                    x1="24"
+                    [attr.y1]="tick.y"
+                    [attr.x2]="chart.width - 24"
+                    [attr.y2]="tick.y"
+                    stroke="rgba(255,255,255,0.13)"
+                    stroke-dasharray="2 4"
+                  ></line>
+                  <text x="4" [attr.y]="tick.y - 4" fill="rgba(255,255,255,0.5)" font-size="10">{{ tick.value }}</text>
+                </g>
+
+                <path [attr.d]="chart.areaPath" fill="url(#adminTrendFill)"></path>
+                <path [attr.d]="chart.linePath" fill="none" stroke="url(#adminTrendLine)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+
+                <circle
+                  *ngFor="let point of chart.points; trackBy: trackByTrendPoint"
+                  [attr.cx]="point.x"
+                  [attr.cy]="point.y"
+                  r="3.1"
+                  fill="#c7f9c0"
+                  stroke="#2f8f2b"
+                  stroke-width="1.5"
+                ></circle>
+              </svg>
+
+              <div class="mt-3 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-white/45">
+                <span *ngFor="let label of chart.axisLabels">{{ label.label }}</span>
+              </div>
+
+              <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="uppercase tracking-[0.12em] text-white/45">Total</div>
+                  <div class="mt-1 text-sm font-bold text-white">{{ formatNumber(chart.total) }}</div>
+                </div>
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="uppercase tracking-[0.12em] text-white/45">Avg / day</div>
+                  <div class="mt-1 text-sm font-bold text-white">{{ formatNumber(chart.avg) }}</div>
+                </div>
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="uppercase tracking-[0.12em] text-white/45">Last point</div>
+                  <div class="mt-1 text-sm font-bold text-white">{{ formatNumber(chart.points[chart.points.length - 1].value) }}</div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </article>
+
+        <article class="rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
+          <div class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-white/55">
+            <lucide-icon [img]="HistoryIcon" [size]="13"></lucide-icon>
+            Engagement
+          </div>
+          <h3 class="mt-1 text-lg font-black tracking-tight text-white">Search to click efficiency</h3>
+
+          <ng-container *ngIf="engagementCard() as engagement">
+            <div class="mt-5 flex items-center gap-5">
+              <div
+                class="relative grid h-32 w-32 place-items-center rounded-full p-[10px]"
+                [style.background]="'conic-gradient(#57c84d 0% ' + engagement.clickRate + '%, rgba(255,255,255,0.1) ' + engagement.clickRate + '% 100%)'"
+              >
+                <div class="grid h-full w-full place-items-center rounded-full border border-white/15 bg-[#0b160d]">
+                  <div class="text-center">
+                    <div class="text-xl font-black text-white">{{ engagement.clickRate | number: '1.0-1' }}%</div>
+                    <div class="text-[10px] uppercase tracking-[0.14em] text-white/45">CTR</div>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-2 text-sm">
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="text-xs text-white/45">Total searches</div>
+                  <div class="font-bold text-white">{{ formatNumber(engagement.totalSearches) }}</div>
+                </div>
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="text-xs text-white/45">Total clicks</div>
+                  <div class="font-bold text-white">{{ formatNumber(engagement.totalClicks) }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3">
+              <div class="flex items-center justify-between text-xs text-white/55">
+                <span>Active click users / search users</span>
+                <span class="font-bold text-ui-green-light">{{ engagement.activeUserRate | number: '1.0-1' }}%</span>
+              </div>
+              <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+                <div class="h-full rounded-full bg-gradient-to-r from-emerald-300 to-ui-green-light" [style.width.%]="engagement.activeUserRate"></div>
+              </div>
+            </div>
+          </ng-container>
+        </article>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <article class="rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
+          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60">Top queries</h3>
+          <div *ngIf="loadingOverview()" class="mt-4 text-sm text-white/55">Loading data...</div>
+          <div *ngIf="!loadingOverview() && topQueryBars().length; else noTopQueriesData" class="mt-4 space-y-3">
+            <div *ngFor="let item of topQueryBars(); trackBy: trackByBarLabel" class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+              <div class="flex items-center justify-between gap-3 text-sm">
+                <div class="min-w-0 inline-flex items-center gap-2">
+                  <span class="rounded-md border border-white/20 px-1.5 py-0.5 text-[10px] font-black text-white/60">#{{ item.rank }}</span>
+                  <span class="truncate text-white/85">{{ item.label }}</span>
+                </div>
+                <span class="font-bold text-ui-green-light">{{ formatNumber(item.value) }}</span>
+              </div>
+              <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div class="h-full rounded-full bg-gradient-to-r from-ui-green-light to-lime-200" [style.width.%]="item.width"></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
+          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60">Top sites</h3>
+          <div *ngIf="loadingOverview()" class="mt-4 text-sm text-white/55">Loading data...</div>
+          <div *ngIf="!loadingOverview() && topSiteBars().length; else noTopSitesData" class="mt-4 space-y-3">
+            <div *ngFor="let item of topSiteBars(); trackBy: trackByBarLabel" class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+              <div class="flex items-center justify-between gap-3 text-sm">
+                <div class="min-w-0 inline-flex items-center gap-2">
+                  <span class="rounded-md border border-white/20 px-1.5 py-0.5 text-[10px] font-black text-white/60">#{{ item.rank }}</span>
+                  <span class="truncate text-white/85">{{ item.label }}</span>
+                </div>
+                <span class="font-bold text-emerald-300">{{ formatNumber(item.value) }}</span>
+              </div>
+              <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div class="h-full rounded-full bg-gradient-to-r from-emerald-300 to-cyan-200" [style.width.%]="item.width"></div>
+              </div>
+            </div>
+          </div>
+        </article>
       </div>
     </section>
 
-    <section class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6 space-y-4">
+    <section class="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <h2 class="text-lg font-black text-white tracking-tight">Report export</h2>
+        <h2 class="inline-flex items-center gap-2 text-lg font-black tracking-tight text-white">
+          <lucide-icon [img]="HistoryIcon" [size]="17"></lucide-icon>
+          Report export
+        </h2>
         <div class="flex flex-wrap items-center gap-2">
-          <select
-            [(ngModel)]="reportType"
-            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85"
-          >
+          <select [(ngModel)]="reportType" class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85">
             <option value="search_stats">Search stats</option>
             <option value="top_queries">Top queries</option>
             <option value="daily_trend">Daily trend</option>
             <option value="top_sites">Top sites</option>
           </select>
-          <select
-            [(ngModel)]="reportFormat"
-            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85"
-          >
+          <select [(ngModel)]="reportFormat" class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85">
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
           <button
             (click)="exportReport()"
             [disabled]="exporting()"
-            class="h-10 px-4 rounded-xl border border-ui-green/40 bg-ui-green/20 text-ui-green-light hover:bg-ui-green/30 text-sm font-black disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+            class="inline-flex h-10 items-center gap-2 rounded-xl border border-ui-green/40 bg-ui-green/20 px-4 text-sm font-black text-ui-green-light transition hover:-translate-y-0.5 hover:bg-ui-green/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <lucide-icon [img]="DownloadIcon" [size]="14"></lucide-icon>
             {{ exporting() ? 'Exporting...' : 'Export' }}
@@ -147,40 +311,114 @@
         </div>
       </div>
 
+      <article class="rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60">Custom report builder</h3>
+            <p class="mt-1 text-xs text-white/45">Choose exactly what to include, pick a format, and export with charts.</p>
+          </div>
+          <button
+            (click)="exportCustomReport()"
+            [disabled]="customExporting()"
+            class="inline-flex h-10 items-center gap-2 rounded-xl border border-emerald-300/40 bg-emerald-400/20 px-4 text-sm font-black text-emerald-100 transition hover:-translate-y-0.5 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <lucide-icon [img]="DownloadIcon" [size]="14"></lucide-icon>
+            {{ customExporting() ? 'Generating...' : 'Generate custom report' }}
+          </button>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-4">
+          <div class="lg:col-span-2">
+            <label class="mb-1 block text-xs text-white/50">Report title</label>
+            <input
+              [(ngModel)]="customReportTitle"
+              placeholder="GreenFind analytics report"
+              class="h-10 w-full rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs text-white/50">Format</label>
+            <select [(ngModel)]="customReportFormat" class="h-10 w-full rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85">
+              <option value="pdf">PDF</option>
+              <option value="word">Word (.doc)</option>
+              <option value="html">HTML</option>
+              <option value="csv">CSV</option>
+              <option value="json">JSON</option>
+              <option value="txt">TXT</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1 block text-xs text-white/50">Top limit per section</label>
+            <input
+              type="number"
+              min="3"
+              max="50"
+              [(ngModel)]="customTopLimit"
+              class="h-10 w-full rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85"
+            />
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+          <label class="inline-flex items-center gap-2 text-sm text-white/75">
+            <input type="checkbox" [(ngModel)]="customIncludeCharts" class="h-4 w-4 rounded border-white/20 bg-black/30" />
+            Include charts in report
+          </label>
+          <span class="text-xs text-white/45">Date period is taken from the main From/To filter above.</span>
+        </div>
+
+        <div class="mt-4">
+          <div class="text-xs uppercase tracking-[0.14em] text-white/55">Sections to include</div>
+          <div class="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+            <label
+              *ngFor="let section of customSectionOptions; trackBy: trackByCustomSection"
+              class="flex cursor-pointer items-start gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm"
+            >
+              <input
+                type="checkbox"
+                [checked]="isCustomSectionEnabled(section.key)"
+                (change)="onCustomSectionToggle(section.key, $event)"
+                class="mt-0.5 h-4 w-4 rounded border-white/20 bg-black/30"
+              />
+              <span>
+                <span class="block font-bold text-white/85">{{ section.label }}</span>
+                <span class="block text-xs text-white/45">{{ section.description }}</span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </article>
+
       <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
-        <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60 mb-3">Recent exports</h3>
-        <div class="space-y-2 max-h-56 overflow-auto custom-scrollbar pr-1">
-          <div *ngFor="let report of reports(); trackBy: trackByReport" class="text-sm border border-white/10 rounded-xl px-3 py-2 bg-white/[0.02]">
+        <h3 class="mb-3 text-sm font-black uppercase tracking-[0.14em] text-white/60">Recent exports</h3>
+        <div class="max-h-56 space-y-2 overflow-auto custom-scrollbar pr-1">
+          <div *ngFor="let report of reports(); trackBy: trackByReport" class="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm">
             <div class="flex items-center justify-between gap-3">
               <span class="text-white/85">{{ report.fileName || report.reportType }}</span>
               <span class="text-white/45">{{ report.createdAt | date: 'MMM d, HH:mm' }}</span>
             </div>
-            <div class="text-xs text-white/45 mt-1">
-              {{ report.reportType }} • {{ report.outputFormat }} • {{ report.status }}
-            </div>
+            <div class="mt-1 text-xs text-white/45">{{ report.reportType }} &bull; {{ report.outputFormat }} &bull; {{ report.status }}</div>
           </div>
-          <div *ngIf="!reports().length && !loadingReports()" class="text-white/40 text-xs">No exports yet</div>
+          <div *ngIf="!reports().length && !loadingReports()" class="text-xs text-white/40">No exports yet</div>
         </div>
       </div>
     </section>
 
-    <section class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6 space-y-4">
+    <section class="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <h2 class="text-lg font-black text-white tracking-tight">Users</h2>
-        <div class="flex items-center gap-2 rounded-xl border border-white/20 bg-black/25 px-3 h-10">
+        <h2 class="inline-flex items-center gap-2 text-lg font-black tracking-tight text-white">
+          <lucide-icon [img]="UserIcon" [size]="17"></lucide-icon>
+          Users
+        </h2>
+        <div class="flex h-10 items-center gap-2 rounded-xl border border-white/20 bg-black/25 px-3">
           <lucide-icon [img]="SearchIcon" [size]="14" class="text-white/40"></lucide-icon>
           <input
             [(ngModel)]="userQuery"
             (keydown.enter)="onUserSearch()"
             placeholder="Search by username/email"
-            class="bg-transparent outline-none text-sm text-white/85 placeholder:text-white/35 w-56"
+            class="w-56 bg-transparent text-sm text-white/85 outline-none placeholder:text-white/35"
           />
-          <button
-            (click)="onUserSearch()"
-            class="text-xs font-bold text-white/70 hover:text-white"
-          >
-            Find
-          </button>
+          <button (click)="onUserSearch()" class="text-xs font-bold text-white/70 transition hover:text-white">Find</button>
         </div>
       </div>
 
@@ -188,21 +426,22 @@
         <div class="space-y-2">
           <div
             *ngFor="let user of users(); trackBy: trackByUser"
-            class="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3"
+            class="flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 sm:flex-row sm:items-center"
           >
             <div class="min-w-0 flex-1">
-              <div class="text-white font-bold truncate">{{ user.username }} <span class="text-white/40 text-xs">({{ user.role }})</span></div>
-              <div class="text-white/45 text-xs truncate">{{ user.email }}</div>
-              <div class="text-white/45 text-xs mt-1">
-                Searches: {{ user.searchesCount }} • Clicks: {{ user.clicksCount }}
+              <div class="truncate text-sm font-bold text-white sm:text-base">
+                {{ user.username }}
+                <span class="ml-1 rounded-md border border-white/15 bg-white/[0.04] px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-white/55">{{ user.role }}</span>
               </div>
+              <div class="truncate text-xs text-white/45">{{ user.email }}</div>
+              <div class="mt-1 text-xs text-white/50">Searches: {{ formatNumber(user.searchesCount) }} &bull; Clicks: {{ formatNumber(user.clicksCount) }}</div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button
                 *ngIf="user.id !== me.id"
                 (click)="toggleUserRole(user)"
                 [disabled]="isRoleUpdating(user.id)"
-                class="h-9 px-3 rounded-xl border border-white/25 bg-white/10 text-white/80 hover:bg-white/20 text-xs font-black disabled:opacity-50 disabled:cursor-not-allowed"
+                class="h-9 rounded-xl border border-white/25 bg-white/10 px-3 text-xs font-black text-white/80 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {{ isRoleUpdating(user.id) ? 'Saving...' : (user.role === 'admin' ? 'Make user' : 'Make admin') }}
               </button>
@@ -210,16 +449,34 @@
                 *ngIf="user.role !== 'admin'"
                 (click)="deleteUser(user)"
                 [disabled]="isDeleting(user.id)"
-                class="h-9 px-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20 text-xs font-black disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+                class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 text-xs font-black text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <lucide-icon [img]="Trash2Icon" [size]="13"></lucide-icon>
                 {{ isDeleting(user.id) ? 'Deleting...' : 'Delete' }}
               </button>
             </div>
           </div>
-          <div *ngIf="!users().length && !loadingUsers()" class="text-white/40 text-xs">No users found.</div>
+          <div *ngIf="!users().length && !loadingUsers()" class="text-xs text-white/40">No users found.</div>
         </div>
       </ng-container>
     </section>
   </div>
 </div>
+
+<ng-template #noModeBreakdownData>
+  <div class="mt-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/45">
+    Mode breakdown is not available from the API for this selected period yet.
+  </div>
+</ng-template>
+
+<ng-template #noDailyTrendData>
+  <div class="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-white/45">No daily trend data for this period.</div>
+</ng-template>
+
+<ng-template #noTopQueriesData>
+  <div class="mt-4 text-sm text-white/45">No query data.</div>
+</ng-template>
+
+<ng-template #noTopSitesData>
+  <div class="mt-4 text-sm text-white/45">No site data.</div>
+</ng-template>
