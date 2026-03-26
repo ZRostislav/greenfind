@@ -216,6 +216,22 @@ export class AdminDashboardComponent implements OnInit {
   });
   readonly ctrByPosition = computed(() => (this.overview()?.ctrByPosition ?? []).slice(0, 8));
   readonly retentionCard = computed(() => this.overview()?.retention ?? null);
+  readonly trendInsights = computed<TrendInsightsModel | null>(() =>
+    this.createTrendInsights(this.overview()?.dailyTrend ?? []),
+  );
+  readonly funnelSteps = computed<FunnelStepItem[]>(() => this.createFunnelSteps(this.funnelCard()));
+  readonly retentionBars = computed<RetentionBarItem[]>(() => this.createRetentionBars(this.retentionCard()));
+  readonly retentionLoss = computed(() => {
+    const retention = this.retentionCard();
+    if (!retention || retention.retainedD1 <= 0) return null;
+
+    const lostUsers = Math.max(retention.retainedD1 - retention.retainedD7, 0);
+    const dropRate = Number(((lostUsers / retention.retainedD1) * 100).toFixed(1));
+    return {
+      lostUsers,
+      dropRate,
+    };
+  });
 
   ngOnInit() {
     this.reloadAll();
@@ -455,6 +471,14 @@ export class AdminDashboardComponent implements OnInit {
     return item.position;
   }
 
+  trackByFunnelStep(_index: number, item: FunnelStepItem): string {
+    return item.key;
+  }
+
+  trackByRetentionBar(_index: number, item: RetentionBarItem): string {
+    return item.label;
+  }
+
   formatNumber(value: number): string {
     return this.numberFormatter.format(value);
   }
@@ -467,6 +491,13 @@ export class AdminDashboardComponent implements OnInit {
   formatPercent(value: number | null | undefined): string {
     if (value === null || value === undefined) return '-';
     return `${value.toFixed(2)}%`;
+  }
+
+  formatSignedPercent(value: number | null | undefined, digits = 1): string {
+    if (value === null || value === undefined || Number.isNaN(value)) return '-';
+    const fixed = value.toFixed(digits);
+    if (value > 0) return `+${fixed}%`;
+    return `${fixed}%`;
   }
 
   isCustomSectionEnabled(key: CustomReportSectionKey): boolean {
@@ -1283,6 +1314,126 @@ export class AdminDashboardComponent implements OnInit {
     return `${value.slice(0, maxLength - 3)}...`;
   }
 
+  private createTrendInsights(items: AdminOverviewResponse['dailyTrend']): TrendInsightsModel | null {
+    if (items.length < 2) return null;
+
+    const normalized = items.map((item) => ({
+      day: item.day,
+      label: this.formatTrendLabel(item.day),
+      count: Math.max(0, item.count),
+    }));
+
+    const windowSize = Math.min(7, Math.floor(normalized.length / 2));
+    if (windowSize < 1) return null;
+
+    const recentWindow = normalized.slice(-windowSize);
+    const previousWindow = normalized.slice(-windowSize * 2, -windowSize);
+
+    const recentTotal = recentWindow.reduce((sum, item) => sum + item.count, 0);
+    const previousTotal = previousWindow.reduce((sum, item) => sum + item.count, 0);
+    const rawDelta = previousTotal
+      ? ((recentTotal - previousTotal) / previousTotal) * 100
+      : recentTotal > 0
+        ? 100
+        : 0;
+    const deltaPercent = Number(rawDelta.toFixed(1));
+
+    const peak = normalized.reduce((current, item) => (item.count > current.count ? item : current), normalized[0]);
+    const low = normalized.reduce((current, item) => (item.count < current.count ? item : current), normalized[0]);
+
+    let direction: 'up' | 'down' | 'flat' = 'flat';
+    if (deltaPercent > 1) direction = 'up';
+    else if (deltaPercent < -1) direction = 'down';
+
+    return {
+      windowSize,
+      recentTotal,
+      previousTotal,
+      deltaPercent,
+      direction,
+      peak,
+      low,
+    };
+  }
+
+  private createFunnelSteps(
+    funnel: {
+      totalSearches: number;
+      totalImpressions: number;
+      totalClicks: number;
+    } | null,
+  ): FunnelStepItem[] {
+    if (!funnel) return [];
+
+    const stepsSeed = [
+      {
+        key: 'searches',
+        label: 'Searches',
+        value: Math.max(0, funnel.totalSearches),
+        gradientClass: 'from-emerald-300 to-lime-200',
+      },
+      {
+        key: 'impressions',
+        label: 'Impressions',
+        value: Math.max(0, funnel.totalImpressions),
+        gradientClass: 'from-cyan-300 to-sky-200',
+      },
+      {
+        key: 'clicks',
+        label: 'Clicks',
+        value: Math.max(0, funnel.totalClicks),
+        gradientClass: 'from-amber-300 to-yellow-200',
+      },
+    ] as const;
+
+    const searches = stepsSeed[0].value;
+    return stepsSeed.map((step, index) => {
+      const prevValue = index === 0 ? step.value : stepsSeed[index - 1].value;
+      const shareOfSearches = this.toPercent(step.value, searches);
+      const stepConversion = this.toPercent(step.value, prevValue);
+      const dropFromPrev = index === 0 ? 0 : Math.max(prevValue - step.value, 0);
+
+      return {
+        key: step.key,
+        label: step.label,
+        value: step.value,
+        shareOfSearches,
+        stepConversion,
+        dropFromPrev,
+        gradientClass: step.gradientClass,
+      };
+    });
+  }
+
+  private createRetentionBars(retention: AdminOverviewResponse['retention'] | null): RetentionBarItem[] {
+    if (!retention) return [];
+
+    return [
+      {
+        label: 'D1 retention',
+        rate: this.clampPercent(retention.d1Rate),
+        retained: Math.max(0, retention.retainedD1),
+        gradientClass: 'from-emerald-300 to-lime-200',
+      },
+      {
+        label: 'D7 retention',
+        rate: this.clampPercent(retention.d7Rate),
+        retained: Math.max(0, retention.retainedD7),
+        gradientClass: 'from-cyan-300 to-blue-200',
+      },
+    ];
+  }
+
+  private toPercent(value: number, total: number): number {
+    if (!total || total <= 0) return 0;
+    return Number(((value / total) * 100).toFixed(1));
+  }
+
+  private clampPercent(value: number): number {
+    if (!Number.isFinite(value)) return 0;
+    return Math.min(100, Math.max(0, Number(value.toFixed(2))));
+  }
+
   private createDailyTrendChart(items: AdminOverviewResponse['dailyTrend']): DailyTrendChartModel {
     const width = 660;
     const height = 248;
@@ -1628,6 +1779,41 @@ interface SearchModeBreakdownItem {
   count: number;
   users: number | null;
   share: number;
+  gradientClass: string;
+}
+
+interface TrendInsightsModel {
+  windowSize: number;
+  recentTotal: number;
+  previousTotal: number;
+  deltaPercent: number;
+  direction: 'up' | 'down' | 'flat';
+  peak: {
+    day: string;
+    label: string;
+    count: number;
+  };
+  low: {
+    day: string;
+    label: string;
+    count: number;
+  };
+}
+
+interface FunnelStepItem {
+  key: string;
+  label: string;
+  value: number;
+  shareOfSearches: number;
+  stepConversion: number;
+  dropFromPrev: number;
+  gradientClass: string;
+}
+
+interface RetentionBarItem {
+  label: string;
+  rate: number;
+  retained: number;
   gradientClass: string;
 }
 
