@@ -61,10 +61,15 @@ export class AdminDashboardComponent implements OnInit {
   readonly overview = signal<AdminOverviewResponse | null>(null);
   readonly users = signal<AdminUserItem[]>([]);
   readonly reports = signal<AdminReportItem[]>([]);
+  readonly userStats = signal({
+    totalAccounts: 0,
+    totalFiltered: 0,
+  });
 
   fromDate = '';
   toDate = '';
   userQuery = '';
+  userRoleFilter: 'all' | 'user' | 'admin' = 'all';
 
   reportType: 'search_stats' | 'top_queries' | 'daily_trend' | 'top_sites' = 'top_queries';
   reportFormat: 'json' | 'csv' = 'csv';
@@ -263,10 +268,22 @@ export class AdminDashboardComponent implements OnInit {
     this.loadingUsers.set(true);
     this.error.set(null);
     this.admin
-      .fetchUsers({ q: this.userQuery.trim(), limit: 100, offset: 0 })
+      .fetchUsers({
+        q: this.userQuery.trim(),
+        role: this.userRoleFilter,
+        limit: 100,
+        offset: 0,
+      })
       .pipe(finalize(() => this.loadingUsers.set(false)))
       .subscribe({
-        next: (res) => this.users.set(res.items || []),
+        next: (res) => {
+          const items = res.items || [];
+          this.users.set(items);
+          this.userStats.set({
+            totalAccounts: Number(res.totalAccounts || 0),
+            totalFiltered: Number(res.totalFiltered ?? items.length),
+          });
+        },
         error: () => this.error.set('Failed to load users'),
       });
   }
@@ -290,6 +307,10 @@ export class AdminDashboardComponent implements OnInit {
     this.loadUsers();
   }
 
+  onRoleFilterChange() {
+    this.loadUsers();
+  }
+
   deleteUser(user: AdminUserItem) {
     if (this.deletingUserId()) return;
     if (!window.confirm(`Delete user "${user.username}"?`)) return;
@@ -302,6 +323,10 @@ export class AdminDashboardComponent implements OnInit {
       .subscribe({
         next: () => {
           this.users.set(this.users().filter((item) => item.id !== user.id));
+          this.userStats.update((state) => ({
+            totalAccounts: Math.max(0, state.totalAccounts - 1),
+            totalFiltered: Math.max(0, state.totalFiltered - 1),
+          }));
           this.loadOverview();
         },
         error: (err) => {
@@ -322,16 +347,7 @@ export class AdminDashboardComponent implements OnInit {
       .pipe(finalize(() => this.roleUpdatingUserId.set(null)))
       .subscribe({
         next: () => {
-          this.users.set(
-            this.users().map((item) =>
-              item.id === user.id
-                ? {
-                    ...item,
-                    role: nextRole,
-                  }
-                : item,
-            ),
-          );
+          this.loadUsers();
         },
         error: (err) => {
           this.error.set(err?.error?.message || 'Failed to update role');

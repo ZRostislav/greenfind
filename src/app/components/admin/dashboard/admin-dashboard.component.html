@@ -647,15 +647,43 @@
           <lucide-icon [img]="UserIcon" [size]="17"></lucide-icon>
           Users
         </h2>
-        <div class="flex h-10 items-center gap-2 rounded-xl border border-white/20 bg-black/25 px-3">
-          <lucide-icon [img]="SearchIcon" [size]="14" class="text-white/40"></lucide-icon>
-          <input
-            [(ngModel)]="userQuery"
-            (keydown.enter)="onUserSearch()"
-            placeholder="Search by username/email"
-            class="w-56 bg-transparent text-sm text-white/85 outline-none placeholder:text-white/35"
-          />
-          <button (click)="onUserSearch()" class="text-xs font-bold text-white/70 transition hover:text-white">Find</button>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex h-10 items-center gap-2 rounded-xl border border-white/20 bg-black/25 px-3">
+            <lucide-icon [img]="SearchIcon" [size]="14" class="text-white/40"></lucide-icon>
+            <input
+              [(ngModel)]="userQuery"
+              (keydown.enter)="onUserSearch()"
+              placeholder="Search by username/email"
+              class="w-52 bg-transparent text-sm text-white/85 outline-none placeholder:text-white/35"
+            />
+            <button (click)="onUserSearch()" class="text-xs font-bold text-white/70 transition hover:text-white">Find</button>
+          </div>
+          <select
+            [(ngModel)]="userRoleFilter"
+            (change)="onRoleFilterChange()"
+            class="h-10 rounded-xl border border-white/20 bg-black/25 px-3 text-sm text-white/85"
+          >
+            <option value="all">All roles</option>
+            <option value="admin">Admins only</option>
+            <option value="user">Users only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
+        <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+          <div class="text-white/45">Total accounts</div>
+          <div class="mt-1 text-base font-bold text-white">{{ formatNumber(userStats().totalAccounts) }}</div>
+        </div>
+        <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+          <div class="text-white/45">Matched by filter</div>
+          <div class="mt-1 text-base font-bold text-white">{{ formatNumber(userStats().totalFiltered) }}</div>
+        </div>
+        <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+          <div class="text-white/45">Active role filter</div>
+          <div class="mt-1 text-base font-bold text-white">
+            {{ userRoleFilter === 'all' ? 'All roles' : (userRoleFilter === 'admin' ? 'Admins only' : 'Users only') }}
+          </div>
         </div>
       </div>
 
@@ -671,6 +699,7 @@
                 <span class="ml-1 rounded-md border border-white/15 bg-white/[0.04] px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-white/55">{{ user.role }}</span>
               </div>
               <div class="truncate text-xs text-white/45">{{ user.email }}</div>
+              <div class="mt-1 text-xs text-white/50">Created: {{ user.createdAt ? (user.createdAt | date: 'MMM d, y, HH:mm') : '-' }}</div>
               <div class="mt-1 text-xs text-white/50">Searches: {{ formatNumber(user.searchesCount) }} &bull; Clicks: {{ formatNumber(user.clicksCount) }}</div>
             </div>
             <div class="flex flex-wrap items-center gap-2">

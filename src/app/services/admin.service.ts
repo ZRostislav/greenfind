@@ -139,13 +139,19 @@ export class AdminService {
     });
   }
 
-  fetchUsers(params?: { q?: string; limit?: number; offset?: number }): Observable<{ items: AdminUserItem[] }> {
+  fetchUsers(params?: {
+    q?: string;
+    role?: 'all' | 'user' | 'admin';
+    limit?: number;
+    offset?: number;
+  }): Observable<{ items: AdminUserItem[]; totalFiltered: number; totalAccounts: number }> {
     let httpParams = new HttpParams();
     if (params?.q) httpParams = httpParams.set('q', params.q);
+    if (params?.role && params.role !== 'all') httpParams = httpParams.set('role', params.role);
     if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
     if (params?.offset) httpParams = httpParams.set('offset', String(params.offset));
 
-    return this.http.get<{ items: AdminUserItem[] }>(`${this.apiUrl}/admin/users`, {
+    return this.http.get<{ items: AdminUserItem[]; totalFiltered: number; totalAccounts: number }>(`${this.apiUrl}/admin/users`, {
       params: httpParams,
     });
   }
