@@ -1,59 +1,90 @@
-# Greenfind
+# Greenfind Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.2.
+Frontend часть поисково-аналитической системы Greenfind (Angular 20).
 
-## Development server
+## Что умеет приложение
 
-To start a local development server, run:
+- Поиск в режимах `web` и `images`.
+- Отображение `knowledge_graph`, `ai_overview`, связанных запросов и пагинации.
+- История поисков пользователя и сохраненные ссылки.
+- Авторизация (local + OAuth callback), верификация почты, reset password.
+- Админ-панель: аналитика, отчеты и управление пользователями.
 
-```bash
-ng serve
-```
+## Технологии
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Angular 20 (standalone API)
+- RxJS
+- TailwindCSS
+- Lucide Icons
+- jsPDF/html2canvas (экспорт отчетов)
 
-## Code scaffolding
+## Структура проекта
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- `src/app/components` — UI-компоненты (поиск, auth, профиль, админка)
+- `src/app/services` — работа с API и состоянием
+- `src/app/guards` — защита маршрутов
+- `src/app/interceptors` — авторизационный interceptor
+- `src/app/validators` — переиспользуемые валидаторы форм
+- `src/app/environments` — runtime API URL
 
-```bash
-ng generate component component-name
-```
+## Быстрый старт
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+1. Установить зависимости:
 
 ```bash
-ng test
+npm install
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+2. Запустить dev-сервер:
 
 ```bash
-ng e2e
+npm run dev
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+3. Открыть приложение:
 
-## Additional Resources
+`https://localhost:4200`
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Переменные окружения
+
+Фронтенд читает API адрес из `window.__env.apiUrl` (файл формируется скриптом `scripts/write-env.mjs` перед сборкой).
+
+Если runtime-переменная не задана, используется fallback:
+
+`http://localhost:3000/api`
+
+## Скрипты
+
+- `npm run dev` — локальный запуск
+- `npm run build` — production build
+- `npm test` — unit-тесты (Karma + Jasmine)
+
+## Покрытие тестами (frontend)
+
+Добавлены базовые unit-тесты на критические части:
+
+- `AuthInterceptor` (добавление токена и очистка сессии на 401)
+- `AdminService` (query params и генерация URL экспорта)
+- `AuthStateService` (localStorage + lifecycle сессии)
+- `passwordPolicyValidator`
+- `matchFieldsValidator`
+
+## Связь с backend
+
+Backend расположен рядом в соседней папке: `../greenfind-Backend`.
+
+Основной API префикс:
+
+- `/api/auth/*`
+- `/api/user/*`
+- `/api/search/*`
+- `/api/admin/*`
+
+## Для диплома
+
+Рекомендуем фиксировать в отчете:
+
+- сценарий поиска с кешированием;
+- сценарий авторизации/верификации;
+- сценарий админ-аналитики (top queries, trend, top sites);
+- скриншоты тестов `npm test` и сборки `npm run build`.
