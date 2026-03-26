@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import {
   AdminOverviewResponse,
+  AdminRisingQueryItem,
+  AdminTrendAnomalyItem,
   AdminSummary,
   AdminTopItem,
   AdminReportItem,
@@ -106,6 +108,8 @@ export class AdminDashboardComponent implements OnInit {
 
   readonly topQueryBars = computed(() => this.toRankBars(this.overview()?.topQueries ?? [], (item) => item.query || '-'));
   readonly topSiteBars = computed(() => this.toRankBars(this.overview()?.topSites ?? [], (item) => item.domain || '-'));
+  readonly risingQueries = computed<RisingQueryCardItem[]>(() => this.toRisingQueryCards(this.overview()?.risingQueries ?? []));
+  readonly trendAnomalies = computed<AnomalyAlertItem[]>(() => this.toAnomalyAlertItems(this.overview()?.trendAnomalies ?? []));
   readonly dailyTrendChart = computed<DailyTrendChartModel>(() => this.createDailyTrendChart(this.overview()?.dailyTrend ?? []));
   readonly modeBreakdown = computed<SearchModeBreakdownItem[]>(() => {
     const metrics = this.extractModeMetrics(this.overview());
@@ -469,6 +473,14 @@ export class AdminDashboardComponent implements OnInit {
 
   trackByCtrPosition(_index: number, item: { position: number }): number {
     return item.position;
+  }
+
+  trackByRisingQuery(_index: number, item: RisingQueryCardItem): string {
+    return item.query;
+  }
+
+  trackByTrendAnomaly(_index: number, item: AnomalyAlertItem): string {
+    return `${item.day}_${item.signal}`;
   }
 
   trackByFunnelStep(_index: number, item: FunnelStepItem): string {
@@ -1513,6 +1525,122 @@ export class AdminDashboardComponent implements OnInit {
     }));
   }
 
+  private toRisingQueryCards(items: AdminRisingQueryItem[]): RisingQueryCardItem[] {
+    if (!items.length) return [];
+
+    const normalized = items
+      .map((item) => ({
+        query: String(item.query || '').trim(),
+        recentCount: Math.max(0, Number(item.recentCount || 0)),
+        previousCount: Math.max(0, Number(item.previousCount || 0)),
+        recentUsers: Math.max(0, Number(item.recentUsers || 0)),
+        growthPercent: Number(item.growthPercent || 0),
+        momentum: this.normalizeMomentum(item.momentum),
+      }))
+      .filter((item) => item.query);
+
+    if (!normalized.length) return [];
+
+    const sorted = [...normalized]
+      .sort((a, b) => {
+        if (b.growthPercent !== a.growthPercent) return b.growthPercent - a.growthPercent;
+        return b.recentCount - a.recentCount;
+      })
+      .slice(0, 8);
+
+    const maxRecent = Math.max(...sorted.map((item) => item.recentCount), 1);
+
+    return sorted.map((item, index) => ({
+      ...item,
+      rank: index + 1,
+      barWidth: Math.max(8, Number(((item.recentCount / maxRecent) * 100).toFixed(1))),
+      gradientClass: this.getRisingMomentumGradientClass(item.momentum),
+      badgeClass: this.getRisingMomentumBadgeClass(item.momentum),
+      momentumLabel: this.formatRisingMomentum(item.momentum),
+    }));
+  }
+
+  private normalizeMomentum(value: string): "new" | "hot" | "up" | "down" | "stable" {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (normalized === 'new') return 'new';
+    if (normalized === 'hot') return 'hot';
+    if (normalized === 'up') return 'up';
+    if (normalized === 'down') return 'down';
+    return 'stable';
+  }
+
+  private formatRisingMomentum(momentum: "new" | "hot" | "up" | "down" | "stable"): string {
+    if (momentum === 'new') return 'New';
+    if (momentum === 'hot') return 'Hot';
+    if (momentum === 'up') return 'Up';
+    if (momentum === 'down') return 'Down';
+    return 'Stable';
+  }
+
+  private getRisingMomentumGradientClass(momentum: "new" | "hot" | "up" | "down" | "stable"): string {
+    if (momentum === 'new') return 'from-violet-300 to-fuchsia-200';
+    if (momentum === 'hot') return 'from-amber-300 to-orange-200';
+    if (momentum === 'up') return 'from-emerald-300 to-lime-200';
+    if (momentum === 'down') return 'from-rose-300 to-red-200';
+    return 'from-slate-300 to-zinc-200';
+  }
+
+  private getRisingMomentumBadgeClass(momentum: "new" | "hot" | "up" | "down" | "stable"): string {
+    if (momentum === 'new') return 'border-violet-300/40 bg-violet-300/15 text-violet-100';
+    if (momentum === 'hot') return 'border-amber-300/40 bg-amber-300/15 text-amber-100';
+    if (momentum === 'up') return 'border-emerald-300/40 bg-emerald-300/15 text-emerald-100';
+    if (momentum === 'down') return 'border-rose-300/40 bg-rose-300/15 text-rose-100';
+    return 'border-white/20 bg-white/10 text-white/70';
+  }
+
+  private toAnomalyAlertItems(items: AdminTrendAnomalyItem[]): AnomalyAlertItem[] {
+    if (!items.length) return [];
+
+    const normalized = items
+      .map((item) => ({
+        day: String(item.day || '').trim(),
+        actualCount: Math.max(0, Number(item.actualCount || 0)),
+        expectedCount: Math.max(0, Number(item.expectedCount || 0)),
+        deltaCount: Number(item.deltaCount || 0),
+        deltaPercent: Number(item.deltaPercent || 0),
+        zScore: Number(item.zScore || 0),
+        signal: String(item.signal || '').trim().toLowerCase() === 'down' ? 'down' as const : 'up' as const,
+        severity: this.normalizeAnomalySeverity(item.severity),
+      }))
+      .filter((item) => item.day);
+
+    return normalized
+      .sort((a, b) => Math.abs(b.zScore) - Math.abs(a.zScore))
+      .slice(0, 8)
+      .map((item) => ({
+        ...item,
+        label: this.formatTrendLabel(item.day),
+        severityLabel: this.formatAnomalySeverity(item.severity),
+        signalLabel: item.signal === 'up' ? 'Spike' : 'Drop',
+        badgeClass: this.getAnomalySeverityBadgeClass(item.severity),
+        signalClass: item.signal === 'up' ? 'text-emerald-200' : 'text-rose-200',
+      }));
+  }
+
+  private normalizeAnomalySeverity(value: string): 'high' | 'medium' | 'low' {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (normalized === 'high') return 'high';
+    if (normalized === 'medium') return 'medium';
+    return 'low';
+  }
+
+  private formatAnomalySeverity(value: 'high' | 'medium' | 'low'): string {
+    if (value === 'high') return 'High';
+    if (value === 'medium') return 'Medium';
+    return 'Low';
+  }
+
+  private getAnomalySeverityBadgeClass(value: 'high' | 'medium' | 'low'): string {
+    if (value === 'high') return 'border-rose-300/40 bg-rose-300/15 text-rose-100';
+    if (value === 'medium') return 'border-amber-300/40 bg-amber-300/15 text-amber-100';
+    return 'border-emerald-300/40 bg-emerald-300/15 text-emerald-100';
+  }
+
   private generateTicks(min: number, max: number, height: number, paddingY: number): DailyTrendTick[] {
     const tickCount = 4;
     const drawHeight = height - paddingY * 2;
@@ -1780,6 +1908,36 @@ interface SearchModeBreakdownItem {
   users: number | null;
   share: number;
   gradientClass: string;
+}
+
+interface RisingQueryCardItem {
+  query: string;
+  recentCount: number;
+  previousCount: number;
+  recentUsers: number;
+  growthPercent: number;
+  momentum: "new" | "hot" | "up" | "down" | "stable";
+  momentumLabel: string;
+  gradientClass: string;
+  badgeClass: string;
+  barWidth: number;
+  rank: number;
+}
+
+interface AnomalyAlertItem {
+  day: string;
+  label: string;
+  actualCount: number;
+  expectedCount: number;
+  deltaCount: number;
+  deltaPercent: number;
+  zScore: number;
+  signal: 'up' | 'down';
+  signalLabel: string;
+  severity: 'high' | 'medium' | 'low';
+  severityLabel: string;
+  badgeClass: string;
+  signalClass: string;
 }
 
 interface TrendInsightsModel {

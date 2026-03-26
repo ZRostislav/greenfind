@@ -61,11 +61,35 @@ export interface AdminRetention {
   d7Rate: number;
 }
 
+export interface AdminRisingQueryItem {
+  query: string;
+  recentCount: number;
+  previousCount: number;
+  recentUsers: number;
+  previousUsers: number;
+  growthPercent: number;
+  userGrowthPercent: number;
+  momentum: string;
+}
+
+export interface AdminTrendAnomalyItem {
+  day: string;
+  actualCount: number;
+  expectedCount: number;
+  deltaCount: number;
+  deltaPercent: number;
+  zScore: number;
+  signal: string;
+  severity: string;
+}
+
 export interface AdminOverviewResponse {
   summary: AdminSummary;
   topQueries: AdminTopItem[];
   dailyTrend: AdminDailyItem[];
   topSites: AdminTopItem[];
+  risingQueries?: AdminRisingQueryItem[];
+  trendAnomalies?: AdminTrendAnomalyItem[];
   modeBreakdown?: AdminModeBreakdownItem[];
   funnel?: AdminFunnel;
   ctrByPosition?: AdminCtrPositionItem[];

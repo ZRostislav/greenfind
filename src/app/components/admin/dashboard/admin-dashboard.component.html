@@ -273,6 +273,52 @@
         </article>
       </div>
 
+      <article class="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60">Anomaly alerts</h3>
+            <div class="mt-1 text-xs text-white/45">
+              Auto-detected spikes and drops in daily activity using baseline deviation.
+            </div>
+          </div>
+          <div class="text-xs uppercase tracking-[0.12em] text-white/45">
+            Z-score based
+          </div>
+        </div>
+
+        <div *ngIf="loadingOverview()" class="mt-4 text-sm text-white/55">Analyzing trend data...</div>
+
+        <div *ngIf="!loadingOverview() && trendAnomalies().length; else noTrendAnomaliesData" class="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2">
+          <div *ngFor="let item of trendAnomalies(); trackBy: trackByTrendAnomaly" class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-bold text-white">{{ item.label }}</div>
+              <span class="rounded-md border px-2 py-0.5 text-[10px] uppercase tracking-[0.08em]" [ngClass]="item.badgeClass">
+                {{ item.severityLabel }}
+              </span>
+            </div>
+
+            <div class="mt-1 text-xs" [ngClass]="item.signalClass">
+              {{ item.signalLabel }} {{ formatSignedPercent(item.deltaPercent) }}
+            </div>
+
+            <div class="mt-2 grid grid-cols-3 gap-2 text-[11px] text-white/55">
+              <div>
+                <div class="text-white/40">Actual</div>
+                <div class="font-bold text-white">{{ formatNumber(item.actualCount) }}</div>
+              </div>
+              <div>
+                <div class="text-white/40">Expected</div>
+                <div class="font-bold text-white">{{ formatNumber(item.expectedCount) }}</div>
+              </div>
+              <div>
+                <div class="text-white/40">Z-score</div>
+                <div class="font-bold text-white">{{ item.zScore | number: '1.1-2' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
       <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <article class="rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
           <div class="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-white/55">
@@ -404,7 +450,7 @@
         </article>
       </div>
 
-      <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <article class="rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
           <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60">Top queries</h3>
           <div *ngIf="loadingOverview()" class="mt-4 text-sm text-white/55">Loading data...</div>
@@ -420,6 +466,35 @@
               <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
                 <div class="h-full rounded-full bg-gradient-to-r from-ui-green-light to-lime-200" [style.width.%]="item.width"></div>
               </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-2xl border border-white/10 bg-black/25 p-4 sm:p-5">
+          <h3 class="text-sm font-black uppercase tracking-[0.14em] text-white/60">Rising queries</h3>
+          <div class="mt-1 text-xs text-white/45">Queries that are growing compared to the previous period.</div>
+          <div *ngIf="loadingOverview()" class="mt-4 text-sm text-white/55">Loading data...</div>
+          <div *ngIf="!loadingOverview() && risingQueries().length; else noRisingQueriesData" class="mt-4 space-y-3">
+            <div *ngFor="let item of risingQueries(); trackBy: trackByRisingQuery" class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+              <div class="flex items-center justify-between gap-2 text-sm">
+                <div class="min-w-0 inline-flex items-center gap-2">
+                  <span class="rounded-md border border-white/20 px-1.5 py-0.5 text-[10px] font-black text-white/60">#{{ item.rank }}</span>
+                  <span class="truncate text-white/85">{{ item.query }}</span>
+                </div>
+                <span class="font-bold" [ngClass]="{ 'text-emerald-200': item.growthPercent >= 0, 'text-rose-200': item.growthPercent < 0 }">
+                  {{ formatSignedPercent(item.growthPercent) }}
+                </span>
+              </div>
+              <div class="mt-1 flex items-center justify-between text-[11px] text-white/45">
+                <span>{{ formatNumber(item.recentCount) }} now vs {{ formatNumber(item.previousCount) }} before</span>
+                <span class="rounded-md border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.08em]" [ngClass]="item.badgeClass">
+                  {{ item.momentumLabel }}
+                </span>
+              </div>
+              <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div class="h-full rounded-full bg-gradient-to-r" [ngClass]="item.gradientClass" [style.width.%]="item.barWidth"></div>
+              </div>
+              <div class="mt-1 text-[11px] text-white/45">Active users: {{ formatNumber(item.recentUsers) }}</div>
             </div>
           </div>
         </article>
@@ -641,6 +716,14 @@
 
 <ng-template #noTopSitesData>
   <div class="mt-4 text-sm text-white/45">No site data.</div>
+</ng-template>
+
+<ng-template #noRisingQueriesData>
+  <div class="mt-4 text-sm text-white/45">No rising-query data for this period.</div>
+</ng-template>
+
+<ng-template #noTrendAnomaliesData>
+  <div class="mt-4 text-sm text-white/45">No significant anomalies detected for this period.</div>
 </ng-template>
 
 <ng-template #noCtrByPositionData>
