@@ -8,6 +8,13 @@ export interface AdminSummary {
   uniqueSearchUsers: number;
   totalClicks: number;
   uniqueClickUsers: number;
+  totalImpressions?: number;
+  noClickSearches?: number;
+  noClickRate?: number;
+  repeatSearches24h?: number;
+  repeatSearchRate?: number;
+  webSearches?: number;
+  imageSearches?: number;
 }
 
 export interface AdminTopItem {
@@ -21,11 +28,48 @@ export interface AdminDailyItem {
   count: number;
 }
 
+export interface AdminModeBreakdownItem {
+  mode: string;
+  count: number;
+  users: number | null;
+}
+
+export interface AdminFunnel {
+  totalSearches: number;
+  totalImpressions: number;
+  totalClicks: number;
+  searchesWithClicks: number;
+  noClickSearches: number;
+  noClickRate: number;
+  repeatSearches24h: number;
+  repeatSearchRate: number;
+  ctrSearchToClick: number;
+}
+
+export interface AdminCtrPositionItem {
+  position: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+}
+
+export interface AdminRetention {
+  cohortSize: number;
+  retainedD1: number;
+  retainedD7: number;
+  d1Rate: number;
+  d7Rate: number;
+}
+
 export interface AdminOverviewResponse {
   summary: AdminSummary;
   topQueries: AdminTopItem[];
   dailyTrend: AdminDailyItem[];
   topSites: AdminTopItem[];
+  modeBreakdown?: AdminModeBreakdownItem[];
+  funnel?: AdminFunnel;
+  ctrByPosition?: AdminCtrPositionItem[];
+  retention?: AdminRetention;
 }
 
 export interface AdminUserItem {

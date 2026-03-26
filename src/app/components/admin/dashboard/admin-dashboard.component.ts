@@ -182,6 +182,40 @@ export class AdminDashboardComponent implements OnInit {
       uniqueClickUsers: summary.uniqueClickUsers,
     };
   });
+  readonly funnelCard = computed(() => {
+    const summary = this.overview()?.summary;
+    const funnel = this.overview()?.funnel;
+    if (!summary && !funnel) return null;
+
+    const totalSearches = funnel?.totalSearches ?? summary?.totalSearches ?? 0;
+    const totalImpressions = funnel?.totalImpressions ?? summary?.totalImpressions ?? 0;
+    const totalClicks = funnel?.totalClicks ?? summary?.totalClicks ?? 0;
+    const noClickSearches =
+      funnel?.noClickSearches ??
+      summary?.noClickSearches ??
+      Math.max(totalSearches - totalClicks, 0);
+    const noClickRate =
+      funnel?.noClickRate ??
+      summary?.noClickRate ??
+      (totalSearches ? (noClickSearches / totalSearches) * 100 : 0);
+    const repeatSearches24h = funnel?.repeatSearches24h ?? summary?.repeatSearches24h ?? 0;
+    const repeatSearchRate =
+      funnel?.repeatSearchRate ??
+      summary?.repeatSearchRate ??
+      (totalSearches ? (repeatSearches24h / totalSearches) * 100 : 0);
+
+    return {
+      totalSearches,
+      totalImpressions,
+      totalClicks,
+      noClickSearches,
+      noClickRate: Math.max(0, Number(noClickRate.toFixed(2))),
+      repeatSearches24h,
+      repeatSearchRate: Math.max(0, Number(repeatSearchRate.toFixed(2))),
+    };
+  });
+  readonly ctrByPosition = computed(() => (this.overview()?.ctrByPosition ?? []).slice(0, 8));
+  readonly retentionCard = computed(() => this.overview()?.retention ?? null);
 
   ngOnInit() {
     this.reloadAll();
@@ -417,13 +451,22 @@ export class AdminDashboardComponent implements OnInit {
     return item.y;
   }
 
+  trackByCtrPosition(_index: number, item: { position: number }): number {
+    return item.position;
+  }
+
   formatNumber(value: number): string {
     return this.numberFormatter.format(value);
   }
 
   formatMetricValue(value: number | null): string {
-    if (value === null) return '—';
+    if (value === null) return '-';
     return this.formatNumber(value);
+  }
+
+  formatPercent(value: number | null | undefined): string {
+    if (value === null || value === undefined) return '-';
+    return `${value.toFixed(2)}%`;
   }
 
   isCustomSectionEnabled(key: CustomReportSectionKey): boolean {
