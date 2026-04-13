@@ -3,6 +3,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } fr
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
+import emojiFlags from 'emoji-flags';
 import {
   AiOverview,
   ImageResult,
@@ -32,11 +33,19 @@ import {
   HistoryIcon,
   UserIcon,
   Shield,
+  ImageIcon,
 } from 'lucide-angular';
 import { SavedLink, SavedLinksService } from '../../services/saved-links.service';
 import { AuthService } from '../../services/auth.service';
 import { AuthStateService, User } from '../../services/auth-state.service';
 import { environment } from '../../environments/environment';
+
+interface CountryOption {
+  code: string;
+  name: string;
+  flagSrc: string;
+}
+
 @Component({
   selector: 'app-results',
   standalone: true,
@@ -62,6 +71,15 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly HistoryIcon = HistoryIcon;
   readonly UserIcon = UserIcon;
   readonly ShieldIcon = Shield;
+  readonly ImageIcon = ImageIcon;
+  readonly filterInputClass =
+    'w-full h-11 rounded-2xl border border-white/25 bg-transparent px-4 text-sm text-white placeholder:text-white/32 outline-none transition-all focus:border-ui-green-light/70 focus:shadow-[0_0_0_3px_rgba(87,200,77,0.16)]';
+  readonly filterButtonClass =
+    'h-11 rounded-2xl border border-white/30 bg-transparent px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80 transition-all hover:border-white/50 hover:text-white';
+  readonly filterAccentButtonClass =
+    'h-11 rounded-2xl border border-ui-green-light/70 bg-transparent px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-ui-green-light transition-all hover:border-ui-green-light hover:text-white';
+  readonly filterIconButtonClass =
+    'h-11 w-11 shrink-0 rounded-2xl border border-white/30 bg-transparent text-white/80 transition-all hover:border-white/50 hover:text-white flex items-center justify-center';
 
   results$: Observable<any[]>;
   loading$: Observable<boolean>;
@@ -87,7 +105,9 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   query = '';
   mode: 'web' | 'images' = 'web';
   country = '';
-  city = '';
+  countryQuery = '';
+  showCountryPicker = false;
+  countries: CountryOption[] = [];
 
   siteInput = '';
   similarInput = '';
@@ -105,6 +125,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   siteError: string | null = null;
   similarError: string | null = null;
   showFilters = false;
+  showInsightsDetails = false;
 
   constructor(
     private searchService: SearchService,
@@ -147,6 +168,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.loadCountries();
     const filtersFromRoute = this.parseFiltersFromRoute();
     const savedFilters = this.searchService.getCurrentFilters();
     const hasQueryInRoute = !!filtersFromRoute.query;
@@ -268,10 +290,76 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fileTypesSelected.push(type);
   }
 
+  filteredCountries(): CountryOption[] {
+    const q = this.countryQuery.trim().toLowerCase();
+    const list = !q
+      ? this.countries
+      : this.countries.filter(
+          (country) =>
+            country.name.toLowerCase().includes(q) || country.code.toLowerCase().includes(q),
+        );
+
+    return list.slice(0, 18);
+  }
+
+  openCountryPicker() {
+    this.showCountryPicker = true;
+  }
+
+  closeCountryPicker() {
+    setTimeout(() => {
+      this.showCountryPicker = false;
+      this.syncCountryQueryFromCode();
+    }, 120);
+  }
+
+  selectCountry(country: CountryOption) {
+    this.country = country.code.toLowerCase();
+    this.countryQuery = country.name;
+    this.showCountryPicker = false;
+  }
+
+  clearCountry() {
+    this.country = '';
+    this.countryQuery = '';
+    this.showCountryPicker = false;
+  }
+
+  getSelectedCountry(): CountryOption | null {
+    const code = this.country.trim().toUpperCase();
+    if (!code) return null;
+    return this.countries.find((item) => item.code === code) ?? null;
+  }
+
+  applyCountryInput() {
+    const query = this.countryQuery.trim().toLowerCase();
+    if (!query) {
+      this.clearCountry();
+      return;
+    }
+
+    const exactMatch = this.countries.find(
+      (country) =>
+        country.code.toLowerCase() === query || country.name.toLowerCase() === query,
+    );
+
+    if (exactMatch) {
+      this.selectCountry(exactMatch);
+      return;
+    }
+
+    const firstMatch = this.filteredCountries()[0];
+    if (firstMatch) {
+      this.selectCountry(firstMatch);
+      return;
+    }
+
+    this.syncCountryQueryFromCode();
+  }
+
   hasActiveFilters(): boolean {
     return !!(
       this.country.trim() ||
-      this.city.trim() ||
       this.activeSite ||
       this.activeSimilar ||
       this.excludeWords.length ||
@@ -280,12 +368,27 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  getActiveFiltersCount(): number {
+    let count = 0;
+    if (this.country.trim()) count += 1;
+    if (this.activeSite) count += 1;
+    if (this.activeSimilar) count += 1;
+    count += this.excludeWords.length;
+    count += this.exactWords.length;
+    count += this.fileTypesSelected.length;
+    return count;
+  }
+
   trackByLink(index: number, item: any): string {
     return item.link ?? `${index}`;
   }
 
   trackByValue(index: number, value: string): string {
     return value || `${index}`;
+  }
+
+  trackByCountry(index: number, country: CountryOption): string {
+    return country.code || `${index}`;
   }
 
   trackByFact(index: number, fact: KnowledgeGraphFact): string {
@@ -343,7 +446,6 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.query = filters.query ?? '';
     this.mode = filters.mode === 'images' ? 'images' : 'web';
     this.country = filters.country ?? '';
-    this.city = filters.city ?? '';
 
     this.activeSite = filters.site ?? null;
     this.activeSimilar = filters.similar ?? null;
@@ -353,6 +455,28 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.excludeWords = [...(filters.exclude ?? [])];
     this.exactWords = [...(filters.exact ?? [])];
     this.fileTypesSelected = [...(filters.fileTypes ?? [])];
+    this.syncCountryQueryFromCode();
+  }
+
+  private loadCountries() {
+    this.countries = emojiFlags.data
+      .map((entry) => ({
+        code: entry.code,
+        name: entry.name,
+        flagSrc: `/3x2/${entry.code}.svg`,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private syncCountryQueryFromCode() {
+    const normalizedCode = this.country.trim().toUpperCase();
+    if (!normalizedCode) {
+      this.countryQuery = '';
+      return;
+    }
+
+    const match = this.countries.find((item) => item.code === normalizedCode);
+    this.countryQuery = match ? match.name : normalizedCode;
   }
 
   private buildPayload(): SearchFilters | null {
@@ -363,7 +487,6 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
       query,
       mode: this.mode,
       country: this.country.trim().toLowerCase() || undefined,
-      city: this.city.trim() || undefined,
       site: this.activeSite || undefined,
       similar: this.activeSimilar || undefined,
       exclude: this.excludeWords,
@@ -486,7 +609,6 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
       query: qp.get('q')?.trim() || '',
       mode: qp.get('mode') === 'images' ? 'images' : 'web',
       country: qp.get('country')?.trim().toLowerCase() || undefined,
-      city: qp.get('city')?.trim() || undefined,
       site: qp.get('site')?.trim() || undefined,
       similar: qp.get('similar')?.trim() || undefined,
       exclude: split('exclude'),
@@ -513,7 +635,6 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
       q: clean(filters.query),
       mode: filters.mode === 'images' ? 'images' : undefined,
       country: clean(filters.country),
-      city: clean(filters.city),
       site: clean(filters.site),
       similar: clean(filters.similar),
       exclude: join(filters.exclude),

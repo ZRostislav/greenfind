@@ -63,29 +63,34 @@
         </button>
 
         <div
-          class="order-2 sm:order-none ml-auto sm:ml-0 flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl"
+          class="order-2 sm:order-none ml-auto sm:ml-0 flex items-center bg-white/5 border border-white/15 rounded-xl self-stretch overflow-hidden"
         >
           <button
             (click)="setMode('web')"
-            class="px-3 py-2 text-xs font-black rounded-lg transition-all"
+            class="cursor-pointer px-4 sm:px-5 text-sm font-bold transition-all flex items-center justify-center gap-2 active:scale-95 self-stretch"
             [ngClass]="
               mode === 'web'
                 ? 'bg-white/20 text-white'
-                : 'text-white/60 hover:text-white hover:bg-white/10'
+                : 'text-white/50 hover:text-white hover:bg-white/10'
             "
           >
-            Web
+            <i-lucide [img]="GlobeIcon" class="w-4 h-4"></i-lucide>
+            <span>Web</span>
           </button>
+
+          <div class="w-[1px] h-4 bg-white/10"></div>
+
           <button
             (click)="setMode('images')"
-            class="px-3 py-2 text-xs font-black rounded-lg transition-all"
+            class="cursor-pointer px-4 sm:px-5 text-sm font-bold transition-all flex items-center justify-center gap-2 active:scale-95 self-stretch"
             [ngClass]="
               mode === 'images'
                 ? 'bg-white/20 text-white'
-                : 'text-white/60 hover:text-white hover:bg-white/10'
+                : 'text-white/50 hover:text-white hover:bg-white/10'
             "
           >
-            Images
+            <i-lucide [img]="ImageIcon" class="w-4 h-4"></i-lucide>
+            <span>Images</span>
           </button>
         </div>
 
@@ -130,170 +135,251 @@
 
       <div
         *ngIf="showFilters"
-        class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm max-h-[75dvh] overflow-y-auto custom-scrollbar pr-1 pb-4 overscroll-contain"
+        class="mt-4 max-h-[75dvh] overflow-y-auto overscroll-contain p-4 custom-scrollbar sm:p-6"
       >
-        <div class="bg-black/10 border border-white/10 rounded-2xl p-4 space-y-3">
-          <p class="text-white/70 text-xs uppercase tracking-[0.18em]">Location & Domains</p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input
-              [(ngModel)]="country"
-              placeholder="Country code (e.g. us)"
-              class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30"
-            />
-            <input
-              [(ngModel)]="city"
-              placeholder="City"
-              class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input
-                [(ngModel)]="siteInput"
-                (keydown.enter)="applySiteFilter()"
-                placeholder="site: example.com"
-                class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/30 outline-none focus:border-white/30"
-              />
-              <button
-                (click)="applySiteFilter()"
-                class="w-full sm:w-auto px-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 transition-colors"
+        <div class="grid grid-cols-1 xl:grid-cols-12">
+          <section class="space-y-5 xl:col-span-6 p-4 sm:p-5">
+            <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
+              <label class="text-[10px] font-semibold uppercase tracking-widest text-white/60"
+                >Country</label
               >
-                Apply
-              </button>
-            </div>
-            <p *ngIf="siteError" class="text-red-200 text-xs">{{ siteError }}</p>
-            <div
-              *ngIf="activeSite"
-              class="inline-flex items-center gap-2 text-xs bg-white/10 rounded-xl px-3 py-1.5"
-            >
-              <span>site:{{ activeSite }}</span>
-              <button (click)="removeSiteFilter()" class="text-white/50 hover:text-red-300">
-                x
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input
-                [(ngModel)]="similarInput"
-                (keydown.enter)="applySimilarFilter()"
-                placeholder="related: example.com"
-                class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/30 outline-none focus:border-white/30"
-              />
-              <button
-                (click)="applySimilarFilter()"
-                class="w-full sm:w-auto px-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 transition-colors"
-              >
-                Apply
-              </button>
-            </div>
-            <p *ngIf="similarError" class="text-red-200 text-xs">{{ similarError }}</p>
-            <div
-              *ngIf="activeSimilar"
-              class="inline-flex items-center gap-2 text-xs bg-white/10 rounded-xl px-3 py-1.5"
-            >
-              <span>related:{{ activeSimilar }}</span>
-              <button (click)="removeSimilarFilter()" class="text-white/50 hover:text-red-300">
-                x
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-black/10 border border-white/10 rounded-2xl p-4 space-y-3">
-          <p class="text-white/70 text-xs uppercase tracking-[0.18em]">Words</p>
-
-          <div class="space-y-2">
-            <div class="flex gap-2">
-              <input
-                [(ngModel)]="exactInput"
-                (keydown.enter)="addWord('exact')"
-                placeholder="Exact phrase"
-                class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/30 outline-none focus:border-white/30"
-              />
-              <button
-                (click)="addWord('exact')"
-                class="px-3 rounded-xl border border-emerald-300/30 bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors"
-              >
-                +
-              </button>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                *ngFor="let word of exactWords"
-                class="inline-flex items-center gap-2 text-xs bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-2.5 py-1"
-              >
-                "{{ word }}"
-                <button
-                  (click)="removeWord('exact', word)"
-                  class="text-white/60 hover:text-red-300"
+              <div class="relative">
+                <input
+                  [(ngModel)]="countryQuery"
+                  (focus)="openCountryPicker()"
+                  (blur)="closeCountryPicker()"
+                  (keydown.enter)="applyCountryInput()"
+                  placeholder="Search country or code..."
+                  [ngClass]="filterInputClass"
+                  class="pr-14"
+                />
+                <div
+                  *ngIf="getSelectedCountry() as selectedCountry"
+                  class="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-2 rounded-xl border border-white/20 px-2 py-1"
                 >
-                  x
-                </button>
-              </span>
-            </div>
-          </div>
+                  <img
+                    [src]="selectedCountry.flagSrc"
+                    [alt]="selectedCountry.name + ' flag'"
+                    class="h-3.5 w-5 rounded-[4px] border border-white/20 object-cover"
+                  />
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-white/80">
+                    {{ selectedCountry.code }}
+                  </span>
+                </div>
+              </div>
 
-          <div class="space-y-2">
-            <div class="flex gap-2">
-              <input
-                [(ngModel)]="excludeInput"
-                (keydown.enter)="addWord('exclude')"
-                placeholder="Exclude word"
-                class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white placeholder:text-white/30 outline-none focus:border-white/30"
-              />
-              <button
-                (click)="addWord('exclude')"
-                class="px-3 rounded-xl border border-red-300/30 bg-red-500/10 hover:bg-red-500/20 transition-colors"
+              <div
+                *ngIf="showCountryPicker"
+                class="absolute left-0 right-0 top-[68px] z-40 max-h-60 overflow-y-auto rounded-2xl border border-white/25 bg-black/80 p-2 shadow-[0_24px_56px_rgba(0,0,0,0.42)] custom-scrollbar"
               >
-                -
-              </button>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                *ngFor="let word of excludeWords"
-                class="inline-flex items-center gap-2 text-xs bg-red-500/10 border border-red-500/30 rounded-xl px-2.5 py-1"
-              >
-                -{{ word }}
                 <button
-                  (click)="removeWord('exclude', word)"
-                  class="text-white/60 hover:text-red-300"
+                  *ngFor="let countryOption of filteredCountries(); trackBy: trackByCountry"
+                  (mousedown)="selectCountry(countryOption)"
+                  class="flex w-full items-center justify-between rounded-xl border border-transparent px-3 py-2.5 text-left transition-all hover:border-white/[0.08] hover:bg-white/[0.06]"
+                  [ngClass]="
+                    country === countryOption.code.toLowerCase()
+                      ? 'border-ui-green-light/60 text-white'
+                      : 'text-white/72'
+                  "
                 >
-                  x
+                  <span class="flex items-center gap-3">
+                    <img
+                      [src]="countryOption.flagSrc"
+                      [alt]="countryOption.name + ' flag'"
+                      class="h-3.5 w-5 rounded-[4px] border border-white/20 object-cover"
+                    />
+                    <span class="text-sm truncate">{{ countryOption.name }}</span>
+                  </span>
+                  <span class="text-[10px] uppercase tracking-wider text-white/50">{{
+                    countryOption.code
+                  }}</span>
                 </button>
-              </span>
-            </div>
-          </div>
-        </div>
+                <div
+                  *ngIf="!filteredCountries().length"
+                  class="p-4 text-center text-xs text-white/40"
+                >
+                  No countries found
+                </div>
+              </div>
 
-        <div class="md:col-span-2 bg-black/10 border border-white/10 rounded-2xl p-4 space-y-3">
-          <p class="text-white/70 text-xs uppercase tracking-[0.18em]">File Types</p>
-          <div class="flex flex-wrap gap-2">
+              <div
+                *ngIf="country"
+                class="inline-flex items-center gap-2 rounded-2xl border border-ui-green-light/50 px-3 py-2 text-xs text-white"
+              >
+                <img
+                  *ngIf="getSelectedCountry() as selectedCountry"
+                  [src]="selectedCountry.flagSrc"
+                  [alt]="selectedCountry.name + ' flag'"
+                  class="h-3.5 w-5 rounded-[4px] border border-white/20 object-cover"
+                />
+                <span>{{ countryQuery || country.toUpperCase() }}</span>
+                <button
+                  (click)="clearCountry()"
+                  class="flex h-6 w-6 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
+              <label class="text-[10px] font-semibold uppercase tracking-widest text-white/60"
+                >Site Filter</label
+              >
+              <div class="flex gap-2">
+                <input
+                  [(ngModel)]="siteInput"
+                  (keydown.enter)="applySiteFilter()"
+                  placeholder="e.g. example.com"
+                  [ngClass]="filterInputClass"
+                />
+                <button (click)="applySiteFilter()" [class]="filterAccentButtonClass">Apply</button>
+              </div>
+              <p *ngIf="siteError" class="text-xs text-red-400">{{ siteError }}</p>
+              <div
+                *ngIf="activeSite"
+                class="inline-flex items-center gap-2 rounded-2xl border border-ui-green-light/50 px-3 py-2 text-xs text-white"
+              >
+                <span class="opacity-60">site:</span> {{ activeSite }}
+                <button
+                  (click)="removeSiteFilter()"
+                  class="flex h-6 w-6 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
+              <label class="text-[10px] font-semibold uppercase tracking-widest text-white/60"
+                >Similar Sources</label
+              >
+              <div class="flex gap-2">
+                <input
+                  [(ngModel)]="similarInput"
+                  (keydown.enter)="applySimilarFilter()"
+                  placeholder="e.g. example.com"
+                  [ngClass]="filterInputClass"
+                />
+                <button (click)="applySimilarFilter()" [class]="filterButtonClass">Apply</button>
+              </div>
+              <p *ngIf="similarError" class="text-xs text-red-400">{{ similarError }}</p>
+              <div
+                *ngIf="activeSimilar"
+                class="inline-flex items-center gap-2 rounded-2xl border border-white/25 px-3 py-2 text-xs text-white"
+              >
+                <span class="opacity-60">related:</span> {{ activeSimilar }}
+                <button
+                  (click)="removeSimilarFilter()"
+                  class="flex h-6 w-6 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="space-y-5 xl:col-span-6 p-4 sm:p-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
+                <label
+                  class="text-[10px] font-semibold uppercase tracking-widest text-white/60 flex items-center gap-1.5"
+                >
+                  <lucide-icon [img]="PlusIcon" [size]="12"></lucide-icon> Include
+                </label>
+                <div class="flex gap-2">
+                  <input
+                    [(ngModel)]="exactInput"
+                    (keydown.enter)="addWord('exact')"
+                    placeholder="Exact phrase"
+                    [ngClass]="filterInputClass"
+                  />
+                  <button (click)="addWord('exact')" [class]="filterIconButtonClass">
+                    <lucide-icon [img]="PlusIcon" [size]="16"></lucide-icon>
+                  </button>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-1" *ngIf="exactWords.length > 0">
+                  <span
+                    *ngFor="let word of exactWords"
+                    class="inline-flex items-center gap-1.5 rounded-2xl border border-ui-green-light/50 px-3 py-1.5 text-xs text-white"
+                  >
+                    "{{ word }}"
+                    <button
+                      (click)="removeWord('exact', word)"
+                      class="flex h-5 w-5 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <lucide-icon [img]="XIcon" [size]="12"></lucide-icon>
+                    </button>
+                  </span>
+                </div>
+              </div>
+
+              <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
+                <label
+                  class="text-[10px] font-semibold uppercase tracking-widest text-white/60 flex items-center gap-1.5"
+                >
+                  <lucide-icon [img]="MinusIcon" [size]="12"></lucide-icon> Exclude
+                </label>
+                <div class="flex gap-2">
+                  <input
+                    [(ngModel)]="excludeInput"
+                    (keydown.enter)="addWord('exclude')"
+                    placeholder="Word to skip"
+                    [ngClass]="filterInputClass"
+                  />
+                  <button (click)="addWord('exclude')" [class]="filterIconButtonClass">
+                    <lucide-icon [img]="MinusIcon" [size]="16"></lucide-icon>
+                  </button>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-1" *ngIf="excludeWords.length > 0">
+                  <span
+                    *ngFor="let word of excludeWords"
+                    class="inline-flex items-center gap-1.5 rounded-2xl border border-red-300/35 px-3 py-1.5 text-xs text-white"
+                  >
+                    -{{ word }}
+                    <button
+                      (click)="removeWord('exclude', word)"
+                      class="flex h-5 w-5 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <lucide-icon [img]="XIcon" [size]="12"></lucide-icon>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-3 rounded-[1.4rem] border border-white/15 p-3.5">
+              <label
+                class="text-[10px] font-semibold uppercase tracking-widest text-white/60 flex items-center gap-1.5"
+              >
+                <lucide-icon [img]="FileTextIcon" [size]="12"></lucide-icon> Preferred File Types
+              </label>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  *ngFor="let type of fileTypes"
+                  (click)="toggleFileType(type)"
+                  class="h-10 rounded-2xl border px-4 text-[11px] font-semibold uppercase tracking-[0.14em] transition-all"
+                  [ngClass]="
+                    fileTypesSelected.includes(type)
+                      ? 'border-ui-green-light/60 text-ui-green-light'
+                      : 'border-white/30 bg-transparent text-white/60 hover:border-white/50 hover:text-white'
+                  "
+                >
+                  {{ type }}
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <div class="xl:col-span-12 mt-1 flex justify-end border-t border-white/15 pt-5">
             <button
-              *ngFor="let type of fileTypes"
-              (click)="toggleFileType(type)"
-              class="cursor-pointer px-3 py-1.5 rounded-xl border text-xs uppercase tracking-[0.08em] transition-all"
-              [ngClass]="
-                fileTypesSelected.includes(type)
-                  ? 'bg-white/20 border-white/35 text-white'
-                  : 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-white/25'
-              "
+              (click)="doSearch()"
+              class="inline-flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-ui-green-light/70 bg-transparent px-8 text-sm font-semibold uppercase tracking-[0.14em] text-ui-green-light transition-all hover:border-ui-green-light hover:text-white active:scale-95"
             >
-              {{ type }}
+              <span>Apply Filters</span>
+              <lucide-icon [img]="ArrowRightIcon" [size]="16"></lucide-icon>
             </button>
           </div>
-        </div>
-
-        <div class="md:col-span-2 flex justify-stretch sm:justify-end">
-          <button
-            (click)="doSearch()"
-            class="w-full sm:w-auto px-5 py-2 rounded-xl border border-white/25 bg-white/15 hover:bg-white/25 text-sm font-semibold transition-colors"
-          >
-            Apply filters
-          </button>
         </div>
       </div>
     </div>
@@ -319,50 +405,47 @@
 
       <ng-container *ngIf="mode === 'web'">
         <section
-        *ngIf="aiOverview$ | async as aiOverview"
-        class="mb-8 rounded-3xl border border-ui-green/25 bg-ui-green/[0.08] backdrop-blur-sm p-5 sm:p-6"
+          *ngIf="aiOverview$ | async as aiOverview"
+          class="mb-8 rounded-3xl border border-ui-green/25 bg-ui-green/[0.08] backdrop-blur-sm p-5 sm:p-6"
         >
-        <div class="flex items-center gap-2 mb-3">
-          <span
-            class="px-2.5 py-1 rounded-lg border border-ui-green/30 bg-ui-green/15 text-[10px] font-black uppercase tracking-[0.14em] text-ui-green-light"
-          >
-            AI Overview
-          </span>
-          <h3 class="text-lg sm:text-xl font-bold text-white">{{ aiOverview.title }}</h3>
-        </div>
+          <div class="flex items-center gap-2 mb-3">
+            <span
+              class="px-2.5 py-1 rounded-lg border border-ui-green/30 bg-ui-green/15 text-[10px] font-black uppercase tracking-[0.14em] text-ui-green-light"
+            >
+              AI Overview
+            </span>
+            <h3 class="text-lg sm:text-xl font-bold text-white">{{ aiOverview.title }}</h3>
+          </div>
 
-        <p *ngIf="aiOverview.summary" class="text-white/80 text-sm leading-relaxed">
-          {{ aiOverview.summary }}
-        </p>
+          <p *ngIf="aiOverview.summary" class="text-white/80 text-sm leading-relaxed">
+            {{ aiOverview.summary }}
+          </p>
 
-        <ul *ngIf="aiOverview.points.length" class="mt-3 space-y-2">
-          <li
-            *ngFor="let point of aiOverview.points; let i = index"
-            class="text-white/75 text-sm leading-relaxed flex items-start gap-2"
-          >
-            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-ui-green-light shrink-0"></span>
-            <span>{{ point }}</span>
-          </li>
-        </ul>
+          <ul *ngIf="aiOverview.points.length" class="mt-3 space-y-2">
+            <li
+              *ngFor="let point of aiOverview.points; let i = index"
+              class="text-white/75 text-sm leading-relaxed flex items-start gap-2"
+            >
+              <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-ui-green-light shrink-0"></span>
+              <span>{{ point }}</span>
+            </li>
+          </ul>
 
-        <div *ngIf="aiOverview.sources.length" class="mt-4 flex flex-wrap gap-2">
-          <a
-            *ngFor="let source of aiOverview.sources; trackBy: trackByAiSource"
-            [href]="source.link"
-            target="_blank"
-            (click)="handleExternalClick({ url: source.link, title: source.title }, $event)"
-            class="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-white/30 transition-colors"
-          >
-            {{ source.title }}
-          </a>
-        </div>
+          <div *ngIf="aiOverview.sources.length" class="mt-4 flex flex-wrap gap-2">
+            <a
+              *ngFor="let source of aiOverview.sources; trackBy: trackByAiSource"
+              [href]="source.link"
+              target="_blank"
+              (click)="handleExternalClick({ url: source.link, title: source.title }, $event)"
+              class="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-white/30 transition-colors"
+            >
+              {{ source.title }}
+            </a>
+          </div>
         </section>
       </ng-container>
 
-      <section
-        *ngIf="(imageResults$ | async) as imageResults"
-        class="mb-8"
-      >
+      <section *ngIf="imageResults$ | async as imageResults" class="mb-8">
         <div *ngIf="imageResults.length && mode === 'images'" class="space-y-3">
           <div class="columns-2 sm:columns-3 lg:columns-4 [column-gap:0.75rem]">
             <button
@@ -391,64 +474,79 @@
 
       <ng-container *ngIf="savedLinks$ | async as savedLinks">
         <div class="space-y-10" *ngIf="mode === 'web'">
-        <div
-          *ngIf="!(results$ | async)?.length && !(loading$ | async)"
-          class="text-white/60 py-20 font-light"
-        >
-          No trails found.
-        </div>
+          <div
+            *ngIf="!(results$ | async)?.length && !(loading$ | async)"
+            class="text-white/60 py-20 font-light"
+          >
+            No trails found.
+          </div>
 
-        <div
-          *ngFor="let item of results$ | async; trackBy: trackByLink"
-          class="group relative animate-in fade-in slide-in-from-bottom-4 duration-500"
-        >
-          <div class="flex items-start gap-3 sm:gap-4">
-            <div
-              class="shrink-0 mt-1.5 p-2 bg-white/5 rounded-xl border border-white/10 group-hover:border-ui-green/30 transition-all duration-300 relative"
-            >
-              <button
-                (click)="toggleSaved(item, $event)"
-                class="absolute -top-2 -right-2 w-7 h-7 rounded-xl border bg-black/40 backdrop-blur hover:bg-black/60 transition-colors flex items-center justify-center"
-                [ngClass]="
-                  isSaved(item.link)
-                    ? 'text-ui-green border-ui-green/30'
-                    : 'text-white/30 border-white/10 hover:text-white/60'
-                "
-                [title]="isSaved(item.link) ? 'Remove from saved' : 'Save link'"
+          <div
+            *ngFor="let item of results$ | async; trackBy: trackByLink"
+            class="group relative animate-in fade-in slide-in-from-bottom-4 duration-500"
+          >
+            <div class="flex items-start gap-3 sm:gap-4">
+              <div
+                class="shrink-0 mt-1.5 p-2 bg-white/5 rounded-xl border border-white/10 group-hover:border-ui-green/30 transition-all duration-300"
               >
-                <lucide-icon [img]="StarIcon" [size]="16"></lucide-icon>
-              </button>
-              <img
-                *ngIf="item.favicon"
-                [src]="item.favicon"
-                class="w-5 h-5 grayscale group-hover:grayscale-0 transition-all"
-                (error)="item.favicon = '/default-favicon.png'"
-                alt="Favicon"
-              />
-            </div>
+                <img
+                  *ngIf="item.favicon"
+                  [src]="item.favicon"
+                  class="w-5 h-5 grayscale group-hover:grayscale-0 transition-all"
+                  (error)="item.favicon = '/default-favicon.png'"
+                  alt="Favicon"
+                />
+              </div>
 
-            <div class="flex-grow min-w-0">
-              <cite
-                class="not-italic text-ui-green/60 text-[11px] font-mono tracking-tight block mb-1 break-words"
-              >
-                {{ item.link }}
-              </cite>
-              <h3 class="text-lg sm:text-xl font-josefin font-semibold mb-2 leading-snug">
-                <a
-                  [href]="item.link"
-                  target="_blank"
-                  (click)="handleExternalClick({ url: item.link, title: item.title, snippet: item.snippet, position: item.position }, $event)"
-                  class="text-white group-hover:text-ui-green transition-colors underline-offset-4 decoration-ui-green/0 group-hover:decoration-ui-green/30 underline"
-                >
-                  {{ item.title }}
-                </a>
-              </h3>
-              <p class="text-white/60 leading-relaxed text-sm max-w-2xl font-light">
-                {{ item.snippet }}
-              </p>
+              <div class="flex-grow min-w-0">
+                <div class="flex items-start justify-between gap-3">
+                  <cite
+                    class="not-italic text-ui-green/60 text-[11px] font-mono tracking-tight block break-words"
+                  >
+                    {{ item.link }}
+                  </cite>
+                  <button
+                    (click)="toggleSaved(item, $event)"
+                    class="shrink-0 h-7 px-2.5 rounded-lg border backdrop-blur transition-colors flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] font-semibold"
+                    [ngClass]="
+                      isSaved(item.link)
+                        ? 'text-ui-green border-ui-green/40 bg-ui-green/10 hover:bg-ui-green/20'
+                        : 'text-white/55 border-white/15 bg-white/5 hover:text-white hover:border-white/30 hover:bg-white/10'
+                    "
+                    [title]="isSaved(item.link) ? 'Remove from saved' : 'Save link'"
+                  >
+                    <lucide-icon [img]="StarIcon" [size]="14"></lucide-icon>
+                    <span class="hidden sm:inline">
+                      {{ isSaved(item.link) ? 'Saved' : 'Save' }}
+                    </span>
+                  </button>
+                </div>
+                <h3 class="text-lg sm:text-xl font-josefin font-semibold mb-2 leading-snug">
+                  <a
+                    [href]="item.link"
+                    target="_blank"
+                    (click)="
+                      handleExternalClick(
+                        {
+                          url: item.link,
+                          title: item.title,
+                          snippet: item.snippet,
+                          position: item.position,
+                        },
+                        $event
+                      )
+                    "
+                    class="text-white group-hover:text-ui-green transition-colors underline-offset-4 decoration-ui-green/0 group-hover:decoration-ui-green/30 underline"
+                  >
+                    {{ item.title }}
+                  </a>
+                </h3>
+                <p class="text-white/60 leading-relaxed text-sm max-w-2xl font-light">
+                  {{ item.snippet }}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </ng-container>
 
@@ -469,7 +567,10 @@
       </div>
 
       <!-- Pagination -->
-      <div *ngIf="mode === 'web' && (pagination$ | async) as pagination" class="mt-12 flex flex-col gap-6">
+      <div
+        *ngIf="mode === 'web' && (pagination$ | async) as pagination"
+        class="mt-12 flex flex-col gap-6"
+      >
         <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1 sm:gap-2">
           <button
             *ngIf="pagination.current > 1"
@@ -569,7 +670,12 @@
                   *ngFor="let person of kg.people_also_search_for; trackBy: trackByRelation"
                   [href]="person.link || null"
                   [attr.target]="person.link ? '_blank' : null"
-                  (click)="handleExternalClick({ url: person.link, title: person.name, source: person.type }, $event)"
+                  (click)="
+                    handleExternalClick(
+                      { url: person.link, title: person.name, source: person.type },
+                      $event
+                    )
+                  "
                   class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-white/70 transition-colors hover:border-white/20 hover:text-white"
                 >
                   <img
@@ -622,15 +728,103 @@
             </div>
           </div>
           <ng-template #defaultInsights>
-            <p class="text-white/50 text-xs leading-loose">
-              You are using <strong>GreenFind</strong>, an eco-conscious search layer. All results
-              are filtered to prioritize sustainability and open-source intelligence.
-            </p>
-            <div
-              class="mt-6 pt-6 border-t border-white/5 flex items-center justify-between text-[10px] text-white/30 font-mono"
-            >
-              <span>Nodes: 128</span>
-              <span>Status: Optimized</span>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span
+                  class="inline-flex items-center gap-2 rounded-xl border border-ui-green/30 bg-ui-green/15 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-ui-green-light"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-ui-green-light"></span>
+                  Live Insights
+                </span>
+                <button
+                  (click)="showInsightsDetails = !showInsightsDetails"
+                  class="text-[10px] uppercase tracking-[0.16em] text-white/45 hover:text-white/75 transition-colors"
+                >
+                  {{ showInsightsDetails ? 'Hide details' : 'Show details' }}
+                </button>
+              </div>
+
+              <p class="text-white/55 text-xs leading-loose">
+                <ng-container *ngIf="query.trim(); else defaultInsightsHint">
+                  Showing live data for:
+                  <strong class="text-white">"{{ query.trim() }}"</strong>
+                </ng-container>
+                <ng-template #defaultInsightsHint>
+                  Start a search and this panel will show live metrics, quick actions, and context
+                  for your current query.
+                </ng-template>
+              </p>
+
+              <div
+                class="grid grid-cols-2 gap-2 text-[11px] font-mono"
+                *ngIf="{
+                  webCount: (results$ | async)?.length || 0,
+                  loading: loading$ | async,
+                } as stats"
+              >
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">Mode</div>
+                  <div class="text-white/80 mt-1">web</div>
+                </div>
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">Results</div>
+                  <div class="text-white/80 mt-1">{{ stats.webCount }}</div>
+                </div>
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">Filters</div>
+                  <div class="text-white/80 mt-1">{{ getActiveFiltersCount() }}</div>
+                </div>
+                <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">Status</div>
+                  <div class="text-white/80 mt-1">{{ stats.loading ? 'Updating' : 'Synced' }}</div>
+                </div>
+              </div>
+
+              <div *ngIf="showInsightsDetails" class="pt-2 border-t border-white/8 space-y-3">
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    (click)="showFilters = !showFilters"
+                    class="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-white/30 transition-colors"
+                  >
+                    {{ showFilters ? 'Hide filters' : 'Open filters' }}
+                  </button>
+                  <button
+                    (click)="setMode('images')"
+                    class="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-white/30 transition-colors"
+                  >
+                    Switch to images
+                  </button>
+                </div>
+
+                <div
+                  *ngIf="(relatedSearches$ | async)?.length"
+                  class="rounded-2xl border border-white/8 bg-white/[0.02] p-3"
+                >
+                  <div class="text-white/40 text-[10px] uppercase tracking-[0.16em] mb-2">
+                    Suggested queries
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      *ngFor="let related of (relatedSearches$ | async)?.slice(0, 3)"
+                      (click)="searchRelated(related.query)"
+                      class="cursor-pointer rounded-xl border border-white/12 bg-white/[0.03] px-2.5 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-white/30 transition-colors"
+                    >
+                      {{ related.query }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="pt-4 border-t border-white/5 flex items-center justify-between text-[10px] text-white/30 font-mono"
+                *ngIf="{
+                  page: (pagination$ | async)?.current || 1,
+                  saved: (savedLinks$ | async)?.length || 0,
+                } as footer"
+              >
+                <span>Page: {{ footer.page }}</span>
+                <span>Saved: {{ footer.saved }}</span>
+              </div>
             </div>
           </ng-template>
         </div>
@@ -649,9 +843,15 @@
     >
       <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div class="min-w-0">
-          <div class="text-white text-sm font-semibold truncate">{{ activeImage.title || 'Image preview' }}</div>
+          <div class="text-white text-sm font-semibold truncate">
+            {{ activeImage.title || 'Image preview' }}
+          </div>
           <div class="text-white/50 text-xs">
-            {{ activeImageSize ? (activeImageSize.width + ' x ' + activeImageSize.height) : 'Loading size...' }}
+            {{
+              activeImageSize
+                ? activeImageSize.width + ' x ' + activeImageSize.height
+                : 'Loading size...'
+            }}
           </div>
         </div>
         <button
@@ -663,7 +863,9 @@
         </button>
       </div>
 
-      <div class="bg-black/20 max-h-[76vh] overflow-auto flex items-center justify-center p-3 sm:p-6">
+      <div
+        class="bg-black/20 max-h-[76vh] overflow-auto flex items-center justify-center p-3 sm:p-6"
+      >
         <img
           [src]="activeImage.original"
           [alt]="activeImage.title || 'Image preview'"
@@ -676,7 +878,16 @@
         <a
           [href]="activeImage.sourceLink || activeImage.link"
           target="_blank"
-          (click)="handleExternalClick({ url: activeImage.sourceLink || activeImage.link, title: activeImage.title, source: activeImage.source }, $event)"
+          (click)="
+            handleExternalClick(
+              {
+                url: activeImage.sourceLink || activeImage.link,
+                title: activeImage.title,
+                source: activeImage.source,
+              },
+              $event
+            )
+          "
           class="h-10 px-4 rounded-xl border border-white/20 bg-white/5 text-white/80 hover:text-white hover:bg-white/10 transition-colors flex items-center"
         >
           Open source

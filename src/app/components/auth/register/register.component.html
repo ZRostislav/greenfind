@@ -1,17 +1,17 @@
 <div
-  class="min-h-screen w-full flex items-center justify-center px-4 py-10 relative overflow-hidden"
+  class="min-h-screen w-full flex items-center justify-center px-4 py-6 sm:py-10 relative overflow-hidden"
 >
   <div
-    class="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-ui-green/10 rounded-full blur-[120px] pointer-events-none"
+    class="absolute top-[-15%] left-[-10%] w-[320px] h-[320px] sm:w-[500px] sm:h-[500px] bg-ui-green/10 rounded-full blur-[120px] pointer-events-none"
   ></div>
   <div
-    class="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] bg-white/5 rounded-full blur-[150px] pointer-events-none"
+    class="absolute bottom-[-15%] right-[-10%] w-[340px] h-[340px] sm:w-[600px] sm:h-[600px] bg-white/5 rounded-full blur-[150px] pointer-events-none"
   ></div>
 
   <div class="w-full max-w-md z-10 animate-slide-up">
     <a
       routerLink="/"
-      class="group flex items-center gap-2 text-white/40 hover:text-white transition-all font-bold text-sm mb-8 justify-center"
+      class="group flex items-center gap-2 text-white/40 hover:text-white transition-all font-bold text-xs sm:text-sm mb-6 sm:mb-8 justify-center"
     >
       <lucide-icon
         [img]="ArrowLeftIcon"
@@ -22,26 +22,26 @@
     </a>
 
     <div
-      class="w-full rounded-[2.5rem] border border-white/15 bg-white/5 backdrop-blur-2xl p-10 shadow-2xl relative"
+      class="w-full rounded-[2rem] sm:rounded-[2.5rem] border border-white/15 bg-white/5 backdrop-blur-2xl p-6 sm:p-10 shadow-2xl relative"
     >
       <div
-        class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-ui-green rounded-b-full shadow-[0_0_15px_#57c84d]"
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-1 bg-ui-green rounded-b-full shadow-[0_0_15px_#57c84d]"
       ></div>
 
-      <div class="text-center mb-10">
-        <h1 class="text-4xl font-black text-white tracking-tight">Join Us</h1>
-        <p class="text-white text-sm mt-3 font-medium">Start your eco-friendly search journey.</p>
+      <div class="text-center mb-8 sm:mb-10">
+        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">Join Us</h1>
+        <p class="text-white text-xs sm:text-sm mt-3 font-medium">Start your eco-friendly search journey.</p>
       </div>
 
       <div
         *ngIf="error"
-        class="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-xs text-red-300 flex items-start gap-3 animate-shake"
+        class="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 p-3 sm:p-4 text-[11px] sm:text-xs text-red-300 flex items-start gap-3 animate-shake"
       >
         <lucide-icon [img]="AlertCircleIcon" [size]="16" class="shrink-0 mt-0.5"></lucide-icon>
         <span>{{ error }}</span>
       </div>
 
-      <form class="space-y-5" [formGroup]="form" (ngSubmit)="submit()">
+      <form class="space-y-4 sm:space-y-5" [formGroup]="form" (ngSubmit)="submit()">
         <div class="space-y-2">
           <label class="block text-[10px] font-black text-white uppercase tracking-[0.15em] ml-1">
             Username
@@ -51,7 +51,7 @@
               type="text"
               formControlName="username"
               placeholder="username"
-              class="peer w-full h-14 rounded-2xl bg-white/5 border border-white/10 pl-12 pr-4 text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all font-bold"
+              class="peer w-full h-12 sm:h-14 rounded-2xl bg-white/5 border border-white/10 pl-12 pr-4 text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all font-bold"
             />
 
             <div
@@ -90,7 +90,7 @@
               type="email"
               formControlName="email"
               placeholder="hello@example.com"
-              class="peer w-full h-14 rounded-2xl bg-white/5 border border-white/10 pl-12 pr-4 text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all font-bold"
+              class="peer w-full h-12 sm:h-14 rounded-2xl bg-white/5 border border-white/10 pl-12 pr-4 text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all font-bold"
             />
 
             <div
@@ -118,7 +118,7 @@
               type="password"
               formControlName="password"
               placeholder="********"
-              class="peer w-full h-14 rounded-2xl bg-white/5 border border-white/10 pl-12 pr-4 text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all font-bold"
+              class="peer w-full h-12 sm:h-14 rounded-2xl bg-white/5 border border-white/10 pl-12 pr-4 text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all font-bold"
             />
 
             <div
@@ -186,7 +186,7 @@
               type="password"
               formControlName="confirmPassword"
               placeholder="********"
-              class="peer w-full h-14 rounded-2xl bg-white/5 border border-white/10 pl-12 pr-4 text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all font-bold"
+              class="peer w-full h-12 sm:h-14 rounded-2xl bg-white/5 border border-white/10 pl-12 pr-4 text-white placeholder:text-white/20 outline-none focus:bg-white/10 focus:border-ui-green/40 transition-all font-bold"
             />
 
             <div
@@ -220,7 +220,7 @@
           [attr.title]="
             !loading && (form.invalid || form.pending) ? 'Fill in the form correctly to continue' : null
           "
-          class="w-full h-14 mt-4 rounded-2xl bg-ui-base text-white font-black uppercase tracking-widest text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed shadow-[0_10px_20px_rgba(87,200,77,0.2)] hover:shadow-[0_15px_30px_rgba(87,200,77,0.3)] flex items-center justify-center gap-2"
+          class="w-full h-12 sm:h-14 mt-4 rounded-2xl bg-ui-base text-white font-black uppercase tracking-widest text-xs sm:text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed shadow-[0_10px_20px_rgba(87,200,77,0.2)] hover:shadow-[0_15px_30px_rgba(87,200,77,0.3)] flex items-center justify-center gap-2"
         >
           <span *ngIf="!loading">Create account</span>
           <div
@@ -230,8 +230,8 @@
         </button>
       </form>
 
-      <div class="mt-8 pt-8 border-t border-white/5 text-center">
-        <p class="text-sm text-white font-medium">
+      <div class="mt-8 pt-6 sm:pt-8 border-t border-white/5 text-center">
+        <p class="text-xs sm:text-sm text-white font-medium">
           Already have an account?
           <a
             routerLink="/login"
@@ -242,7 +242,7 @@
       </div>
     </div>
 
-    <p class="mt-6 text-center text-[10px] text-white font-bold uppercase tracking-widest">
+    <p class="mt-6 text-center text-[9px] sm:text-[10px] text-white font-bold uppercase tracking-widest">
       By signing up, you agree to our Terms of Service.
     </p>
   </div>

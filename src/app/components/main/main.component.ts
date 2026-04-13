@@ -35,6 +35,8 @@ interface Country {
   svg: string;
 }
 
+type MainLanguage = 'en' | 'ru';
+
 export const fadeIn = trigger('fadeIn', [
   transition(':enter', [style({ opacity: 0 }), animate('600ms ease-out', style({ opacity: 1 }))]),
 ]);
@@ -145,6 +147,108 @@ export class MainComponent implements OnInit, OnDestroy {
   readonly ArrowRightIcon = ArrowRight;
   readonly LogOutIcon = LogOutIcon;
   readonly ImageIcon = ImageIcon;
+  readonly languageOptions: readonly MainLanguage[] = ['en', 'ru'];
+  readonly languageLabels: Record<MainLanguage, string> = {
+    en: 'EN',
+    ru: 'RU',
+  };
+  selectedLanguage: MainLanguage = 'en';
+
+  private readonly languageStorageKey = 'greenfind.main.language';
+  private readonly translations: Record<MainLanguage, Record<string, string>> = {
+    en: {
+      history: 'History',
+      login: 'Login',
+      logout: 'Logout',
+      register: 'Register',
+      join: 'Join',
+      heroBadge: 'Eco Search Lab',
+      heroSubtitle: 'Smart search, clean interface, and powerful filters for quick research.',
+      searchPlaceholder: 'Search for anything...',
+      voiceStart: 'Start voice input',
+      voiceStop: 'Stop voice input',
+      searchImages: 'Search images',
+      voice: 'Voice',
+      image: 'Image',
+      find: 'Find',
+      savedUrlPlaceholder: 'https://example.com',
+      savedTitlePlaceholder: 'Name (optional)',
+      add: 'Add',
+      editTitle: 'Edit title',
+      remove: 'Remove',
+      titlePlaceholder: 'Title',
+      save: 'Save',
+      cancel: 'Cancel',
+      noSavedLinks: 'No saved links yet. Click the star in results to save one.',
+      listening: 'Listening...',
+      filters: 'Filters',
+      saved: 'Saved',
+      region: 'Region',
+      searchCountry: 'Search country...',
+      wordFilters: 'Word Filters',
+      exactWords: 'Exact words...',
+      excludeWords: 'Exclude words...',
+      fileTypes: 'File Types',
+      specificSite: 'Specific Site',
+      sitePrefix: 'site:',
+      domainPlaceholder: 'example.com',
+      enterValidDomain: 'Enter a valid domain',
+      enterValidUrl: 'Enter a valid URL.',
+      pleaseLoginSaveLinks: 'Please log in to save links.',
+      unableSaveLink: 'Unable to save link.',
+      titleCannotBeEmpty: 'Title cannot be empty.',
+      pleaseLoginEditLinks: 'Please log in to edit saved links.',
+      unableUpdateTitle: 'Unable to update title.',
+      pleaseLoginRemoveLinks: 'Please log in to remove saved links.',
+      unableRemoveLink: 'Unable to remove link.',
+    },
+    ru: {
+      history: 'История',
+      login: 'Вход',
+      logout: 'Выйти',
+      register: 'Регистрация',
+      join: 'Войти',
+      heroBadge: 'Эко Поиск',
+      heroSubtitle: 'Умный поиск, чистый интерфейс и мощные фильтры для быстрой работы.',
+      searchPlaceholder: 'Введите запрос...',
+      voiceStart: 'Начать голосовой ввод',
+      voiceStop: 'Остановить голосовой ввод',
+      searchImages: 'Поиск изображений',
+      voice: 'Голос',
+      image: 'Картинки',
+      find: 'Поиск',
+      savedUrlPlaceholder: 'https://example.com',
+      savedTitlePlaceholder: 'Название (необязательно)',
+      add: 'Добавить',
+      editTitle: 'Изменить название',
+      remove: 'Удалить',
+      titlePlaceholder: 'Название',
+      save: 'Сохранить',
+      cancel: 'Отмена',
+      noSavedLinks: 'Сохраненных ссылок пока нет. Нажмите звезду в результатах, чтобы добавить.',
+      listening: 'Слушаю...',
+      filters: 'Фильтры',
+      saved: 'Сохраненное',
+      region: 'Регион',
+      searchCountry: 'Поиск страны...',
+      wordFilters: 'Фильтры слов',
+      exactWords: 'Точные слова...',
+      excludeWords: 'Исключить слова...',
+      fileTypes: 'Типы файлов',
+      specificSite: 'Конкретный сайт',
+      sitePrefix: 'сайт:',
+      domainPlaceholder: 'example.com',
+      enterValidDomain: 'Введите корректный домен',
+      enterValidUrl: 'Введите корректный URL.',
+      pleaseLoginSaveLinks: 'Войдите, чтобы сохранять ссылки.',
+      unableSaveLink: 'Не удалось сохранить ссылку.',
+      titleCannotBeEmpty: 'Название не может быть пустым.',
+      pleaseLoginEditLinks: 'Войдите, чтобы редактировать сохраненные ссылки.',
+      unableUpdateTitle: 'Не удалось обновить название.',
+      pleaseLoginRemoveLinks: 'Войдите, чтобы удалять сохраненные ссылки.',
+      unableRemoveLink: 'Не удалось удалить ссылку.',
+    },
+  };
 
   query = '';
 
@@ -214,7 +318,18 @@ export class MainComponent implements OnInit, OnDestroy {
     }
   });
 
+  t(key: string): string {
+    return this.translations[this.selectedLanguage][key] ?? this.translations.en[key] ?? key;
+  }
+
+  setLanguage(language: MainLanguage): void {
+    if (this.selectedLanguage === language) return;
+    this.selectedLanguage = language;
+    this.persistLanguagePreference();
+  }
+
   ngOnInit() {
+    this.loadLanguagePreference();
     this.loadCountries();
     this.resetState();
     this.detectCountry();
@@ -242,6 +357,25 @@ export class MainComponent implements OnInit, OnDestroy {
       name: c.name,
       svg: `3x2/${c.code}.svg`,
     }));
+  }
+
+  private loadLanguagePreference(): void {
+    if (typeof localStorage !== 'undefined') {
+      const stored = localStorage.getItem(this.languageStorageKey);
+      if (stored === 'en' || stored === 'ru') {
+        this.selectedLanguage = stored;
+        return;
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('ru')) {
+      this.selectedLanguage = 'ru';
+    }
+  }
+
+  private persistLanguagePreference(): void {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(this.languageStorageKey, this.selectedLanguage);
   }
 
   private resetState(): void {
@@ -368,7 +502,7 @@ export class MainComponent implements OnInit, OnDestroy {
     }
 
     if (!this.isValidDomain(this.siteInput)) {
-      this.siteError = 'Enter a valid domain';
+      this.siteError = this.t('enterValidDomain');
       return;
     }
 
@@ -388,7 +522,7 @@ export class MainComponent implements OnInit, OnDestroy {
     }
 
     if (!this.isValidDomain(this.similarInput)) {
-      this.similarError = 'Enter a valid domain';
+      this.similarError = this.t('enterValidDomain');
       return;
     }
 
@@ -485,10 +619,10 @@ export class MainComponent implements OnInit, OnDestroy {
     if (!res.ok) {
       this.savedLinksError =
         res.reason === 'INVALID_URL'
-          ? 'Enter a valid URL.'
+          ? this.t('enterValidUrl')
           : res.reason === 'AUTH_REQUIRED'
-            ? 'Please log in to save links.'
-            : 'Unable to save link.';
+            ? this.t('pleaseLoginSaveLinks')
+            : this.t('unableSaveLink');
       return;
     }
 
@@ -513,10 +647,10 @@ export class MainComponent implements OnInit, OnDestroy {
     if (!res.ok) {
       this.savedLinksError =
         res.reason === 'EMPTY_TITLE'
-          ? 'Title cannot be empty.'
+          ? this.t('titleCannotBeEmpty')
           : res.reason === 'AUTH_REQUIRED'
-            ? 'Please log in to edit saved links.'
-            : 'Unable to update title.';
+            ? this.t('pleaseLoginEditLinks')
+            : this.t('unableUpdateTitle');
       return;
     }
 
@@ -528,7 +662,9 @@ export class MainComponent implements OnInit, OnDestroy {
     const res = this.savedLinks.remove(url);
     if (!res.ok) {
       this.savedLinksError =
-        res.reason === 'AUTH_REQUIRED' ? 'Please log in to remove saved links.' : 'Unable to remove link.';
+        res.reason === 'AUTH_REQUIRED'
+          ? this.t('pleaseLoginRemoveLinks')
+          : this.t('unableRemoveLink');
     }
   }
 
