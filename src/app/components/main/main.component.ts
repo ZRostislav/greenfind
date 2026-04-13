@@ -28,14 +28,13 @@ import { LoaderService } from '../../services/loader.service';
 import { AuthService } from '../../services/auth.service';
 import { AuthStateService } from '../../services/auth-state.service';
 import { SavedLink, SavedLinksService } from '../../services/saved-links.service';
+import { AppLanguage, LanguageService } from '../../services/language.service';
 
 interface Country {
   code: string;
   name: string;
   svg: string;
 }
-
-type MainLanguage = 'en' | 'ru';
 
 export const fadeIn = trigger('fadeIn', [
   transition(':enter', [style({ opacity: 0 }), animate('600ms ease-out', style({ opacity: 1 }))]),
@@ -147,15 +146,10 @@ export class MainComponent implements OnInit, OnDestroy {
   readonly ArrowRightIcon = ArrowRight;
   readonly LogOutIcon = LogOutIcon;
   readonly ImageIcon = ImageIcon;
-  readonly languageOptions: readonly MainLanguage[] = ['en', 'ru'];
-  readonly languageLabels: Record<MainLanguage, string> = {
-    en: 'EN',
-    ru: 'RU',
-  };
-  selectedLanguage: MainLanguage = 'en';
-
-  private readonly languageStorageKey = 'greenfind.main.language';
-  private readonly translations: Record<MainLanguage, Record<string, string>> = {
+  private readonly language = inject(LanguageService);
+  readonly languageOptions = this.language.languageOptions;
+  readonly languageLabels = this.language.languageLabels;
+  private readonly translations: Record<AppLanguage, Record<string, string>> = {
     en: {
       history: 'History',
       login: 'Login',
@@ -318,18 +312,19 @@ export class MainComponent implements OnInit, OnDestroy {
     }
   });
 
-  t(key: string): string {
-    return this.translations[this.selectedLanguage][key] ?? this.translations.en[key] ?? key;
+  get selectedLanguage(): AppLanguage {
+    return this.language.currentLanguage();
   }
 
-  setLanguage(language: MainLanguage): void {
-    if (this.selectedLanguage === language) return;
-    this.selectedLanguage = language;
-    this.persistLanguagePreference();
+  t(key: string): string {
+    return this.translations[this.language.currentLanguage()][key] ?? this.translations.en[key] ?? key;
+  }
+
+  setLanguage(language: AppLanguage): void {
+    this.language.setLanguage(language);
   }
 
   ngOnInit() {
-    this.loadLanguagePreference();
     this.loadCountries();
     this.resetState();
     this.detectCountry();
@@ -357,25 +352,6 @@ export class MainComponent implements OnInit, OnDestroy {
       name: c.name,
       svg: `3x2/${c.code}.svg`,
     }));
-  }
-
-  private loadLanguagePreference(): void {
-    if (typeof localStorage !== 'undefined') {
-      const stored = localStorage.getItem(this.languageStorageKey);
-      if (stored === 'en' || stored === 'ru') {
-        this.selectedLanguage = stored;
-        return;
-      }
-    }
-
-    if (typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('ru')) {
-      this.selectedLanguage = 'ru';
-    }
-  }
-
-  private persistLanguagePreference(): void {
-    if (typeof localStorage === 'undefined') return;
-    localStorage.setItem(this.languageStorageKey, this.selectedLanguage);
   }
 
   private resetState(): void {

@@ -39,6 +39,7 @@ import { SavedLink, SavedLinksService } from '../../services/saved-links.service
 import { AuthService } from '../../services/auth.service';
 import { AuthStateService, User } from '../../services/auth-state.service';
 import { environment } from '../../environments/environment';
+import { AppLanguage, LanguageService } from '../../services/language.service';
 
 interface CountryOption {
   code: string;
@@ -80,6 +81,133 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     'h-11 rounded-2xl border border-ui-green-light/70 bg-transparent px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-ui-green-light transition-all hover:border-ui-green-light hover:text-white';
   readonly filterIconButtonClass =
     'h-11 w-11 shrink-0 rounded-2xl border border-white/30 bg-transparent text-white/80 transition-all hover:border-white/50 hover:text-white flex items-center justify-center';
+  private readonly language = inject(LanguageService);
+  readonly languageOptions = this.language.languageOptions;
+  readonly languageLabels = this.language.languageLabels;
+  private readonly translations: Record<AppLanguage, Record<string, string>> = {
+    en: {
+      searchPlaceholder: 'Search the web...',
+      web: 'Web',
+      images: 'Images',
+      history: 'History',
+      admin: 'Admin',
+      logout: 'Logout',
+      country: 'Country',
+      searchCountryOrCode: 'Search country or code...',
+      noCountriesFound: 'No countries found',
+      siteFilter: 'Site Filter',
+      similarSources: 'Similar Sources',
+      apply: 'Apply',
+      sitePrefix: 'site:',
+      relatedPrefix: 'related:',
+      include: 'Include',
+      exclude: 'Exclude',
+      exactPhrase: 'Exact phrase',
+      wordToSkip: 'Word to skip',
+      preferredFileTypes: 'Preferred File Types',
+      applyFilters: 'Apply Filters',
+      analyzingEcosystem: 'Analyzing Ecosystem',
+      aiOverview: 'AI Overview',
+      noImagesFound: 'No images found.',
+      noTrailsFound: 'No trails found.',
+      removeFromSaved: 'Remove from saved',
+      saveLink: 'Save link',
+      saved: 'Saved',
+      save: 'Save',
+      relatedSearches: 'Related Searches',
+      back: 'back',
+      next: 'next',
+      overview: 'Overview',
+      peopleAlsoSearchFor: 'People Also Search For',
+      sources: 'Sources',
+      liveInsights: 'Live Insights',
+      hideDetails: 'Hide details',
+      showDetails: 'Show details',
+      showingLiveDataFor: 'Showing live data for:',
+      defaultInsightsHint:
+        'Start a search and this panel will show live metrics, quick actions, and context for your current query.',
+      mode: 'Mode',
+      results: 'Results',
+      filters: 'Filters',
+      status: 'Status',
+      updating: 'Updating',
+      synced: 'Synced',
+      hideFilters: 'Hide filters',
+      openFilters: 'Open filters',
+      switchToImages: 'Switch to images',
+      suggestedQueries: 'Suggested queries',
+      page: 'Page',
+      savedCount: 'Saved',
+      imagePreview: 'Image preview',
+      loadingSize: 'Loading size...',
+      close: 'Close',
+      openSource: 'Open source',
+      download: 'Download',
+      blockedBySafety: 'Blocked by 18+ safety mode.',
+      enterValidDomain: 'Enter a valid domain',
+    },
+    ru: {
+      searchPlaceholder: 'Поиск в интернете...',
+      web: 'Веб',
+      images: 'Картинки',
+      history: 'История',
+      admin: 'Админ',
+      logout: 'Выйти',
+      country: 'Страна',
+      searchCountryOrCode: 'Поиск страны или кода...',
+      noCountriesFound: 'Страны не найдены',
+      siteFilter: 'Фильтр сайта',
+      similarSources: 'Похожие источники',
+      apply: 'Применить',
+      sitePrefix: 'сайт:',
+      relatedPrefix: 'похожее:',
+      include: 'Включить',
+      exclude: 'Исключить',
+      exactPhrase: 'Точная фраза',
+      wordToSkip: 'Слово для исключения',
+      preferredFileTypes: 'Предпочтительные типы файлов',
+      applyFilters: 'Применить фильтры',
+      analyzingEcosystem: 'Анализ экосистемы',
+      aiOverview: 'Сводка AI',
+      noImagesFound: 'Изображения не найдены.',
+      noTrailsFound: 'Результаты не найдены.',
+      removeFromSaved: 'Убрать из сохраненного',
+      saveLink: 'Сохранить ссылку',
+      saved: 'Сохранено',
+      save: 'Сохранить',
+      relatedSearches: 'Похожие запросы',
+      back: 'назад',
+      next: 'дальше',
+      overview: 'Обзор',
+      peopleAlsoSearchFor: 'Люди также ищут',
+      sources: 'Источники',
+      liveInsights: 'Живые инсайты',
+      hideDetails: 'Скрыть детали',
+      showDetails: 'Показать детали',
+      showingLiveDataFor: 'Показываем данные для:',
+      defaultInsightsHint:
+        'Начните поиск, и эта панель покажет метрики, быстрые действия и контекст по вашему запросу.',
+      mode: 'Режим',
+      results: 'Результаты',
+      filters: 'Фильтры',
+      status: 'Статус',
+      updating: 'Обновление',
+      synced: 'Синхронизировано',
+      hideFilters: 'Скрыть фильтры',
+      openFilters: 'Открыть фильтры',
+      switchToImages: 'Переключить на картинки',
+      suggestedQueries: 'Рекомендуемые запросы',
+      page: 'Страница',
+      savedCount: 'Сохранено',
+      imagePreview: 'Предпросмотр изображения',
+      loadingSize: 'Загрузка размера...',
+      close: 'Закрыть',
+      openSource: 'Открыть источник',
+      download: 'Скачать',
+      blockedBySafety: 'Заблокировано режимом безопасности 18+.',
+      enterValidDomain: 'Введите корректный домен',
+    },
+  };
 
   results$: Observable<any[]>;
   loading$: Observable<boolean>;
@@ -126,6 +254,18 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   similarError: string | null = null;
   showFilters = false;
   showInsightsDetails = false;
+
+  get selectedLanguage(): AppLanguage {
+    return this.language.currentLanguage();
+  }
+
+  setLanguage(language: AppLanguage): void {
+    this.language.setLanguage(language);
+  }
+
+  t(key: string): string {
+    return this.translations[this.language.currentLanguage()][key] ?? this.translations.en[key] ?? key;
+  }
 
   constructor(
     private searchService: SearchService,
