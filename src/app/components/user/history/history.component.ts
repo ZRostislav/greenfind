@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService, SearchHistoryItem } from '../../../services/auth.service';
+import { AppLanguage, LanguageService } from '../../../services/language.service';
 import { SearchFilters, SearchService } from '../../../services/search.service';
 import {
   ArrowLeftIcon,
@@ -14,11 +15,12 @@ import {
   UserIcon,
   XIcon,
 } from 'lucide-angular';
+import { LanguageSwitcherComponent } from '../../shared/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, LanguageSwitcherComponent],
   templateUrl: './history.component.html',
 })
 export class HistoryComponent implements OnInit {
@@ -33,6 +35,7 @@ export class HistoryComponent implements OnInit {
   private readonly searchService = inject(SearchService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly language = inject(LanguageService);
 
   readonly loading = signal(true);
   readonly deletingAll = signal(false);
@@ -42,6 +45,70 @@ export class HistoryComponent implements OnInit {
   readonly querySearch = signal('');
   readonly selectedDay = signal<'all' | string>('all');
   returnUrl = '/';
+  private readonly translations: Record<AppLanguage, Record<string, string>> = {
+    en: {
+      backToSearch: 'Back to Search',
+      myProfile: 'My Profile',
+      history: 'History',
+      searchesCount: 'searches',
+      searchPlaceholder: 'Search history by title...',
+      allDays: 'All days',
+      reset: 'Reset',
+      clearAll: 'Clear all',
+      loadingHistory: 'Loading history...',
+      noMatchingHistory: 'No matching history.',
+      noMatchingHint: 'Try another search or day filter.',
+      items: 'items',
+      region: 'region',
+      clicks: 'clicks',
+      more: 'more',
+      delete: 'Delete',
+      failedLoad: 'Failed to load history',
+      failedDelete: 'Failed to delete history item',
+      failedClear: 'Failed to clear history',
+      confirmDeleteAll: 'Delete all search history?',
+      unknownDay: 'Unknown day',
+      today: 'Today',
+      yesterday: 'Yesterday',
+    },
+    ru: {
+      backToSearch: 'Назад к поиску',
+      myProfile: 'Мой профиль',
+      history: 'История',
+      searchesCount: 'поисков',
+      searchPlaceholder: 'Поиск по истории...',
+      allDays: 'Все дни',
+      reset: 'Сброс',
+      clearAll: 'Очистить всё',
+      loadingHistory: 'Загрузка истории...',
+      noMatchingHistory: 'Подходящая история не найдена.',
+      noMatchingHint: 'Попробуйте другой запрос или фильтр по дню.',
+      items: 'записей',
+      region: 'регион',
+      clicks: 'клики',
+      more: 'ещё',
+      delete: 'Удалить',
+      failedLoad: 'Не удалось загрузить историю',
+      failedDelete: 'Не удалось удалить запись истории',
+      failedClear: 'Не удалось очистить историю',
+      confirmDeleteAll: 'Удалить всю историю поиска?',
+      unknownDay: 'Неизвестный день',
+      today: 'Сегодня',
+      yesterday: 'Вчера',
+    },
+  };
+
+  get selectedLanguage(): AppLanguage {
+    return this.language.currentLanguage();
+  }
+
+  setLanguage(language: AppLanguage): void {
+    this.language.setLanguage(language);
+  }
+
+  t(key: string): string {
+    return this.translations[this.selectedLanguage][key] ?? this.translations.en[key] ?? key;
+  }
 
   readonly totalItems = computed(() => this.items().length);
 
@@ -101,7 +168,7 @@ export class HistoryComponent implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (items) => this.items.set(items.map((item) => this.toViewItem(item))),
-        error: () => this.error.set('Failed to load history'),
+        error: () => this.error.set(this.t('failedLoad')),
       });
   }
 
@@ -137,14 +204,14 @@ export class HistoryComponent implements OnInit {
         const resetSet = new Set(this.deletingIds());
         resetSet.delete(item.id);
         this.deletingIds.set(resetSet);
-        this.error.set('Failed to delete history item');
+        this.error.set(this.t('failedDelete'));
       },
     });
   }
 
   clearAll() {
     if (!this.items().length || this.deletingAll()) return;
-    if (!window.confirm('Delete all search history?')) return;
+    if (!window.confirm(this.t('confirmDeleteAll'))) return;
 
     this.deletingAll.set(true);
     this.error.set(null);
@@ -153,7 +220,7 @@ export class HistoryComponent implements OnInit {
       .pipe(finalize(() => this.deletingAll.set(false)))
       .subscribe({
         next: () => this.items.set([]),
-        error: () => this.error.set('Failed to clear history'),
+        error: () => this.error.set(this.t('failedClear')),
       });
   }
 
@@ -280,7 +347,7 @@ export class HistoryComponent implements OnInit {
 
   private formatDayLabel(date: Date): string {
     if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
-      return 'Unknown day';
+      return this.t('unknownDay');
     }
 
     const now = new Date();
@@ -288,10 +355,10 @@ export class HistoryComponent implements OnInit {
     const startOfInput = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
     const diffDays = Math.round((startOfToday - startOfInput) / 86400000);
 
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
+    if (diffDays === 0) return this.t('today');
+    if (diffDays === 1) return this.t('yesterday');
 
-    return date.toLocaleDateString(undefined, {
+    return date.toLocaleDateString(this.selectedLanguage === 'ru' ? 'ru-RU' : undefined, {
       weekday: 'short',
       month: 'short',
       day: 'numeric',

@@ -1,6 +1,10 @@
 <div
   class="min-h-screen w-full flex items-center justify-center px-4 py-6 sm:py-10 relative overflow-hidden"
 >
+  <div class="absolute top-4 right-4 z-20">
+    <app-language-switcher></app-language-switcher>
+  </div>
+
   <div
     class="absolute top-[-10%] left-[-10%] w-[320px] h-[320px] sm:w-[500px] sm:h-[500px] bg-ui-green/10 rounded-full blur-[140px] pointer-events-none"
   ></div>
@@ -34,9 +38,9 @@
             </div>
           </div>
 
-          <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight mb-3">Identity Sync</h1>
+          <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight mb-3">{{ t('identitySync') }}</h1>
           <p class="text-white/40 text-xs sm:text-sm font-medium animate-pulse">
-            Securely completing your login...
+            {{ t('loadingSubtitle') }}
           </p>
 
           <div class="mt-8 w-full h-1 bg-white/5 rounded-full overflow-hidden">
@@ -51,7 +55,7 @@
             <lucide-icon [img]="ShieldAlertIcon" [size]="30" class="text-red-400"></lucide-icon>
           </div>
 
-          <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight mb-3">Access Denied</h1>
+          <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight mb-3">{{ t('accessDenied') }}</h1>
           <div class="rounded-2xl bg-red-500/5 border border-red-500/20 p-3 sm:p-4 mb-7 sm:mb-8">
             <p class="text-red-300 text-[11px] sm:text-xs font-bold leading-relaxed">
               {{ error }}
@@ -63,7 +67,7 @@
             class="cursor-pointer w-full h-12 sm:h-14 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-white/10 transition-all active:scale-[0.98]"
           >
             <lucide-icon [img]="ArrowLeftIcon" [size]="18"></lucide-icon>
-            Return to Login
+            {{ t('returnToLogin') }}
           </a>
         </ng-container>
       </div>
@@ -72,9 +76,9 @@
     <div
       class="mt-6 sm:mt-8 flex items-center justify-center gap-3 sm:gap-4 text-[9px] sm:text-[10px] font-black text-white uppercase tracking-[0.16em] sm:tracking-[0.2em]"
     >
-      <span>OAuth 2.0</span>
+      <span>{{ t('oauthTag') }}</span>
       <span class="w-1 h-1 rounded-full bg-white/10"></span>
-      <span>Encrypted Session</span>
+      <span>{{ t('encryptedSession') }}</span>
     </div>
   </div>
 </div>

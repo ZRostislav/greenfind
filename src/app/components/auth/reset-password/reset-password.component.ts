@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
+import { AppLanguage, LanguageService } from '../../../services/language.service';
 import {
   LucideAngularModule,
   Search,
@@ -39,11 +40,18 @@ import {
   HashIcon,
   KeyIcon,
 } from 'lucide-angular';
+import { LanguageSwitcherComponent } from '../../shared/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, LucideAngularModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    LucideAngularModule,
+    LanguageSwitcherComponent,
+  ],
   templateUrl: './reset-password.component.html',
 })
 export class ResetPasswordComponent {
@@ -83,10 +91,53 @@ export class ResetPasswordComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly language = inject(LanguageService);
 
   loading = false;
   error: string | null = null;
   info: string | null = null;
+  private readonly translations: Record<AppLanguage, Record<string, string>> = {
+    en: {
+      backToSignIn: 'Back to Sign In',
+      newPassword: 'New Password',
+      subtitle: 'Create a strong password to secure your account.',
+      email: 'Email',
+      emailPlaceholder: 'you@example.com',
+      recoveryCode: 'Recovery Code',
+      newPasswordLabel: 'New Password',
+      passwordHint: 'Must be at least 8 characters.',
+      updatePassword: 'Update Password',
+      cancelAndReturn: 'Cancel and return to Sign In',
+      passwordUpdated: 'Password updated. You can sign in now.',
+      resetFailed: 'Reset failed',
+    },
+    ru: {
+      backToSignIn: 'Назад ко входу',
+      newPassword: 'Новый пароль',
+      subtitle: 'Создайте надёжный пароль для защиты аккаунта.',
+      email: 'Email',
+      emailPlaceholder: 'you@example.com',
+      recoveryCode: 'Код восстановления',
+      newPasswordLabel: 'Новый пароль',
+      passwordHint: 'Минимум 8 символов.',
+      updatePassword: 'Обновить пароль',
+      cancelAndReturn: 'Отменить и вернуться ко входу',
+      passwordUpdated: 'Пароль обновлён. Теперь можно войти.',
+      resetFailed: 'Не удалось сбросить пароль',
+    },
+  };
+
+  get selectedLanguage(): AppLanguage {
+    return this.language.currentLanguage();
+  }
+
+  setLanguage(language: AppLanguage): void {
+    this.language.setLanguage(language);
+  }
+
+  t(key: string): string {
+    return this.translations[this.selectedLanguage][key] ?? this.translations.en[key] ?? key;
+  }
 
   readonly form = new FormGroup({
     email: new FormControl('', {
@@ -122,11 +173,11 @@ export class ResetPasswordComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
-          this.info = 'Password updated. You can sign in now.';
+          this.info = this.t('passwordUpdated');
           this.router.navigate(['/login']);
         },
         error: (err) => {
-          const msg = err?.error?.message || 'Reset failed';
+          const msg = err?.error?.message || this.t('resetFailed');
           this.error = msg;
         },
       });

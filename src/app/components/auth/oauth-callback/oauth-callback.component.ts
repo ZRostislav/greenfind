@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
+import { AppLanguage, LanguageService } from '../../../services/language.service';
 import {
   LucideAngularModule,
   Search,
@@ -36,11 +37,12 @@ import {
   FingerprintIcon,
   ShieldAlertIcon,
 } from 'lucide-angular';
+import { LanguageSwitcherComponent } from '../../shared/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-oauth-callback',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterLink],
+  imports: [CommonModule, LucideAngularModule, RouterLink, LanguageSwitcherComponent],
   templateUrl: './oauth-callback.component.html',
 })
 export class OauthCallbackComponent {
@@ -77,15 +79,50 @@ export class OauthCallbackComponent {
 
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly language = inject(LanguageService);
 
   loading = true;
   error: string | null = null;
+  private readonly translations: Record<AppLanguage, Record<string, string>> = {
+    en: {
+      identitySync: 'Identity Sync',
+      loadingSubtitle: 'Securely completing your login...',
+      accessDenied: 'Access Denied',
+      returnToLogin: 'Return to Login',
+      oauthMissingToken: 'Missing access token in callback URL.',
+      oauthFailed: 'OAuth login failed.',
+      oauthTag: 'OAuth 2.0',
+      encryptedSession: 'Encrypted Session',
+    },
+    ru: {
+      identitySync: 'Синхронизация доступа',
+      loadingSubtitle: 'Безопасно завершаем вход...',
+      accessDenied: 'Доступ запрещён',
+      returnToLogin: 'Вернуться ко входу',
+      oauthMissingToken: 'В callback URL отсутствует access token.',
+      oauthFailed: 'Ошибка OAuth-входа.',
+      oauthTag: 'OAuth 2.0',
+      encryptedSession: 'Шифрованная сессия',
+    },
+  };
+
+  get selectedLanguage(): AppLanguage {
+    return this.language.currentLanguage();
+  }
+
+  setLanguage(language: AppLanguage): void {
+    this.language.setLanguage(language);
+  }
+
+  t(key: string): string {
+    return this.translations[this.selectedLanguage][key] ?? this.translations.en[key] ?? key;
+  }
 
   constructor() {
     const token = this.extractAccessTokenFromHash();
     if (!token) {
       this.loading = false;
-      this.error = 'Missing access token in callback URL.';
+      this.error = this.t('oauthMissingToken');
       return;
     }
 
@@ -99,7 +136,7 @@ export class OauthCallbackComponent {
           this.router.navigateByUrl('/');
         },
         error: () => {
-          this.error = 'OAuth login failed.';
+          this.error = this.t('oauthFailed');
           this.auth.clearSession();
           this.clearHash();
         },

@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
+import { AppLanguage, LanguageService } from '../../../services/language.service';
 import {
   LucideAngularModule,
   Search,
@@ -35,11 +36,18 @@ import {
   ShieldCheckIcon,
   InfoIcon,
 } from 'lucide-angular';
+import { LanguageSwitcherComponent } from '../../shared/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-verify-email',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, LucideAngularModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    LucideAngularModule,
+    LanguageSwitcherComponent,
+  ],
   templateUrl: './verify-email.component.html',
 })
 export class VerifyEmailComponent {
@@ -75,11 +83,54 @@ export class VerifyEmailComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly language = inject(LanguageService);
 
   verifying = false;
   resending = false;
   error: string | null = null;
   info: string | null = null;
+  private readonly translations: Record<AppLanguage, Record<string, string>> = {
+    en: {
+      backToSignIn: 'Back to Sign In',
+      securityCheck: 'Security Check',
+      subtitle: "We've sent a 6-digit verification code to your inbox.",
+      account: 'Account',
+      verificationCode: 'Verification Code',
+      confirmAccess: 'Confirm Access',
+      resending: 'Resending Code...',
+      resendHint: "Didn't get the code? Resend",
+      verificationFailed: 'Verification failed',
+      resendSent:
+        'A new code has been sent (check your email or server console if EMAIL_ENABLED=false).',
+      resendMasked: 'If the email exists, a new code was sent.',
+    },
+    ru: {
+      backToSignIn: 'Назад ко входу',
+      securityCheck: 'Проверка безопасности',
+      subtitle: 'Мы отправили 6-значный код подтверждения на вашу почту.',
+      account: 'Аккаунт',
+      verificationCode: 'Код подтверждения',
+      confirmAccess: 'Подтвердить вход',
+      resending: 'Повторная отправка...',
+      resendHint: 'Не получили код? Отправить снова',
+      verificationFailed: 'Не удалось подтвердить email',
+      resendSent:
+        'Новый код отправлен (проверьте email или консоль сервера, если EMAIL_ENABLED=false).',
+      resendMasked: 'Если email существует, новый код уже отправлен.',
+    },
+  };
+
+  get selectedLanguage(): AppLanguage {
+    return this.language.currentLanguage();
+  }
+
+  setLanguage(language: AppLanguage): void {
+    this.language.setLanguage(language);
+  }
+
+  t(key: string): string {
+    return this.translations[this.selectedLanguage][key] ?? this.translations.en[key] ?? key;
+  }
 
   readonly form = new FormGroup({
     email: new FormControl('', {
@@ -114,7 +165,7 @@ export class VerifyEmailComponent {
       .subscribe({
         next: () => this.router.navigate(['/login']),
         error: (err) => {
-          const msg = err?.error?.message || 'Verification failed';
+          const msg = err?.error?.message || this.t('verificationFailed');
           this.error = msg;
         },
       });
@@ -132,11 +183,10 @@ export class VerifyEmailComponent {
       .pipe(finalize(() => (this.resending = false)))
       .subscribe({
         next: () => {
-          this.info =
-            'A new code has been sent (check your email or server console if EMAIL_ENABLED=false).';
+          this.info = this.t('resendSent');
         },
         error: () => {
-          this.info = 'If the email exists, a new code was sent.';
+          this.info = this.t('resendMasked');
         },
       });
   }

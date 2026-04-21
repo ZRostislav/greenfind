@@ -1,6 +1,10 @@
 <div
   class="min-h-screen w-full flex items-center justify-center px-4 py-6 sm:py-10 relative overflow-hidden"
 >
+  <div class="absolute top-4 right-4 z-20">
+    <app-language-switcher></app-language-switcher>
+  </div>
+
   <div
     class="absolute top-[-10%] left-[-10%] w-[320px] h-[320px] sm:w-[500px] sm:h-[500px] bg-ui-green/10 rounded-full blur-[140px] pointer-events-none"
   ></div>
@@ -18,7 +22,7 @@
         [size]="18"
         class="group-hover:-translate-x-1 transition-transform"
       ></lucide-icon>
-      Back to Sign In
+      {{ t('backToSignIn') }}
     </a>
 
     <div
@@ -34,9 +38,9 @@
         >
           <lucide-icon [img]="ShieldCheckIcon" [size]="30" class="text-ui-green"></lucide-icon>
         </div>
-        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">Security Check</h1>
+        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">{{ t('securityCheck') }}</h1>
         <p class="text-white text-xs sm:text-sm mt-3 font-medium px-2 sm:px-4">
-          We've sent a 6-digit verification code to your inbox.
+          {{ t('subtitle') }}
         </p>
       </div>
 
@@ -62,9 +66,9 @@
 
       <form class="space-y-5 sm:space-y-6" [formGroup]="form" (ngSubmit)="verify()">
         <div class="space-y-2 opacity-60">
-          <label class="block text-[10px] font-black text-white uppercase tracking-[0.15em] ml-1"
-            >Account</label
-          >
+          <label class="block text-[10px] font-black text-white uppercase tracking-[0.15em] ml-1">
+            {{ t('account') }}
+          </label>
           <div class="relative">
             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-white/20">
               <lucide-icon [img]="MailIcon" [size]="18"></lucide-icon>
@@ -79,9 +83,9 @@
         </div>
 
         <div class="space-y-3">
-          <label class="block text-[10px] font-black text-white uppercase tracking-[0.15em] ml-1"
-            >Verification Code</label
-          >
+          <label class="block text-[10px] font-black text-white uppercase tracking-[0.15em] ml-1">
+            {{ t('verificationCode') }}
+          </label>
           <input
             type="text"
             inputmode="numeric"
@@ -97,7 +101,7 @@
           [disabled]="verifying || form.invalid"
           class="cursor-pointer w-full h-12 sm:h-14 mt-4 rounded-2xl bg-ui-base text-white font-black uppercase tracking-widest text-xs sm:text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed shadow-[0_10px_20px_rgba(87,200,77,0.2)] hover:shadow-[0_15px_30px_rgba(87,200,77,0.3)] flex items-center justify-center gap-2"
         >
-          <span *ngIf="!verifying">Confirm Access</span>
+          <span *ngIf="!verifying">{{ t('confirmAccess') }}</span>
           <div
             *ngIf="verifying"
             class="w-5 h-5 border-2 border-ui-base/30 border-t-ui-base rounded-full animate-spin"
@@ -116,7 +120,7 @@
             [size]="14"
             [class.animate-spin]="resending"
           ></lucide-icon>
-          {{ resending ? 'Resending Code...' : "Didn't get the code? Resend" }}
+          {{ resending ? t('resending') : t('resendHint') }}
         </button>
       </div>
     </div>

@@ -12,6 +12,7 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../services/auth.service';
+import { AppLanguage, LanguageService } from '../../../services/language.service';
 import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
@@ -48,11 +49,18 @@ import {
   ChevronRightIcon,
   LockIcon,
 } from 'lucide-angular';
+import { LanguageSwitcherComponent } from '../../shared/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, LucideAngularModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    LucideAngularModule,
+    LanguageSwitcherComponent,
+  ],
   templateUrl: './register.component.html',
 })
 export class RegisterComponent {
@@ -84,9 +92,84 @@ export class RegisterComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly language = inject(LanguageService);
 
   loading = false;
   error: string | null = null;
+  private readonly translations: Record<AppLanguage, Record<string, string>> = {
+    en: {
+      backToGreenFind: 'Back to GreenFind',
+      joinUs: 'Join Us',
+      subtitle: 'Start your eco-friendly search journey.',
+      username: 'Username',
+      usernamePlaceholder: 'username',
+      usernameRequired: 'Username is required.',
+      usernameMin: 'Username must be at least 5 characters.',
+      usernameMax: 'Username must be at most 30 characters.',
+      usernameTaken: 'This username is already taken.',
+      usernameHint: '5-30 characters.',
+      emailAddress: 'Email Address',
+      emailPlaceholder: 'hello@example.com',
+      emailRequired: 'Email is required.',
+      emailInvalid: 'Enter a valid email address.',
+      emailTaken: 'This email is already in use.',
+      password: 'Password',
+      passwordRules: 'Password rules:',
+      minLengthRule: '- At least 8 characters',
+      uppercaseRule: '- One uppercase letter (A-Z)',
+      lowercaseRule: '- One lowercase letter (a-z)',
+      digitRule: '- One number (0-9)',
+      passwordRequired: 'Password is required.',
+      passwordMinLength: 'Password must be at least 8 characters.',
+      passwordMaxLength: 'Password must be at most 128 characters.',
+      passwordInvalid: 'Password does not match the required format.',
+      repeatPassword: 'Repeat Password',
+      repeatPasswordRequired: 'Repeat password is required.',
+      passwordsMismatch: 'Passwords do not match.',
+      fillFormTooltip: 'Fill in the form correctly to continue',
+      createAccount: 'Create account',
+      alreadyHaveAccount: 'Already have an account?',
+      signIn: 'Sign in',
+      terms: 'By signing up, you agree to our Terms of Service.',
+      registrationFailed: 'Registration failed',
+    },
+    ru: {
+      backToGreenFind: 'Назад в GreenFind',
+      joinUs: 'Присоединяйтесь',
+      subtitle: 'Начните экологичный поиск вместе с нами.',
+      username: 'Имя пользователя',
+      usernamePlaceholder: 'username',
+      usernameRequired: 'Имя пользователя обязательно.',
+      usernameMin: 'Имя пользователя должно быть не короче 5 символов.',
+      usernameMax: 'Имя пользователя должно быть не длиннее 30 символов.',
+      usernameTaken: 'Это имя пользователя уже занято.',
+      usernameHint: 'От 5 до 30 символов.',
+      emailAddress: 'Электронная почта',
+      emailPlaceholder: 'hello@example.com',
+      emailRequired: 'Email обязателен.',
+      emailInvalid: 'Введите корректный email.',
+      emailTaken: 'Этот email уже используется.',
+      password: 'Пароль',
+      passwordRules: 'Требования к паролю:',
+      minLengthRule: '- Минимум 8 символов',
+      uppercaseRule: '- Одна заглавная буква (A-Z)',
+      lowercaseRule: '- Одна строчная буква (a-z)',
+      digitRule: '- Одна цифра (0-9)',
+      passwordRequired: 'Пароль обязателен.',
+      passwordMinLength: 'Пароль должен содержать минимум 8 символов.',
+      passwordMaxLength: 'Пароль должен содержать максимум 128 символов.',
+      passwordInvalid: 'Пароль не соответствует формату.',
+      repeatPassword: 'Повторите пароль',
+      repeatPasswordRequired: 'Повтор пароля обязателен.',
+      passwordsMismatch: 'Пароли не совпадают.',
+      fillFormTooltip: 'Заполните форму корректно, чтобы продолжить',
+      createAccount: 'Создать аккаунт',
+      alreadyHaveAccount: 'Уже есть аккаунт?',
+      signIn: 'Войти',
+      terms: 'Регистрируясь, вы соглашаетесь с условиями сервиса.',
+      registrationFailed: 'Не удалось зарегистрироваться',
+    },
+  };
 
   get usernameCtrl() {
     return this.form.controls.username;
@@ -102,6 +185,18 @@ export class RegisterComponent {
 
   get confirmPasswordCtrl() {
     return this.form.controls.confirmPassword;
+  }
+
+  get selectedLanguage(): AppLanguage {
+    return this.language.currentLanguage();
+  }
+
+  setLanguage(language: AppLanguage): void {
+    this.language.setLanguage(language);
+  }
+
+  t(key: string): string {
+    return this.translations[this.selectedLanguage][key] ?? this.translations.en[key] ?? key;
   }
 
   passwordHasUppercase(): boolean {
@@ -236,7 +331,7 @@ export class RegisterComponent {
             (typeof err?.error === 'string' && err.error) ||
             err?.error?.message ||
             err?.message ||
-            'Registration failed';
+            this.t('registrationFailed');
           this.error = msg;
           this.applyServerFieldErrors(err);
           this.form.markAllAsTouched();

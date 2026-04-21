@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -40,6 +40,7 @@ import { AuthService } from '../../services/auth.service';
 import { AuthStateService, User } from '../../services/auth-state.service';
 import { environment } from '../../environments/environment';
 import { AppLanguage, LanguageService } from '../../services/language.service';
+import { LanguageSwitcherComponent } from '../shared/language-switcher/language-switcher.component';
 
 interface CountryOption {
   code: string;
@@ -50,7 +51,7 @@ interface CountryOption {
 @Component({
   selector: 'app-results',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, LanguageSwitcherComponent],
   templateUrl: './results.component.html',
 })
 export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -384,7 +385,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (!this.isValidDomain(this.siteInput)) {
-      this.siteError = 'Enter a valid domain';
+      this.siteError = this.t('enterValidDomain');
       return;
     }
 
@@ -400,7 +401,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (!this.isValidDomain(this.similarInput)) {
-      this.similarError = 'Enter a valid domain';
+      this.similarError = this.t('enterValidDomain');
       return;
     }
 
@@ -698,7 +699,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     event?.preventDefault();
     event?.stopPropagation();
-    window.alert('Blocked by 18+ safety mode.');
+    window.alert(this.t('blockedBySafety'));
     return false;
   }
 

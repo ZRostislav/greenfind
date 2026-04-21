@@ -1,4 +1,8 @@
 <div class="min-h-screen w-full flex flex-col items-center px-4 py-10 relative overflow-y-auto">
+  <div class="absolute top-4 right-4 z-20">
+    <app-language-switcher></app-language-switcher>
+  </div>
+
   <div
     class="absolute top-[-10%] right-[20%] w-[500px] h-[500px] bg-ui-green/10 rounded-full blur-[150px] pointer-events-none z-0"
   ></div>
@@ -17,7 +21,7 @@
           [size]="18"
           class="group-hover:-translate-x-1 transition-transform"
         ></lucide-icon>
-        Back to Search
+        {{ t('backToSearch') }}
       </button>
       <a
         routerLink="/me"
@@ -25,14 +29,14 @@
         class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all font-bold text-sm flex items-center gap-2"
       >
         <lucide-icon [img]="UserIcon" [size]="16"></lucide-icon>
-        My Profile
+        {{ t('myProfile') }}
       </a>
     </div>
 
     <div class="flex flex-wrap items-center gap-3 mb-6">
-      <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tighter">History</h1>
+      <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tighter">{{ t('history') }}</h1>
       <span class="text-ui-green font-bold text-sm pt-2" *ngIf="totalItems()">
-        {{ totalItems() }} searches
+        {{ totalItems() }} {{ t('searchesCount') }}
       </span>
     </div>
 
@@ -45,7 +49,7 @@
           type="text"
           [value]="querySearch()"
           (input)="onSearchInput($any($event.target).value)"
-          placeholder="Search history by title..."
+          [placeholder]="t('searchPlaceholder')"
           class="w-full bg-transparent text-white placeholder:text-white/30 outline-none text-sm"
         />
       </div>
@@ -55,7 +59,7 @@
         (change)="onSelectDay($any($event.target).value)"
         class="h-12 rounded-2xl bg-white/5 border border-white/10 text-white/80 px-3 text-sm outline-none focus:border-white/30"
       >
-        <option value="all" class="bg-[#0f0f0f]">All days</option>
+        <option value="all" class="bg-[#0f0f0f]">{{ t('allDays') }}</option>
         <option *ngFor="let day of dayOptions()" [value]="day.key" class="bg-[#0f0f0f]">
           {{ day.label }}
         </option>
@@ -65,7 +69,7 @@
         (click)="resetFilters()"
         class="h-12 px-4 rounded-2xl border border-white/15 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-all text-sm font-bold"
       >
-        Reset
+        {{ t('reset') }}
       </button>
 
       <button
@@ -74,7 +78,7 @@
         class="h-12 px-4 rounded-2xl border border-red-500/25 bg-red-500/10 text-red-200 hover:bg-red-500/20 transition-all text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         <lucide-icon [img]="Trash2Icon" [size]="15"></lucide-icon>
-        Clear all
+        {{ t('clearAll') }}
       </button>
     </div>
 
@@ -82,7 +86,7 @@
       <div
         class="w-8 h-8 border-2 border-white/10 border-t-ui-green rounded-full animate-spin mb-4"
       ></div>
-      <p class="text-white/30 font-bold uppercase tracking-widest text-xs">Loading history...</p>
+      <p class="text-white/30 font-bold uppercase tracking-widest text-xs">{{ t('loadingHistory') }}</p>
     </div>
 
     <div *ngIf="error()" class="mb-5 rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-red-200 text-sm">
@@ -94,8 +98,8 @@
       class="py-20 rounded-3xl border border-white/5 bg-white/[0.02] text-center backdrop-blur-sm"
     >
       <lucide-icon [img]="HistoryIcon" class="text-white/10 mx-auto mb-4" [size]="48"></lucide-icon>
-      <p class="text-white/40 font-bold text-xl">No matching history.</p>
-      <p class="text-white/20 text-sm mt-1">Try another search or day filter.</p>
+      <p class="text-white/40 font-bold text-xl">{{ t('noMatchingHistory') }}</p>
+      <p class="text-white/20 text-sm mt-1">{{ t('noMatchingHint') }}</p>
     </div>
 
     <div class="space-y-5" *ngIf="groupedItems().length">
@@ -107,7 +111,7 @@
           <h2 class="text-sm font-black uppercase tracking-[0.14em] text-white/60">
             {{ group.dayLabel }}
           </h2>
-          <span class="text-xs text-white/35">{{ group.items.length }} items</span>
+          <span class="text-xs text-white/35">{{ group.items.length }} {{ t('items') }}</span>
         </div>
 
         <div class="space-y-2.5">
@@ -127,7 +131,7 @@
                     *ngIf="item.region"
                     class="px-2 py-0.5 rounded-lg border border-emerald-400/25 bg-emerald-500/10 text-[10px] font-bold text-emerald-300 uppercase"
                   >
-                    region: {{ item.region }}
+                    {{ t('region') }}: {{ item.region }}
                   </span>
                   <span
                     *ngIf="item.parsed.site || item.siteFilter"
@@ -163,7 +167,7 @@
                     *ngIf="(item.clicksCount || 0) > 0"
                     class="px-2 py-0.5 rounded-lg border border-ui-green/25 bg-ui-green/10 text-[10px] font-bold text-ui-green-light uppercase"
                   >
-                    clicks: {{ item.clicksCount }}
+                    {{ t('clicks') }}: {{ item.clicksCount }}
                   </span>
                   <span
                     *ngFor="let site of (item.clickedSites || []).slice(0, 4)"
@@ -175,7 +179,7 @@
                     *ngIf="(item.clickedSites || []).length > 4"
                     class="px-2 py-0.5 rounded-lg border border-white/20 bg-white/10 text-[10px] font-bold text-white/75"
                   >
-                    +{{ (item.clickedSites || []).length - 4 }} more
+                    +{{ (item.clickedSites || []).length - 4 }} {{ t('more') }}
                   </span>
                 </div>
               </div>
@@ -184,10 +188,10 @@
                 (click)="deleteItem(item, $event)"
                 [disabled]="isDeleting(item.id)"
                 class="h-8 px-3 rounded-xl border border-red-500/25 bg-red-500/10 text-red-200 hover:bg-red-500/20 text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
-                title="Delete"
+                [title]="t('delete')"
               >
                 <lucide-icon [img]="XIcon" [size]="14"></lucide-icon>
-                Delete
+                {{ t('delete') }}
               </button>
             </div>
           </div>

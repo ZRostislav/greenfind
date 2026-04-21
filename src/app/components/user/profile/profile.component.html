@@ -1,6 +1,10 @@
 <div
   class="min-h-screen w-full flex items-center justify-center px-4 py-10 relative overflow-hidden"
 >
+  <div class="absolute top-4 right-4 z-20">
+    <app-language-switcher></app-language-switcher>
+  </div>
+
   <div
     class="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-ui-green/10 rounded-full blur-[120px] pointer-events-none"
   ></div>
@@ -18,7 +22,7 @@
         [size]="18"
         class="group-hover:-translate-x-1 transition-transform duration-300"
       ></lucide-icon>
-      Back to Search
+      {{ t('backToSearch') }}
     </button>
 
     <div
@@ -45,7 +49,7 @@
             <span
               class="px-5 py-2 rounded-full bg-ui-green/10 border border-ui-green/20 text-ui-green-light text-xs font-black uppercase tracking-widest shadow-sm"
             >
-              Active User
+              {{ t('activeUser') }}
             </span>
           </div>
         </div>
@@ -61,7 +65,7 @@
                 class="text-white/30 group-hover:text-ui-green transition-colors"
               ></lucide-icon>
               <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
-                >Username</span
+                >{{ t('username') }}</span
               >
             </div>
             <div class="text-white font-bold text-lg">{{ user.username }}</div>
@@ -77,7 +81,7 @@
                 class="text-white/30 group-hover:text-ui-green transition-colors"
               ></lucide-icon>
               <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
-                >Email Address</span
+                >{{ t('emailAddress') }}</span
               >
             </div>
             <div class="text-white font-bold text-lg truncate">{{ user.email }}</div>
@@ -93,7 +97,7 @@
                 class="text-white/30 group-hover:text-ui-green transition-colors"
               ></lucide-icon>
               <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
-                >Auth Provider</span
+                >{{ t('authProvider') }}</span
               >
             </div>
             <div class="text-white font-bold text-lg capitalize">{{ user.authProvider }}</div>
@@ -109,7 +113,7 @@
                 class="text-white/30 group-hover:text-ui-green transition-colors"
               ></lucide-icon>
               <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
-                >Security Status</span
+                >{{ t('securityStatus') }}</span
               >
             </div>
             <div class="flex items-center gap-2 mt-1">
@@ -121,7 +125,7 @@
                 "
               ></div>
               <span class="text-white font-bold text-lg">{{
-                user.emailVerified ? 'Email Verified' : 'Unverified'
+                user.emailVerified ? t('emailVerified') : t('unverified')
               }}</span>
             </div>
           </div>
@@ -140,14 +144,14 @@
                     class="text-white/30 group-hover:text-ui-green transition-colors"
                   ></lucide-icon>
                   <span class="text-[10px] text-white/40 font-black uppercase tracking-widest"
-                    >18+ Content</span
+                    >{{ t('adultContent') }}</span
                   >
                 </div>
                 <div class="text-white font-bold text-lg">
-                  {{ allowAdultContent ? 'Allowed (18+)' : 'Blocked (Safe mode)' }}
+                  {{ allowAdultContent ? t('adultAllowed') : t('adultBlocked') }}
                 </div>
                 <p class="text-white/45 text-sm mt-1 leading-relaxed">
-                  When blocked, 18+ results are hidden and opening suspicious links is denied.
+                  {{ t('adultHint') }}
                 </p>
                 <p *ngIf="adultContentError" class="text-red-300 text-sm mt-2">
                   {{ adultContentError }}
@@ -158,15 +162,15 @@
                 (click)="toggleAdultContent()"
                 [disabled]="updatingAdultContent"
                 class="h-14 px-4 rounded-2xl border border-white/15 bg-gradient-to-b from-white/10 to-white/[0.03] hover:from-white/15 hover:to-white/[0.06] transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(0,0,0,0.25)] shrink-0"
-                title="Toggle 18+ content"
+                [title]="t('adultToggleTitle')"
               >
-                <span class="sr-only">Toggle 18+ content</span>
+                <span class="sr-only">{{ t('adultToggleSr') }}</span>
                 <span class="inline-flex items-center gap-4 min-w-[150px] justify-between">
                   <span
                     class="text-[10px] font-black uppercase tracking-[0.18em]"
                     [ngClass]="allowAdultContent ? 'text-amber-200/90' : 'text-ui-green-light/90'"
                   >
-                    {{ allowAdultContent ? 'Adult' : 'Safe' }}
+                    {{ allowAdultContent ? t('adultLabel') : t('safeLabel') }}
                   </span>
                   <span
                     class="relative inline-flex h-7 w-12 items-center rounded-full border transition-all duration-300"
@@ -184,7 +188,7 @@
                   <span
                     class="text-[10px] font-black uppercase tracking-[0.18em] text-white/80 w-[50px] text-right"
                   >
-                    {{ updatingAdultContent ? '...' : allowAdultContent ? '18+ ON' : '18+ OFF' }}
+                    {{ updatingAdultContent ? '...' : allowAdultContent ? t('adultOn') : t('adultOff') }}
                   </span>
                 </span>
               </button>
@@ -201,7 +205,7 @@
             class="w-full sm:w-auto h-14 px-8 rounded-2xl bg-white text-ui-base hover:bg-ui-green-light hover:text-ui-base transition-all duration-300 hover:-translate-y-1 flex items-center justify-center font-black text-sm uppercase tracking-wider shadow-lg hover:shadow-[0_8px_24px_rgba(87,200,77,0.3)]"
           >
             <lucide-icon [img]="HistoryIcon" [size]="18" class="mr-2"></lucide-icon>
-            Search history
+            {{ t('searchHistory') }}
           </a>
 
           <a
@@ -210,7 +214,7 @@
             class="w-full sm:w-auto h-14 px-8 rounded-2xl bg-ui-green/20 border border-ui-green/35 hover:bg-ui-green/30 text-ui-green-light transition-all duration-300 hover:-translate-y-1 flex items-center justify-center font-black text-sm uppercase tracking-wider"
           >
             <lucide-icon [img]="ShieldIcon" [size]="18" class="mr-2"></lucide-icon>
-            Admin panel
+            {{ t('adminPanel') }}
           </a>
 
           <div class="flex-1 w-full flex flex-col sm:flex-row gap-4 sm:justify-end">
@@ -218,14 +222,14 @@
               (click)="logout()"
               class="w-full sm:w-auto h-14 px-8 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-black text-sm uppercase tracking-wider transition-all duration-300 hover:-translate-y-1"
             >
-              Logout account
+              {{ t('logoutAccount') }}
             </button>
 
             <button
               (click)="openDeleteConfirm()"
               class="w-full sm:w-auto h-14 px-8 rounded-2xl bg-red-600/10 border border-red-600/35 hover:bg-red-600/20 text-red-300 font-black text-sm uppercase tracking-wider transition-all duration-300 hover:-translate-y-1"
             >
-              Delete account
+              {{ t('deleteAccount') }}
             </button>
           </div>
         </div>
@@ -237,7 +241,7 @@
             class="w-12 h-12 border-4 border-ui-green/30 border-t-ui-green rounded-full animate-spin mb-6"
           ></div>
           <p class="text-white/40 font-bold uppercase tracking-widest text-sm animate-pulse">
-            Synchronizing Profile...
+            {{ t('syncingProfile') }}
           </p>
         </div>
       </ng-template>
@@ -251,9 +255,9 @@
     <div
       class="w-full max-w-md rounded-[2rem] border border-red-500/30 bg-[#121212]/95 p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-200"
     >
-      <h3 class="text-2xl font-black text-white mb-2">Delete account?</h3>
+      <h3 class="text-2xl font-black text-white mb-2">{{ t('deleteAccountTitle') }}</h3>
       <p class="text-sm text-white/70 leading-relaxed">
-        This action is permanent. Your saved links and search history will be deleted.
+        {{ t('deleteAccountHint') }}
       </p>
 
       <p
@@ -269,14 +273,14 @@
           [disabled]="deletingAccount"
           class="w-full sm:w-auto h-12 px-6 rounded-xl border border-white/15 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 font-bold transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Cancel
+          {{ t('cancel') }}
         </button>
         <button
           (click)="confirmDeleteAccount()"
           [disabled]="deletingAccount"
           class="w-full sm:w-auto h-12 px-6 rounded-xl border border-red-500/35 bg-red-500/15 text-red-300 hover:bg-red-500/25 hover:text-red-200 font-bold transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(239,68,68,0.1)] hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]"
         >
-          {{ deletingAccount ? 'Deleting...' : 'Yes, delete' }}
+          {{ deletingAccount ? t('deleting') : t('yesDelete') }}
         </button>
       </div>
     </div>

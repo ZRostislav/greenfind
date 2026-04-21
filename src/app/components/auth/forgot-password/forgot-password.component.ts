@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
+import { AppLanguage, LanguageService } from '../../../services/language.service';
 import {
   LucideAngularModule,
   Search,
@@ -38,11 +39,18 @@ import {
   ShieldAlertIcon,
   LifeBuoyIcon,
 } from 'lucide-angular';
+import { LanguageSwitcherComponent } from '../../shared/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, LucideAngularModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    LucideAngularModule,
+    LanguageSwitcherComponent,
+  ],
   templateUrl: './forgot-password.component.html',
 })
 export class ForgotPasswordComponent {
@@ -80,10 +88,45 @@ export class ForgotPasswordComponent {
 
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly language = inject(LanguageService);
 
   loading = false;
   error: string | null = null;
   info: string | null = null;
+  private readonly translations: Record<AppLanguage, Record<string, string>> = {
+    en: {
+      backToSignIn: 'Back to Sign In',
+      recovery: 'Recovery',
+      subtitle: "Enter your email and we'll send you a 6-digit reset code.",
+      registeredEmail: 'Registered Email',
+      emailPlaceholder: 'you@example.com',
+      sendResetCode: 'Send Reset Code',
+      secureIdentityService: 'Secure Identity Service',
+      resetSent: 'If the email exists, a reset code was sent.',
+    },
+    ru: {
+      backToSignIn: 'Назад ко входу',
+      recovery: 'Восстановление',
+      subtitle: 'Введите email, и мы отправим 6-значный код для сброса пароля.',
+      registeredEmail: 'Зарегистрированный email',
+      emailPlaceholder: 'you@example.com',
+      sendResetCode: 'Отправить код',
+      secureIdentityService: 'Безопасный сервис идентификации',
+      resetSent: 'Если email существует, код сброса уже отправлен.',
+    },
+  };
+
+  get selectedLanguage(): AppLanguage {
+    return this.language.currentLanguage();
+  }
+
+  setLanguage(language: AppLanguage): void {
+    this.language.setLanguage(language);
+  }
+
+  t(key: string): string {
+    return this.translations[this.selectedLanguage][key] ?? this.translations.en[key] ?? key;
+  }
 
   readonly form = new FormGroup({
     email: new FormControl('', {
@@ -104,11 +147,11 @@ export class ForgotPasswordComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
-          this.info = 'If the email exists, a reset code was sent.';
+          this.info = this.t('resetSent');
           this.router.navigate(['/reset-password'], { queryParams: { email: payload.email } });
         },
         error: () => {
-          this.info = 'If the email exists, a reset code was sent.';
+          this.info = this.t('resetSent');
           this.router.navigate(['/reset-password'], { queryParams: { email: payload.email } });
         },
       });

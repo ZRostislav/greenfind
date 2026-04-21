@@ -697,6 +697,12 @@
               <div class="truncate text-sm font-bold text-white sm:text-base">
                 {{ user.username }}
                 <span class="ml-1 rounded-md border border-white/15 bg-white/[0.04] px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-white/55">{{ user.role }}</span>
+                <span
+                  *ngIf="isSuperAdmin(user)"
+                  class="ml-1 rounded-md border border-amber-300/40 bg-amber-400/15 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-amber-100"
+                >
+                  super
+                </span>
               </div>
               <div class="truncate text-xs text-white/45">{{ user.email }}</div>
               <div class="mt-1 text-xs text-white/50">Created: {{ user.createdAt ? (user.createdAt | date: 'MMM d, y, HH:mm') : '-' }}</div>
@@ -704,7 +710,7 @@
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button
-                *ngIf="user.id !== me.id"
+                *ngIf="user.id !== me.id && !isSuperAdmin(user)"
                 (click)="toggleUserRole(user)"
                 [disabled]="isRoleUpdating(user.id)"
                 class="h-9 rounded-xl border border-white/25 bg-white/10 px-3 text-xs font-black text-white/80 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
@@ -712,7 +718,7 @@
                 {{ isRoleUpdating(user.id) ? 'Saving...' : (user.role === 'admin' ? 'Make user' : 'Make admin') }}
               </button>
               <button
-                *ngIf="user.role !== 'admin'"
+                *ngIf="user.role !== 'admin' && !isSuperAdmin(user)"
                 (click)="deleteUser(user)"
                 [disabled]="isDeleting(user.id)"
                 class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 text-xs font-black text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
@@ -720,6 +726,12 @@
                 <lucide-icon [img]="Trash2Icon" [size]="13"></lucide-icon>
                 {{ isDeleting(user.id) ? 'Deleting...' : 'Delete' }}
               </button>
+              <span
+                *ngIf="isSuperAdmin(user)"
+                class="inline-flex h-9 items-center rounded-xl border border-amber-300/30 bg-amber-400/10 px-3 text-xs font-black uppercase tracking-[0.1em] text-amber-100"
+              >
+                Protected
+              </span>
             </div>
           </div>
           <div *ngIf="!users().length && !loadingUsers()" class="text-xs text-white/40">No users found.</div>

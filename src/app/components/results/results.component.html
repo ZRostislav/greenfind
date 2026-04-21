@@ -4,6 +4,10 @@
   >
     <div class="max-w-[1600px] mx-auto w-full">
       <div class="flex flex-wrap sm:flex-nowrap items-end gap-3">
+        <div class="order-2 sm:order-none ml-auto sm:ml-0">
+          <app-language-switcher></app-language-switcher>
+        </div>
+
         <h2
           routerLink="/"
           class="order-1 sm:order-none font-josefin text-xl sm:text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0 mb-1 mr-2 sm:mr-4"
@@ -19,7 +23,7 @@
           >
             <input
               type="text"
-              placeholder="Search the web..."
+              [placeholder]="t('searchPlaceholder')"
               [(ngModel)]="query"
               (keydown.enter)="doSearch()"
               class="w-full bg-transparent px-4 sm:px-5 py-2 sm:py-2.5 text-white placeholder:text-white/30 outline-none text-base sm:text-lg"
@@ -75,7 +79,7 @@
             "
           >
             <i-lucide [img]="GlobeIcon" class="w-4 h-4"></i-lucide>
-            <span>Web</span>
+            <span>{{ t('web') }}</span>
           </button>
 
           <div class="w-[1px] h-4 bg-white/10"></div>
@@ -90,7 +94,7 @@
             "
           >
             <i-lucide [img]="ImageIcon" class="w-4 h-4"></i-lucide>
-            <span>Images</span>
+            <span>{{ t('images') }}</span>
           </button>
         </div>
 
@@ -104,7 +108,7 @@
               class="px-3 py-2 text-xs font-black text-white/75 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-1.5"
             >
               <lucide-icon [img]="HistoryIcon" [size]="14"></lucide-icon>
-              History
+              {{ t('history') }}
             </a>
             <a
               *ngIf="user.role === 'admin'"
@@ -112,7 +116,7 @@
               class="px-3 py-2 text-xs font-black text-ui-green-light hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-1.5"
             >
               <lucide-icon [img]="ShieldIcon" [size]="14"></lucide-icon>
-              Admin
+              {{ t('admin') }}
             </a>
             <a
               routerLink="/me"
@@ -127,7 +131,7 @@
               class="px-3 py-2 text-xs font-black text-red-300 hover:text-red-200 hover:bg-red-500/15 rounded-xl transition-all flex items-center gap-1.5"
             >
               <lucide-icon [img]="LogOutIcon" [size]="14"></lucide-icon>
-              Logout
+              {{ t('logout') }}
             </button>
           </div>
         </ng-container>
@@ -141,7 +145,7 @@
           <section class="space-y-5 xl:col-span-6 p-4 sm:p-5">
             <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
               <label class="text-[10px] font-semibold uppercase tracking-widest text-white/60"
-                >Country</label
+                >{{ t('country') }}</label
               >
               <div class="relative">
                 <input
@@ -149,7 +153,7 @@
                   (focus)="openCountryPicker()"
                   (blur)="closeCountryPicker()"
                   (keydown.enter)="applyCountryInput()"
-                  placeholder="Search country or code..."
+                  [placeholder]="t('searchCountryOrCode')"
                   [ngClass]="filterInputClass"
                   class="pr-14"
                 />
@@ -198,7 +202,7 @@
                   *ngIf="!filteredCountries().length"
                   class="p-4 text-center text-xs text-white/40"
                 >
-                  No countries found
+                  {{ t('noCountriesFound') }}
                 </div>
               </div>
 
@@ -224,7 +228,7 @@
 
             <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
               <label class="text-[10px] font-semibold uppercase tracking-widest text-white/60"
-                >Site Filter</label
+                >{{ t('siteFilter') }}</label
               >
               <div class="flex gap-2">
                 <input
@@ -233,7 +237,7 @@
                   placeholder="e.g. example.com"
                   [ngClass]="filterInputClass"
                 />
-                <button (click)="applySiteFilter()" [class]="filterAccentButtonClass">Apply</button>
+                <button (click)="applySiteFilter()" [class]="filterAccentButtonClass">{{ t('apply') }}</button>
               </div>
               <p *ngIf="siteError" class="text-xs text-red-400">{{ siteError }}</p>
               <div
@@ -252,7 +256,7 @@
 
             <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
               <label class="text-[10px] font-semibold uppercase tracking-widest text-white/60"
-                >Similar Sources</label
+                >{{ t('similarSources') }}</label
               >
               <div class="flex gap-2">
                 <input
@@ -261,14 +265,14 @@
                   placeholder="e.g. example.com"
                   [ngClass]="filterInputClass"
                 />
-                <button (click)="applySimilarFilter()" [class]="filterButtonClass">Apply</button>
+                <button (click)="applySimilarFilter()" [class]="filterButtonClass">{{ t('apply') }}</button>
               </div>
               <p *ngIf="similarError" class="text-xs text-red-400">{{ similarError }}</p>
               <div
                 *ngIf="activeSimilar"
                 class="inline-flex items-center gap-2 rounded-2xl border border-white/25 px-3 py-2 text-xs text-white"
               >
-                <span class="opacity-60">related:</span> {{ activeSimilar }}
+                <span class="opacity-60">{{ t('relatedPrefix') }}</span> {{ activeSimilar }}
                 <button
                   (click)="removeSimilarFilter()"
                   class="flex h-6 w-6 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
@@ -285,13 +289,13 @@
                 <label
                   class="text-[10px] font-semibold uppercase tracking-widest text-white/60 flex items-center gap-1.5"
                 >
-                  <lucide-icon [img]="PlusIcon" [size]="12"></lucide-icon> Include
+                  <lucide-icon [img]="PlusIcon" [size]="12"></lucide-icon> {{ t('include') }}
                 </label>
                 <div class="flex gap-2">
                   <input
                     [(ngModel)]="exactInput"
                     (keydown.enter)="addWord('exact')"
-                    placeholder="Exact phrase"
+                    [placeholder]="t('exactPhrase')"
                     [ngClass]="filterInputClass"
                   />
                   <button (click)="addWord('exact')" [class]="filterIconButtonClass">
@@ -318,13 +322,13 @@
                 <label
                   class="text-[10px] font-semibold uppercase tracking-widest text-white/60 flex items-center gap-1.5"
                 >
-                  <lucide-icon [img]="MinusIcon" [size]="12"></lucide-icon> Exclude
+                  <lucide-icon [img]="MinusIcon" [size]="12"></lucide-icon> {{ t('exclude') }}
                 </label>
                 <div class="flex gap-2">
                   <input
                     [(ngModel)]="excludeInput"
                     (keydown.enter)="addWord('exclude')"
-                    placeholder="Word to skip"
+                    [placeholder]="t('wordToSkip')"
                     [ngClass]="filterInputClass"
                   />
                   <button (click)="addWord('exclude')" [class]="filterIconButtonClass">
@@ -352,7 +356,7 @@
               <label
                 class="text-[10px] font-semibold uppercase tracking-widest text-white/60 flex items-center gap-1.5"
               >
-                <lucide-icon [img]="FileTextIcon" [size]="12"></lucide-icon> Preferred File Types
+                <lucide-icon [img]="FileTextIcon" [size]="12"></lucide-icon> {{ t('preferredFileTypes') }}
               </label>
               <div class="flex flex-wrap gap-2">
                 <button
@@ -376,7 +380,7 @@
               (click)="doSearch()"
               class="inline-flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-ui-green-light/70 bg-transparent px-8 text-sm font-semibold uppercase tracking-[0.14em] text-ui-green-light transition-all hover:border-ui-green-light hover:text-white active:scale-95"
             >
-              <span>Apply Filters</span>
+              <span>{{ t('applyFilters') }}</span>
               <lucide-icon [img]="ArrowRightIcon" [size]="16"></lucide-icon>
             </button>
           </div>
@@ -395,7 +399,7 @@
           class="w-10 h-10 border-2 border-ui-green/20 border-t-ui-green rounded-full animate-spin"
         ></div>
         <p class="mt-4 text-white/30 text-xs font-josefin uppercase tracking-[0.2em]">
-          Analyzing Ecosystem
+          {{ t('analyzingEcosystem') }}
         </p>
       </div>
 
@@ -412,7 +416,7 @@
             <span
               class="px-2.5 py-1 rounded-lg border border-ui-green/30 bg-ui-green/15 text-[10px] font-black uppercase tracking-[0.14em] text-ui-green-light"
             >
-              AI Overview
+              {{ t('aiOverview') }}
             </span>
             <h3 class="text-lg sm:text-xl font-bold text-white">{{ aiOverview.title }}</h3>
           </div>
@@ -468,7 +472,7 @@
           *ngIf="mode === 'images' && !imageResults.length && !(loading$ | async)"
           class="text-white/60 py-12 font-light"
         >
-          No images found.
+          {{ t('noImagesFound') }}
         </div>
       </section>
 
@@ -478,7 +482,7 @@
             *ngIf="!(results$ | async)?.length && !(loading$ | async)"
             class="text-white/60 py-20 font-light"
           >
-            No trails found.
+            {{ t('noTrailsFound') }}
           </div>
 
           <div
@@ -513,11 +517,11 @@
                         ? 'text-ui-green border-ui-green/40 bg-ui-green/10 hover:bg-ui-green/20'
                         : 'text-white/55 border-white/15 bg-white/5 hover:text-white hover:border-white/30 hover:bg-white/10'
                     "
-                    [title]="isSaved(item.link) ? 'Remove from saved' : 'Save link'"
+                    [title]="isSaved(item.link) ? t('removeFromSaved') : t('saveLink')"
                   >
                     <lucide-icon [img]="StarIcon" [size]="14"></lucide-icon>
                     <span class="hidden sm:inline">
-                      {{ isSaved(item.link) ? 'Saved' : 'Save' }}
+                      {{ isSaved(item.link) ? t('saved') : t('save') }}
                     </span>
                   </button>
                 </div>
@@ -553,7 +557,7 @@
       <!-- Related Searches -->
       <div *ngIf="(relatedSearches$ | async)?.length" class="mt-12">
         <h4 class="text-white/70 text-sm font-semibold mb-4 uppercase tracking-[0.1em]">
-          Related Searches
+          {{ t('relatedSearches') }}
         </h4>
         <div class="flex flex-wrap gap-2">
           <button
@@ -578,7 +582,7 @@
             class="cursor-pointer group flex items-center px-3 py-2 text-white/50 hover:text-white transition-colors"
           >
             <span class="mr-2">←</span>
-            <span class="hidden sm:inline">back</span>
+            <span class="hidden sm:inline">{{ t('back') }}</span>
           </button>
 
           <div class="flex flex-wrap items-center justify-center gap-1">
@@ -599,7 +603,7 @@
             (click)="goToPage(pagination.current + 1)"
             class="cursor-pointer group flex items-center px-3 py-2 text-white/50 hover:text-white transition-colors"
           >
-            <span class="hidden sm:inline">next</span>
+            <span class="hidden sm:inline">{{ t('next') }}</span>
             <span class="ml-2">→</span>
           </button>
         </div>
@@ -646,7 +650,7 @@
 
             <div *ngIf="kg.facts.length" class="space-y-3 mb-5">
               <h6 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-2">
-                Overview
+                {{ t('overview') }}
               </h6>
               <div
                 *ngFor="let fact of kg.facts; trackBy: trackByFact"
@@ -663,7 +667,7 @@
 
             <div *ngIf="kg.people_also_search_for.length" class="space-y-3 mb-4">
               <h6 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-2">
-                People Also Search For
+                {{ t('peopleAlsoSearchFor') }}
               </h6>
               <div class="grid grid-cols-1 gap-2">
                 <a
@@ -713,7 +717,7 @@
             </div>
 
             <div *ngIf="kg.sources.length" class="mt-4 pt-4 border-t border-white/5">
-              <div class="text-white/40 text-[10px] uppercase tracking-[0.18em] mb-3">Sources</div>
+              <div class="text-white/40 text-[10px] uppercase tracking-[0.18em] mb-3">{{ t('sources') }}</div>
               <div class="flex flex-wrap gap-2">
                 <a
                   *ngFor="let source of kg.sources; trackBy: trackBySource"
@@ -734,24 +738,23 @@
                   class="inline-flex items-center gap-2 rounded-xl border border-ui-green/30 bg-ui-green/15 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-ui-green-light"
                 >
                   <span class="w-1.5 h-1.5 rounded-full bg-ui-green-light"></span>
-                  Live Insights
+                  {{ t('liveInsights') }}
                 </span>
                 <button
                   (click)="showInsightsDetails = !showInsightsDetails"
                   class="text-[10px] uppercase tracking-[0.16em] text-white/45 hover:text-white/75 transition-colors"
                 >
-                  {{ showInsightsDetails ? 'Hide details' : 'Show details' }}
+                  {{ showInsightsDetails ? t('hideDetails') : t('showDetails') }}
                 </button>
               </div>
 
               <p class="text-white/55 text-xs leading-loose">
                 <ng-container *ngIf="query.trim(); else defaultInsightsHint">
-                  Showing live data for:
+                  {{ t('showingLiveDataFor') }}
                   <strong class="text-white">"{{ query.trim() }}"</strong>
                 </ng-container>
                 <ng-template #defaultInsightsHint>
-                  Start a search and this panel will show live metrics, quick actions, and context
-                  for your current query.
+                  {{ t('defaultInsightsHint') }}
                 </ng-template>
               </p>
 
@@ -763,20 +766,20 @@
                 } as stats"
               >
                 <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">Mode</div>
+                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">{{ t('mode') }}</div>
                   <div class="text-white/80 mt-1">web</div>
                 </div>
                 <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">Results</div>
+                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">{{ t('results') }}</div>
                   <div class="text-white/80 mt-1">{{ stats.webCount }}</div>
                 </div>
                 <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">Filters</div>
+                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">{{ t('filters') }}</div>
                   <div class="text-white/80 mt-1">{{ getActiveFiltersCount() }}</div>
                 </div>
                 <div class="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">Status</div>
-                  <div class="text-white/80 mt-1">{{ stats.loading ? 'Updating' : 'Synced' }}</div>
+                  <div class="text-white/35 uppercase tracking-[0.12em] text-[10px]">{{ t('status') }}</div>
+                  <div class="text-white/80 mt-1">{{ stats.loading ? t('updating') : t('synced') }}</div>
                 </div>
               </div>
 
@@ -786,13 +789,13 @@
                     (click)="showFilters = !showFilters"
                     class="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-white/30 transition-colors"
                   >
-                    {{ showFilters ? 'Hide filters' : 'Open filters' }}
+                    {{ showFilters ? t('hideFilters') : t('openFilters') }}
                   </button>
                   <button
                     (click)="setMode('images')"
                     class="cursor-pointer rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] text-white/70 hover:text-white hover:border-white/30 transition-colors"
                   >
-                    Switch to images
+                    {{ t('switchToImages') }}
                   </button>
                 </div>
 
@@ -801,7 +804,7 @@
                   class="rounded-2xl border border-white/8 bg-white/[0.02] p-3"
                 >
                   <div class="text-white/40 text-[10px] uppercase tracking-[0.16em] mb-2">
-                    Suggested queries
+                    {{ t('suggestedQueries') }}
                   </div>
                   <div class="flex flex-wrap gap-2">
                     <button
@@ -822,8 +825,8 @@
                   saved: (savedLinks$ | async)?.length || 0,
                 } as footer"
               >
-                <span>Page: {{ footer.page }}</span>
-                <span>Saved: {{ footer.saved }}</span>
+                <span>{{ t('page') }}: {{ footer.page }}</span>
+                <span>{{ t('savedCount') }}: {{ footer.saved }}</span>
               </div>
             </div>
           </ng-template>
@@ -844,20 +847,20 @@
       <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div class="min-w-0">
           <div class="text-white text-sm font-semibold truncate">
-            {{ activeImage.title || 'Image preview' }}
+            {{ activeImage.title || t('imagePreview') }}
           </div>
           <div class="text-white/50 text-xs">
             {{
               activeImageSize
                 ? activeImageSize.width + ' x ' + activeImageSize.height
-                : 'Loading size...'
+                : t('loadingSize')
             }}
           </div>
         </div>
         <button
           (click)="closeImagePreview()"
           class="w-9 h-9 rounded-xl border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10"
-          title="Close"
+          [title]="t('close')"
         >
           X
         </button>
@@ -868,7 +871,7 @@
       >
         <img
           [src]="activeImage.original"
-          [alt]="activeImage.title || 'Image preview'"
+          [alt]="activeImage.title || t('imagePreview')"
           class="max-w-full max-h-[72vh] object-contain"
           (load)="onPreviewImageLoad($event)"
         />
@@ -890,13 +893,13 @@
           "
           class="h-10 px-4 rounded-xl border border-white/20 bg-white/5 text-white/80 hover:text-white hover:bg-white/10 transition-colors flex items-center"
         >
-          Open source
+          {{ t('openSource') }}
         </a>
         <button
           (click)="downloadActiveImage()"
           class="h-10 px-4 rounded-xl border border-ui-green/30 bg-ui-green/15 text-ui-green-light hover:bg-ui-green/25 transition-colors"
         >
-          Download
+          {{ t('download') }}
         </button>
       </div>
     </div>

@@ -312,6 +312,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   deleteUser(user: AdminUserItem) {
+    if (this.isSuperAdmin(user)) return;
     if (this.deletingUserId()) return;
     if (!window.confirm(`Delete user "${user.username}"?`)) return;
 
@@ -336,6 +337,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   toggleUserRole(user: AdminUserItem) {
+    if (this.isSuperAdmin(user)) return;
     if (this.roleUpdatingUserId()) return;
     const nextRole: 'user' | 'admin' = user.role === 'admin' ? 'user' : 'admin';
     if (!window.confirm(`Set role "${nextRole}" for ${user.username}?`)) return;
@@ -449,6 +451,10 @@ export class AdminDashboardComponent implements OnInit {
 
   isRoleUpdating(userId: number): boolean {
     return this.roleUpdatingUserId() === userId;
+  }
+
+  isSuperAdmin(user: AdminUserItem | null | undefined): boolean {
+    return Boolean(user?.isSuperAdmin);
   }
 
   trackByUser(_index: number, item: AdminUserItem): number {

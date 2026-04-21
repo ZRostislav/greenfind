@@ -101,6 +101,7 @@ export interface AdminUserItem {
   username: string;
   email: string;
   role: string;
+  isSuperAdmin?: boolean;
   createdAt: string;
   searchesCount: number;
   clicksCount: number;
