@@ -369,3 +369,45 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
 }
+
+@media (max-width: 640px) {
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  *,
+  *::before,
+  *::after {
+    min-width: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .ui-card {
+    @apply rounded-2xl p-4;
+  }
+
+  .ui-label {
+    @apply text-base;
+  }
+
+  .ui-input {
+    @apply rounded-xl px-4 py-3 text-base;
+  }
+
+  .ui-chip,
+  .ui-type-btn {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+}

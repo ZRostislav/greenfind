@@ -1,16 +1,16 @@
 <div class="min-h-[100dvh] w-full flex flex-col font-sans text-white overflow-x-hidden">
   <header
-    class="fixed top-0 z-50 w-full bg-[#318429]/85 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 md:px-8 py-3 sm:py-4"
+    class="fixed top-0 z-50 w-full bg-[#318429]/85 backdrop-blur-xl border-b border-white/10 px-3 sm:px-6 md:px-8 py-3 sm:py-4"
   >
     <div class="max-w-[1600px] mx-auto w-full">
-      <div class="flex flex-wrap sm:flex-nowrap items-end gap-3">
-        <div class="order-2 sm:order-none ml-auto sm:ml-0">
+      <div class="flex flex-wrap sm:flex-nowrap items-center sm:items-end gap-2 sm:gap-3">
+        <div class="order-2 sm:order-none ml-0 sm:ml-0">
           <app-language-switcher></app-language-switcher>
         </div>
 
         <h2
           routerLink="/"
-          class="order-1 sm:order-none font-josefin text-xl sm:text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0 mb-1 mr-2 sm:mr-4"
+          class="order-1 sm:order-none font-josefin text-xl sm:text-2xl font-bold tracking-tighter text-white cursor-pointer hover:opacity-80 transition-opacity shrink-0 mb-1 mr-auto sm:mr-4"
         >
           Green<span class="text-ui-green">Find</span>
         </h2>
@@ -51,7 +51,7 @@
 
         <button
           (click)="showFilters = !showFilters"
-          class="order-2 sm:order-none ml-auto sm:ml-0 cursor-pointer px-4 sm:px-5 py-2 sm:py-2.5 border transition-all duration-200 self-center sm:self-stretch flex items-center justify-center rounded-xl active:scale-95"
+          class="order-2 sm:order-none ml-0 sm:ml-0 cursor-pointer px-3 sm:px-5 py-2 sm:py-2.5 border transition-all duration-200 self-center sm:self-stretch flex items-center justify-center rounded-xl active:scale-95"
           [ngClass]="
             hasActiveFilters()
               ? 'border-white/35 bg-white/15 text-white'
@@ -67,11 +67,11 @@
         </button>
 
         <div
-          class="order-2 sm:order-none ml-auto sm:ml-0 flex items-center bg-white/5 border border-white/15 rounded-xl self-stretch overflow-hidden"
+          class="order-2 sm:order-none ml-0 sm:ml-0 flex items-center bg-white/5 border border-white/15 rounded-xl self-stretch overflow-hidden"
         >
           <button
             (click)="setMode('web')"
-            class="cursor-pointer px-4 sm:px-5 text-sm font-bold transition-all flex items-center justify-center gap-2 active:scale-95 self-stretch"
+            class="cursor-pointer px-3 sm:px-5 text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95 self-stretch"
             [ngClass]="
               mode === 'web'
                 ? 'bg-white/20 text-white'
@@ -86,7 +86,7 @@
 
           <button
             (click)="setMode('images')"
-            class="cursor-pointer px-4 sm:px-5 text-sm font-bold transition-all flex items-center justify-center gap-2 active:scale-95 self-stretch"
+            class="cursor-pointer px-3 sm:px-5 text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95 self-stretch"
             [ngClass]="
               mode === 'images'
                 ? 'bg-white/20 text-white'
@@ -100,7 +100,7 @@
 
         <ng-container *ngIf="user$ | async as user">
           <div
-            class="order-2 sm:order-none ml-auto sm:ml-0 flex items-center gap-1 p-1.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl"
+            class="order-4 sm:order-none w-full sm:w-auto ml-0 sm:ml-0 flex flex-wrap items-center gap-1 p-1.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl"
           >
             <a
               routerLink="/history"
@@ -139,10 +139,10 @@
 
       <div
         *ngIf="showFilters"
-        class="mt-4 max-h-[75dvh] overflow-y-auto overscroll-contain p-4 custom-scrollbar sm:p-6"
+        class="mt-4 max-h-[70dvh] overflow-y-auto overscroll-contain p-2 custom-scrollbar sm:max-h-[75dvh] sm:p-6"
       >
         <div class="grid grid-cols-1 xl:grid-cols-12">
-          <section class="space-y-5 xl:col-span-6 p-4 sm:p-5">
+          <section class="space-y-5 xl:col-span-6 p-2 sm:p-5">
             <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
               <label class="text-[10px] font-semibold uppercase tracking-widest text-white/60"
                 >{{ t('country') }}</label
@@ -283,7 +283,7 @@
             </div>
           </section>
 
-          <section class="space-y-5 xl:col-span-6 p-4 sm:p-5">
+          <section class="space-y-5 xl:col-span-6 p-2 sm:p-5">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="space-y-2 rounded-[1.4rem] border border-white/15 p-3.5">
                 <label
@@ -389,9 +389,9 @@
     </div>
   </header>
 
-  <div class="w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row pt-28 sm:pt-24 lg:pt-20">
+  <div class="w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row pt-44 min-[380px]:pt-40 sm:pt-24 lg:pt-20">
     <main
-      class="w-full px-4 py-6 sm:py-8"
+      class="w-full px-3 py-5 sm:px-4 sm:py-8"
       [ngClass]="mode === 'images' ? 'lg:w-full lg:px-8' : 'lg:w-[60%] lg:pr-12'"
     >
       <div class="py-12 flex flex-col items-center justify-center" *ngIf="loading$ | async">
@@ -451,7 +451,7 @@
 
       <section *ngIf="imageResults$ | async as imageResults" class="mb-8">
         <div *ngIf="imageResults.length && mode === 'images'" class="space-y-3">
-          <div class="columns-2 sm:columns-3 lg:columns-4 [column-gap:0.75rem]">
+          <div class="columns-1 min-[420px]:columns-2 sm:columns-3 lg:columns-4 [column-gap:0.75rem]">
             <button
               *ngFor="let image of imageResults; trackBy: trackByImageResult"
               (click)="openImagePreview(image, $event)"
