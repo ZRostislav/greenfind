@@ -1,4 +1,6 @@
-<div class="min-h-screen flex flex-col items-center pt-32 sm:pt-28 md:pt-[15vh] px-3 sm:px-4 relative w-full overflow-x-hidden overflow-y-auto">
+<div
+  class="min-h-screen flex flex-col items-center pt-32 sm:pt-28 md:pt-[15vh] px-3 sm:px-4 relative w-full overflow-x-hidden overflow-y-auto"
+>
   <header class="fixed top-3 inset-x-3 md:top-6 md:right-6 md:inset-x-auto z-[100]">
     <div class="flex flex-wrap items-center justify-between md:justify-end gap-2 md:gap-3">
       <div
@@ -95,7 +97,9 @@
       >
         {{ t('heroBadge') }}
       </span>
-      <h1 class="text-4xl min-[360px]:text-5xl sm:text-6xl md:text-7xl font-bold tracking-tighter text-white drop-shadow-lg">
+      <h1
+        class="text-4xl min-[360px]:text-5xl sm:text-6xl md:text-7xl font-bold tracking-tighter text-white drop-shadow-lg"
+      >
         GreenFind
       </h1>
       <p class="mt-2 text-center text-xs sm:text-sm text-white/65 max-w-md">
@@ -357,7 +361,9 @@
       </div>
     </div>
     <!-- BTN -->
-    <div class="mb-6 md:mb-8 w-full max-w-2xl flex items-center gap-2 md:gap-3 animate-slide-up">
+    <div
+      class="mb-6 md:mb-8 w-full max-w-2xl flex items-center gap-2 md:gap-3 animate-slide-up justify-center"
+    >
       <!-- Filters BTN -->
       <button
         (click)="showFilters = !showFilters"
@@ -414,7 +420,9 @@
           class="max-h-[58dvh] md:h-[520px] md:max-h-none flex flex-col bg-white/10 backdrop-blur-xl border border-white/20 rounded-[1.4rem] md:rounded-[2rem] p-4 md:p-7 shadow-2xl"
         >
           <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 md:pr-2">
-            <label class="flex items-center gap-3 font-bold text-base md:text-xl mb-4 md:mb-5 opacity-90">
+            <label
+              class="flex items-center gap-3 font-bold text-base md:text-xl mb-4 md:mb-5 opacity-90"
+            >
               <lucide-icon [img]="GlobeIcon" class="text-white/70" [size]="20"></lucide-icon>
               {{ t('region') }}
             </label>
@@ -469,7 +477,9 @@
         >
           <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 md:pr-3 space-y-6 md:space-y-8">
             <section style="margin: 0">
-              <label class="flex items-center gap-3 font-bold text-base md:text-xl mb-4 md:mb-5 opacity-90">
+              <label
+                class="flex items-center gap-3 font-bold text-base md:text-xl mb-4 md:mb-5 opacity-90"
+              >
                 <lucide-icon [img]="TypeIcon" class="text-white/70" [size]="20"></lucide-icon>
                 {{ t('wordFilters') }}
               </label>
@@ -540,7 +550,9 @@
             <hr class="border-white/5" style="margin: 10px 0" />
 
             <section style="margin: 0">
-              <label class="flex items-center gap-3 font-bold text-base md:text-xl mb-4 md:mb-5 opacity-90">
+              <label
+                class="flex items-center gap-3 font-bold text-base md:text-xl mb-4 md:mb-5 opacity-90"
+              >
                 <lucide-icon [img]="FileTextIcon" class="text-white/70" [size]="20"></lucide-icon>
                 {{ t('fileTypes') }}
               </label>
@@ -564,7 +576,9 @@
             <hr class="border-white/5" style="margin: 10px 0" />
 
             <section style="margin: 0">
-              <label class="flex items-center gap-3 font-bold text-base md:text-xl mb-4 md:mb-5 opacity-90">
+              <label
+                class="flex items-center gap-3 font-bold text-base md:text-xl mb-4 md:mb-5 opacity-90"
+              >
                 <lucide-icon [img]="LinkIcon" class="text-white/70" [size]="20"></lucide-icon>
                 {{ t('specificSite') }}
               </label>
@@ -577,7 +591,8 @@
                     *ngIf="activeSite"
                     class="flex items-center gap-2 bg-white/15 border border-white/20 px-4 py-2 rounded-xl font-bold text-sm text-white animate-pop-in shadow-sm"
                   >
-                    <span class="opacity-70 text-xs">{{ t('sitePrefix') }}</span>{{ activeSite }}
+                    <span class="opacity-70 text-xs">{{ t('sitePrefix') }}</span
+                    >{{ activeSite }}
                     <button
                       (click)="removeSite()"
                       class="cursor-pointer ml-1 text-white/40 hover:text-red-400 transition-colors"
